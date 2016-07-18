@@ -13,10 +13,10 @@ This app is written in Javascript (frontend aka gui), Python (backend aka web se
 
 - frontend
 - backend
-  - [API](api.md)
+  - [API](docs/api.md)
 - firmware
-  - [serial protocol](protocol.md) 
+  - [serial protocol](docs/protocol.md)
 - jobs
-  - [dba file format)](dba.md)
+  - [dba file format)](docs/dba.md)
 
 **DISCLAIMER:** Please be aware that operating CNC machines can be dangerous and requires full awareness of the risks involved. NORTD Labs does not warrant for any code or documentation and does not assume any risks whatsoever with regard to using this software.
