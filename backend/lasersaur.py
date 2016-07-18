@@ -13,7 +13,7 @@
 # import time
 # import lasersaur
 #
-# jobname = lasersaur.load_library('Lasersaur.lsa')
+# jobname = lasersaur.load_library('Lasersaur.dba')
 # if lasersaur.ready():
 #   lasersaur.run(jobname)
 #
@@ -150,12 +150,12 @@ class Lasersaur(object):
         """Load and convert a job file locally.
 
         Args:
-            jobfile: Path to job file (lsa, svg, dxf, or ngc).
+            jobfile: Path to job file (dba, svg, dxf, or ngc).
             optimize: Flag for optimizing path tolerances.
             tolerance: Tolerance used in convert/optimization.
 
         Returns:
-            A parsed .lsa job.
+            A parsed .dba job.
         """
         import jobimport # dependancy only when actually needed
         name_f = os.path.basename(jobfile)
@@ -170,22 +170,22 @@ class Lasersaur(object):
 
 
     def convert_file(self, jobfile, optimize=True, tolerance=None):
-        """Convert any job file to a .lsa file.
+        """Convert any job file to a .dba file.
 
         Args:
-            jobfile: Path to job file (lsa, svg, dxf, or gcode).
+            jobfile: Path to job file (dba, svg, dxf, or gcode).
             optimize: Flag for optimizing path tolerances.
             tolerance: Tolerance used in convert/optimization.
 
         Output:
-            A .lsa file in the same directory called <name>.conv.lsa
+            A .dba file in the same directory called <name>.conv.dba
         """
         import jobimport # dependancy only when actually needed
         base, name = os.path.split(jobfile)
         name, ext = os.path.splitext(name)
         job = self.open_file(jobfile, optimize=optimize, tolerance=tolerance)
         job = json.dumps(job)
-        outfile = os.path.join(base, "%s.conv.lsa" % (name))
+        outfile = os.path.join(base, "%s.conv.dba" % (name))
         with open(outfile,'w') as fp:
             fp.write(job)
         print "INFO: job file written to: %s" % outfile
@@ -198,13 +198,13 @@ class Lasersaur(object):
         This will place a job in the job list on the machine. From
         there it can be run by calling the run(jobname) function.
 
-        Typically a job is sent in the native lsa format. Supported
+        Typically a job is sent in the native dba format. Supported
         file types can be converted with the open_file() function.
         Alternatively, any supported file types can be loaded and will
         then be converted on the machine (this is usually slower).
 
         Args:
-            job: Parsed lsa job OR job string (lsa, svg, dxf, or ngc).
+            job: Parsed dba job OR job string (dba, svg, dxf, or ngc).
             name: Name the job. If not unique gets a post-numeral.
             optimize: Flag for optimizing path tolerances on machine.
 
@@ -219,10 +219,10 @@ class Lasersaur(object):
 
 
     def load_file(self, jobfile, optimize=True, tolerance=None):
-        """Convert any job file to a .lsa file.
+        """Convert any job file to a .dba file.
 
         Args:
-            jobfile: Path to job file (lsa, svg, dxf, or gcode).
+            jobfile: Path to job file (dba, svg, dxf, or gcode).
             optimize: Flag for optimizing path tolerances.
             tolerance: Tolerance used in convert/optimization.
 
@@ -303,7 +303,7 @@ class Lasersaur(object):
         return jobs
 
     def get(self, jobname):
-        """Get a queue job in .lsa format."""
+        """Get a queue job in .dba format."""
         return self._request('/get/%s' % jobname, ret=True)
 
     def star(self, jobname):
@@ -330,7 +330,7 @@ class Lasersaur(object):
         return self._request('/listing_library', ret=True)
 
     def get_library(self, jobname):
-        """Get a library job in .lsa format."""
+        """Get a library job in .dba format."""
         return self._request('/get_library/'+jobname, ret=True)
 
     def load_library(self, jobname):
@@ -492,7 +492,7 @@ def local():
 
 
 if __name__ == '__main__':
-    jobname = lasersaur.load_library('Lasersaur.lsa')
+    jobname = lasersaur.load_library('Lasersaur.dba')
     if lasersaur.ready():
       lasersaur.run(jobname)
 

@@ -829,7 +829,7 @@ def rastermove(x, y, z=0.0):
 
 
 def job(jobdict):
-    """Queue an .lsa job.
+    """Queue an .dba job.
     A job dictionary can define vector and raster passes.
     Unlike gcode it's not procedural but declarative.
     The job dict looks like this:
@@ -1155,7 +1155,7 @@ def sel_offset_custom():
 
 
 def testjob(jobname="Lasersaur", feedrate=2000, intensity=10):
-    j = json.load(open(os.path.join(conf['rootdir'], 'backend', 'testjobs', jobname+'.lsa')))
+    j = json.load(open(os.path.join(conf['rootdir'], 'backend', 'testjobs', jobname+'.dba')))
     if "vector" in j:
         j['vector']['passes'] = [{
             "paths":[0],

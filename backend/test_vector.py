@@ -24,7 +24,7 @@ class TestJobs(unittest.TestCase):
     def testLoad(self):
         # jobfile = os.path.join(thislocation,'testjobs','full-bed.svg')
         # jobfile = os.path.join(thislocation,'testjobs','key.svg')
-        jobfile = os.path.join(thislocation,'testjobs','k4.lsa')
+        jobfile = os.path.join(thislocation,'testjobs','k4.dba')
         job = lasersaur.open_file(jobfile)
         if 'vector' in job:
             job['vector']['passes'] = [{

@@ -155,7 +155,7 @@ function app_status_connect() {
     }
   }
   status_websocket.onmessage = function(e) {
-    // pulsate
+    // pudbate
     $("#status_glyph").animate({"opacity": 1.0},50).animate({"opacity": 0.5},200)
 
     // handle data

@@ -180,7 +180,7 @@ function passes_get_assignments() {
 
 
 function passes_set_assignments(job) {
-  // set passes in gui from lsa job dict
+  // set passes in gui from dba job dict
   // console.log(job)
   var not_set_flag = true
   if ("vector" in job) {

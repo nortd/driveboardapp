@@ -16,9 +16,9 @@ function controls_ready() {
     if (!jobhandler.isEmpty()) {
       var filename = jobhandler.name
       if (filename.length > 4 && filename.slice(-4,-3) == '.') {
-        filename = filename.slice(0,-4)+'.lsa'
+        filename = filename.slice(0,-4)+'.dba'
       } else {
-        filename = filename+'.lsa'
+        filename = filename+'.dba'
       }
       jobhandler.setPassesFromGUI()
       var blob = new Blob([jobhandler.getJson()], {type: "application/json;charset=utf-8"})
@@ -30,7 +30,7 @@ function controls_ready() {
       //   success: function (jobname) {
       //     console.log("stashing successful")
       //     // download file
-      //     window.open('/download/'+jobname+'/'+jobhandler.name+'.lsa', '_blank')
+      //     window.open('/download/'+jobname+'/'+jobhandler.name+'.dba', '_blank')
       //   },
       //   error: function (data) {
       //     $().uxmessage('error', "/temp error.")

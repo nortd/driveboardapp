@@ -220,9 +220,9 @@ def _get_sorted(globpattern, library=False, stripext=False):
             files.sort(key=lambda x: os.path.getmtime(x))
         if stripext:
             for i in range(len(files)):
-                if files[i].endswith('.lsa'):
+                if files[i].endswith('.dba'):
                     files[i] = files[i][:-4]
-                elif files[i].endswith('.lsa.starred'):
+                elif files[i].endswith('.dba.starred'):
                     files[i] = files[i][:-12]
     finally:
         os.chdir(cwd_temp)
@@ -234,10 +234,10 @@ def _get(jobname, library=False):
         jobpath = os.path.join(conf['rootdir'], 'library', jobname.strip('/\\'))
     else:
         jobpath = os.path.join(conf['stordir'], jobname.strip('/\\'))
-    if os.path.exists(jobpath+'.lsa'):
-        jobpath = jobpath+'.lsa'
-    elif os.path.exists(jobpath + '.lsa.starred'):
-        jobpath = jobpath + '.lsa.starred'
+    if os.path.exists(jobpath+'.dba'):
+        jobpath = jobpath+'.dba'
+    elif os.path.exists(jobpath + '.dba.starred'):
+        jobpath = jobpath + '.dba.starred'
     else:
         bottle.abort(400, "No such file.")
     with open(jobpath) as fp:
@@ -249,20 +249,20 @@ def _get_path(jobname, library=False):
         jobpath = os.path.join(conf['rootdir'], 'library', jobname.strip('/\\'))
     else:
         jobpath = os.path.join(conf['stordir'], jobname.strip('/\\'))
-    if os.path.exists(jobpath+'.lsa'):
-        return jobpath+'.lsa'
-    elif os.path.exists(jobpath+'.lsa.starred'):
-        return jobpath+'.lsa.starred'
+    if os.path.exists(jobpath+'.dba'):
+        return jobpath+'.dba'
+    elif os.path.exists(jobpath+'.dba.starred'):
+        return jobpath+'.dba.starred'
     else:
         bottle.abort(400, "No such file.")
 
 def _exists(jobname):
     namepath = os.path.join(conf['stordir'], jobname.strip('/\\'))
-    if os.path.exists(namepath+'.lsa') or os.path.exists(namepath+'.lsa.starred'):
+    if os.path.exists(namepath+'.dba') or os.path.exists(namepath+'.dba.starred'):
         bottle.abort(400, "File name exists.")
 
 def _clear(limit=None):
-    files = _get_sorted('*.lsa')
+    files = _get_sorted('*.dba')
     if type(limit) is not int and limit is not None:
         raise ValueError
     for filename in files:
@@ -275,18 +275,18 @@ def _clear(limit=None):
             limit -= 1
 
 def _add(job, name):
-    # add job (lsa string)
+    # add job (dba string)
     # overwrites file if already exists, use _unique_name(name) to avoid
-    namepath = os.path.join(conf['stordir'], name.strip('/\\')+'.lsa')
+    namepath = os.path.join(conf['stordir'], name.strip('/\\')+'.dba')
     with open(namepath, 'w') as fp:
         fp.write(job)
         print "file saved: " + namepath
     # delete excessive job files
-    num_to_del = (len(_get_sorted('*.lsa')) +1) - conf['max_jobs_in_list']
+    num_to_del = (len(_get_sorted('*.dba')) +1) - conf['max_jobs_in_list']
     _clear(num_to_del)
 
 def _unique_name(jobname):
-    files = _get_sorted('*.lsa*', stripext=True)
+    files = _get_sorted('*.dba*', stripext=True)
     if jobname in files:
         for i in xrange(2,999):
             altname = "%s_%s" % (jobname, i)
@@ -302,11 +302,11 @@ def _unique_name(jobname):
 @bottle.route('/load', method='POST')
 @bottle.auth_basic(checkuser)
 def load():
-    """Load a lsa, svg, dxf, or gcode job.
+    """Load a dba, svg, dxf, or gcode job.
 
     Args:
         (Args come in through the POST request.)
-        job: Parsed lsa or job string (lsa, svg, dxf, or ngc).
+        job: Parsed dba or job string (dba, svg, dxf, or ngc).
         name: name of the job (string)
         optimize: flag whether to optimize (bool)
         overwrite: flag whether to overwite file if present (bool)
@@ -339,12 +339,12 @@ def load():
 def listing(kind=None):
     """List all queue jobs by name."""
     if kind is None:
-        files = _get_sorted('*.lsa*', stripext=True)
+        files = _get_sorted('*.dba*', stripext=True)
     elif kind == 'starred':
-        files = _get_sorted('*.lsa.starred', stripext=True)
+        files = _get_sorted('*.dba.starred', stripext=True)
         print files
     elif kind == 'unstarred':
-        files = _get_sorted('*.lsa', stripext=True)
+        files = _get_sorted('*.dba', stripext=True)
     else:
         bottle.abort(400, "Invalid kind.")
     return json.dumps(files)
@@ -353,7 +353,7 @@ def listing(kind=None):
 @bottle.route('/get/<jobname>')
 @bottle.auth_basic(checkuser)
 def get(jobname='woot'):
-    """Get a queue job in .lsa format."""
+    """Get a queue job in .dba format."""
     base, name = os.path.split(_get_path(jobname))
     return bottle.static_file(name, root=base, mimetype='application/json')
 
@@ -363,7 +363,7 @@ def get(jobname='woot'):
 def star(jobname):
     """Star a job."""
     jobpath = _get_path(jobname)
-    if jobpath.endswith('.lsa'):
+    if jobpath.endswith('.dba'):
         os.rename(jobpath, jobpath + '.starred')
     else:
         bottle.abort(400, "No such file.")
@@ -407,14 +407,14 @@ def clear():
 @bottle.auth_basic(checkuser)
 def listing_library():
     """List all library jobs by name."""
-    files = _get_sorted('*.lsa', library=True, stripext=True)
+    files = _get_sorted('*.dba', library=True, stripext=True)
     return json.dumps(files)
 
 
 @bottle.route('/get_library/<jobname>')
 @bottle.auth_basic(checkuser)
 def get_library(jobname):
-    """Get a library job in .lsa format."""
+    """Get a library job in .dba format."""
     base, name = os.path.split(_get_path(jobname, library=True))
     return bottle.static_file(name, root=base, mimetype='application/json')
 
@@ -448,10 +448,10 @@ def run(jobname):
 @bottle.auth_basic(checkuser)
 @checkserial
 def run_direct():
-    """Run an lsa job directly, by-passing the queue.
+    """Run an dba job directly, by-passing the queue.
     Args:
         (Args come in through the POST request.)
-        job: Parsed lsa job.
+        job: Parsed dba job.
     """
     load_request = json.loads(bottle.request.forms.get('load_request'))
     job = load_request.get('job')  # always a string

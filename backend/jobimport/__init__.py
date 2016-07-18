@@ -13,18 +13,18 @@ __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 def convert(job, optimize=True, tolerance=conf['tolerance']):
-    """Convert a job string (lsa, svg, dxf, or ngc).
+    """Convert a job string (dba, svg, dxf, or ngc).
 
     Args:
-        job: Parsed lsa or job string (lsa, svg, dxf, or ngc).
+        job: Parsed dba or job string (dba, svg, dxf, or ngc).
         optimize: Flag for optimizing path tolerances.
         tolerance: Tolerance used in convert/optimization.
 
     Returns:
-        A parsed .lsa job.
+        A parsed .dba job.
     """
     type_ = get_type(job)
-    if type_ == 'lsa':
+    if type_ == 'dba':
         if type(job) in (str, unicode):
             job = json.loads(job)
         if optimize:
@@ -50,13 +50,13 @@ def convert(job, optimize=True, tolerance=conf['tolerance']):
 
 
 def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
-    """Read an svg file string and convert to lsa job."""
+    """Read an svg file string and convert to dba job."""
     svgReader = SVGReader(tolerance, workspace)
     res = svgReader.parse(svg_string, forced_dpi)
     # {'boundarys':b, 'dpi':d, 'lasertags':l, 'rasters':r}
 
-    # create an lsa job from res
-    # TODO: reader should generate an lsa job to begin with
+    # create an dba job from res
+    # TODO: reader should generate an dba job to begin with
     job = {}
     if 'boundarys' in res:
         job['vector'] = {}
@@ -128,7 +128,7 @@ def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
 
 
 def read_dxf(dxf_string, tolerance, optimize=True):
-    """Read an dxf file string and convert to lsa job."""
+    """Read an dxf file string and convert to dba job."""
     dxfReader = DXFReader(tolerance)
     res = dxfReader.parse(dxf_string)
     # # flip y-axis
@@ -137,8 +137,8 @@ def read_dxf(dxf_string, tolerance, optimize=True):
     # 		for vertex in path:
     # 			vertex[1] = 610-vertex[1]
 
-    # create an lsa job from res
-    # TODO: reader should generate an lsa job to begin with
+    # create an dba job from res
+    # TODO: reader should generate an dba job to begin with
     job = {}
     if 'boundarys' in res:
         job['vector'] = {}
@@ -159,11 +159,11 @@ def read_dxf(dxf_string, tolerance, optimize=True):
 
 
 def read_ngc(ngc_string, tolerance, optimize=False):
-    """Read an gcode file string and convert to lsa job."""
+    """Read an gcode file string and convert to dba job."""
     ngcReader = NGCReader(tolerance)
     res = ngcReader.parse(ngc_string)
-    # create an lsa job from res
-    # TODO: reader should generate an lsa job to begin with
+    # create an dba job from res
+    # TODO: reader should generate an dba job to begin with
     job = {}
     if 'boundarys' in res:
         job['vector'] = {}
@@ -187,11 +187,11 @@ def get_type(job):
     """Figure out file type from job string."""
     # figure out type
     if type(job) is dict:
-        type_ = 'lsa'
+        type_ = 'dba'
     elif type(job) is str or type(job) is unicode:
         jobheader = job[:256].lstrip()
         if jobheader and jobheader[0] == '{':
-            type_ = 'lsa'
+            type_ = 'dba'
         elif '<?xml' in jobheader and '<svg' in jobheader:
             type_ = 'svg'
         elif 'SECTION' in jobheader and 'HEADER' in jobheader:

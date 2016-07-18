@@ -97,10 +97,10 @@ footer = """"
 </svg>"""
 
 
-class TestLSA(unittest.TestCase):
+class Testdba(unittest.TestCase):
     def test_encode(self):
         filein = os.path.join(thislocation, 'testjobs', 'bat.png')
-        fileout = os.path.join(thislocation, 'testjobs', 'bat--.lsa')
+        fileout = os.path.join(thislocation, 'testjobs', 'bat--.dba')
         with open(filein,"rb") as fp:
             b64 = base64.encodestring(fp.read()).decode("utf8")
         with open(fileout,"w") as fp:

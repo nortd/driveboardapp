@@ -81,7 +81,7 @@ $(document).ready(function(){
 
 function import_open(jobname, from_library) {
   from_library = typeof from_library !== 'undefined' ? from_library : false  // default to false
-  // get job in lsa format
+  // get job in dba format
   var url = '/get/'+jobname
   if (from_library === true) {
     url = '/get_library/'+jobname
