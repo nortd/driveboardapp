@@ -14,7 +14,7 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 ### Setup Argument Parser
 argparser = argparse.ArgumentParser(description='Run DriveboardApp.', prog='driveboardapp')
 argparser.add_argument('port', metavar='serial_port', nargs='?', default=False,
-                       help='serial port to the Lasersaur')
+                       help='serial port to the Driveboard')
 argparser.add_argument('-v', '--version', action='version', version='%(prog)s ' + conf['version'],
                        default=False, help='print version of this app')
 # argparser.add_argument('-l', '--list', dest='list_serial_devices', action='store_true',

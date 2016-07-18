@@ -41,7 +41,7 @@ elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
 
 
 # (2)
-# Define the serial port to the Lasersaur controller as the first argument to this
+# Define the serial port to the Driveboard controller as the first argument to this
 # script. alternatively you can create a driveboardapp.conf file with the port as
 # the first line. Also on OSX and Linux this script usually finds the right port
 # automatically.

@@ -1,8 +1,8 @@
 
-Lasersaur Firmware - Open Source Laser cutter
-=============================================
+DriveboardFirmware
+==================
 
-This is the firmware of the [Lasersaur](http://www.lasersaur.com). It originated from Grbl and has become a laser-cutter specific firmware with source simplicity as a central goal. Typically it runs on the Atmega of the Lasersaur's Driveboard but it is also compatible with any Arduino Uno.
+This is the firmware of the Driveboard. It originated from Grbl and has become a minimal firmware with source simplicity as a central goal. Typically it runs on the Atmega of the Driveboard but it is also compatible with any Arduino Uno.
 
 For more information see the [Lasersaur Manual]https://github.com/nortd/lasersaur/wiki/software).
 

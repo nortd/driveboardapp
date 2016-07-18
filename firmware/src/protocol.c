@@ -1,5 +1,5 @@
 /*
-  protocol.h - Lasersaur protocol parser.
+  protocol.h - Driveboard protocol parser.
   Part of DriveboardFirmware
 
   Copyright (c) 2014 Stefan Hechenberger
@@ -18,8 +18,8 @@
 
 /*
 
-The Lasersaur Protocol
-======================
+The Driveboard Protocol
+=======================
 
 The protocol is a ascii/binary hybrid. Markers are printable
 ascii values while binary data is transmitted in the extended

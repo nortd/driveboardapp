@@ -1,5 +1,5 @@
 /*
-  protocol.c - Lasersaur protocol parser.
+  protocol.c - Driveboard protocol parser.
   Part of DriveboardFirmware
 
   Copyright (c) 2014 Stefan Hechenberger
