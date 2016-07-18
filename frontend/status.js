@@ -181,7 +181,6 @@ var status_handlers = {
   //// when hardware connected
   'appver': function (status) {
     if (status.appver) {
-      // $().uxmessage('notice', "LasaurApp v" + status.appver)
       $('#app_version').html(status.appver)
     } else {
       $('#app_version').html('&lt;not received&gt;')

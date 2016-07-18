@@ -12,7 +12,7 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 ### Setup Argument Parser
-argparser = argparse.ArgumentParser(description='Run LasaurApp.', prog='lasaurapp')
+argparser = argparse.ArgumentParser(description='Run DriveboardApp.', prog='driveboardapp')
 argparser.add_argument('port', metavar='serial_port', nargs='?', default=False,
                        help='serial port to the Lasersaur')
 argparser.add_argument('-v', '--version', action='version', version='%(prog)s ' + conf['version'],
@@ -36,7 +36,7 @@ args = argparser.parse_args()
 
 
 
-print "LasaurApp " + conf['version']
+print "DriveboardApp " + conf['version']
 conf['usb_reset_hack'] = args.usbhack
 
 if args.debug:
@@ -52,4 +52,4 @@ if args.threaded:
         except KeyboardInterrupt:
             break
     web.stop()
-print "END of LasaurApp"
+print "END of DriveboardApp"

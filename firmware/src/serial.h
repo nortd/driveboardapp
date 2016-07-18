@@ -1,20 +1,20 @@
 /*
   serial.c - Low level functions for sending and recieving bytes via the serial port.
-  Part of LasaurGrbl
+  Part of DriveboardFirmware
 
   Copyright (c) 2009-2011 Simen Svale Skogsrud
   Copyright (c) 2011 Sungeun K. Jeon
-  Copyright (c) 2011 Stefan Hechenberger
+  Copyright (c) 2011-2016 Stefan Hechenberger
 
   Inspired by the wiring_serial module by David A. Mellis which
   used to be a part of the Arduino project.
    
-  LasaurGrbl is free software: you can redistribute it and/or modify
+  DriveboardFirmware is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  LasaurGrbl is distributed in the hope that it will be useful,
+  DriveboardFirmware is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.

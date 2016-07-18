@@ -2,11 +2,7 @@
 
 - bugs
   - stall between certain x-axis jogs
-
-
-- send low level combined also as job
-  - bypass queue
-  - e.g: boundary
+    - send a pierce command in between
 
 
 - gcode editor

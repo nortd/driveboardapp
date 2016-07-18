@@ -11,7 +11,7 @@
     <meta name="author" content="">
     <link rel="icon" href="img/favicon.ico">
 
-    <title>LasaurApp</title>
+    <title>DriveboardApp</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/jquery.toastmessage.css" rel="stylesheet">
@@ -32,6 +32,7 @@
     <script src="tools.js"></script>
     <script src="app.js"></script>
     <script src="jobhandler.js"></script>
+    <script src="gcodehandler.js"></script>
     <script src="import.js"></script>
     <script src="controls.js"></script>
     <script src="passes.js"></script>
@@ -129,7 +130,7 @@
     <div id="main_container" class="container">
 
       <!-- canvas -->
-      <div id="canvas_container" class="pull-left" style="margin:0;padding:0; border:solid 1px #aaaaaa">
+      <div id="canvas_container" class="pull-left" style="margin:0;padding:0; border:solid 1px #bbbbbb">
         <canvas id="job_canvas" resize></canvas>
         <div id="head_position" style="position:absolute; top:0px; left:0px; pointer-events: none;">
           <img src="img/head.png">
@@ -155,12 +156,12 @@
             <div id="about_content" class="modal-body">
               <p><img src="/img/lasersaur-black_w530.jpg"></p>
               <div style="width:60px;margin-left:auto;margin-right:auto;margin-top:20px;margin-bottom:20px"><img src="/img/lasersaur-dino.png" style="width:60px"></div>
-              <p>LasaurApp is the offical control app for the Lasersaur laser cutter and part of the <a href="http://www.lasersaur.com/">Lasersaur project</a>.
+              <p>DriveboardApp is the offical control app for the Lasersaur laser cutter and part of the <a href="http://www.lasersaur.com/">Lasersaur project</a>.
                  This software is made available under the <a href="https://gnu.org/licenses/gpl.html">GPLv3 (version 3 or later)</a> software license.
                  Copyright (c) 2013-2016 <a href="http://labs.nortd.com/">Nortd Labs</a></p>
               <ul>
-              <li>LasaurApp version <span id="app_version">&lt;not received&gt;</span></li>
-              <li>Firmware version <span id="firm_version">&lt;not received&gt;</span></li>
+              <li>DriveboardApp version <span id="app_version">&lt;not received&gt;</span></li>
+              <li>DriveboardFirmware version <span id="firm_version">&lt;not received&gt;</span></li>
               </ul>
             </div>
           </div>
@@ -247,7 +248,7 @@
       <div class="container" style="width:100%">
 
         <a class="navbar-brand" href="/">
-          <img src="img/lasersaur-dino-lasaurapp-190.png" style="margin-right:6px">
+          <img src="img/lasersaur-dino-driveboardapp.png" style="margin-right:6px">
         </a>
 
         <!-- status indicator -->

@@ -10,17 +10,17 @@ import argparse
 from filereaders import read_svg
 
 ### Setup Argument Parser
-argparser = argparse.ArgumentParser(description='Run LasaurApp.', prog='lasaurapp')
+argparser = argparse.ArgumentParser(description='Run DriveboardApp.', prog='driveboardapp')
 argparser.add_argument('svg_file', metavar='svg_file', nargs='?', default=False,
                        help='svg file to parse')
 argparser.add_argument('-p', '--profile', dest='profile', action='store_true',
-                    default=False, help='run with profiling')  
+                    default=False, help='run with profiling')
 argparser.add_argument('-t', '--timeit', dest='timeit', action='store_true',
-                    default=False, help='run with timing')      
+                    default=False, help='run with timing')
 argparser.add_argument('-o', '--optimize', dest='optimize', action='store_true',
-                    default=False, help='optimize by loading c extensions')   
+                    default=False, help='optimize by loading c extensions')
 argparser.add_argument('-d', '--debug', dest='debug', action='store_true',
-                    default=False, help='verbose debug info')                                  
+                    default=False, help='verbose debug info')
 args = argparser.parse_args()
 
 

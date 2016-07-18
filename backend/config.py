@@ -1,4 +1,4 @@
-# Configuration of LasaurApp
+# Configuration of DriveboardApp
 #
 # NOTE!
 # -----
@@ -17,8 +17,8 @@ import glob
 
 
 conf = {
-    'appname': 'lasaurapp',
-    'version': '15.00-beta1',
+    'appname': 'driveboardapp',
+    'version': '16.07-beta',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
@@ -28,7 +28,7 @@ conf = {
     'rootdir': None,                       # defined further down (../)
     'stordir': None,                       # defined further down
     'hardware': None,                      # defined further down
-    'firmware': 'LasaurGrbl.hex',
+    'firmware': 'DriveboardFirmware.hex',
     'tolerance': 0.01,
     'workspace': [1220,610,0],
     'grid_mm': 100,

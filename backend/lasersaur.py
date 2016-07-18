@@ -3,7 +3,7 @@
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
 # ###
 #
-# This is a client implementation that connects to the LasaurApp
+# This is a client implementation that connects to the DriveboardApp
 # control software on a Lasersaur.
 #
 # This library is an example client for the Lasersaur net API.

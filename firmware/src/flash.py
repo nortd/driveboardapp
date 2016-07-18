@@ -1,5 +1,5 @@
-# Super Awesome LasaurGrbl python flash script.
-# 
+# Super Awesome DriveboardFirmware python flash script.
+#
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
 
@@ -22,7 +22,7 @@ if sys.platform == "darwin":  # OSX
     AVRSIZEAPP    = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-size"
     AVROBJDUMPAPP = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-objdump"
     AVRDUDECONFIG = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/etc/avrdude.conf"
-    
+
 elif sys.platform == "win32": # Windows
     AVRDUDEAPP    = "C:\\arduino\\hardware\\tools\\avr\\bin\\avrdude"
     AVRGCCAPP     = "C:\\arduino\\hardware\\tools\\avr\\bin\\avr-gcc"
@@ -30,7 +30,7 @@ elif sys.platform == "win32": # Windows
     AVRSIZEAPP    = "C:\\arduino\\hardware\\tools\\avr\\bin\\avr-size"
     AVROBJDUMPAPP = "C:\\arduino\\hardware\\tools\\avr\\bin\\avr-objdump"
     AVRDUDECONFIG = "C:\\arduino\\hardware\\tools\\avr\\etc\\avrdude.conf"
-    
+
 elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
     AVRDUDEAPP    = "avrdude"
     AVRGCCAPP     = "avr-gcc"
@@ -38,18 +38,18 @@ elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
     AVRSIZEAPP    = "avr-size"
     AVROBJDUMPAPP = "avr-objdump"
     AVRDUDECONFIG = "/etc/avrdude.conf"
-    
-    
+
+
 # (2)
 # Define the serial port to the Lasersaur controller as the first argument to this
-# script. alternatively you can create a lasaurapp.conf file with the port as 
+# script. alternatively you can create a driveboardapp.conf file with the port as
 # the first line. Also on OSX and Linux this script usually finds the right port
 # automatically.
 
 
 # (3)
-# Compile LasaurGrbl and load it to an Arduino Uno via USB. In the Teminal/Command Line
-# from the location of this flash.py type: python flash.py
+# Compile DriveboardFirmware and load it to an Arduino Uno via USB. In the
+# Teminal/Command Line from the location of this flash.py type: python flash.py
 
 
 
@@ -58,7 +58,7 @@ elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
 # No need to edit anything below this line
 
 SERIAL_PORT = None
-CONFIG_FILE = "lasaurapp.conf"
+CONFIG_FILE = "driveboardapp.conf"
 GUESS_PPREFIX = "tty.usbmodem"
 
 
@@ -73,14 +73,14 @@ def build():
         SERIAL_OPTION = '-P %(port)s' % {'port':SERIAL_PORT}
     BITRATE = "115200"
 
-    BUILDNAME = "LasaurGrbl"
+    BUILDNAME = "DriveboardFirmware"
     OBJECTS  = ["main", "serial", "gcode", "planner", "sense_control", "stepper"]
-             
+
     COMPILE = AVRGCCAPP + " -Wall -Os -DF_CPU=" + CLOCK + " -mmcu=" + DEVICE + " -I. -ffunction-sections" + " --std=c99"
 
     for fileobj in OBJECTS:
       os.system('%(compile)s -c %(obj)s.c -o %(obj)s.o' % {'compile': COMPILE, 'obj':fileobj});
-  
+
     os.system('%(compile)s -o main.elf %(alldoto)s  -lm' % {'compile': COMPILE, 'alldoto':".o ".join(OBJECTS)+'.o'});
 
     #os.system('rm -f %(product).hex' % {'product':BUILDNAME})
@@ -111,7 +111,7 @@ def build():
     file_abs = os.path.join(current_dir, 'main.elf')
     if os.path.isfile(file_abs):
         os.remove(file_abs)
-    # file_abs = os.path.join(current_dir, 'LasaurGrbl.hex')
+    # file_abs = os.path.join(current_dir, 'DriveboardFirmware.hex')
     # if os.path.isfile(file_abs):
     #     os.remove(file_abs)
 
@@ -121,7 +121,7 @@ if len(sys.argv) == 2:
     # (1) get the serial device from the argument list
     SERIAL_PORT = sys.argv[1]
     print "Using serial device '"+ SERIAL_PORT +"' from command line."
-else:    
+else:
     if os.path.isfile(CONFIG_FILE):
         # (2) get the serial device from the config file
         fp = open(CONFIG_FILE)
@@ -129,8 +129,8 @@ else:
         if len(line) > 3:
             SERIAL_PORT = line
             print "Using serial device '"+ SERIAL_PORT +"' from '" + CONFIG_FILE + "'."
-            
-        
+
+
 
 if not SERIAL_PORT:
     # (3) try best guess the serial device if on linux or osx
@@ -141,12 +141,12 @@ if not SERIAL_PORT:
                 SERIAL_PORT = "/dev/" + device
                 print "Using serial device '"+ SERIAL_PORT +"' by best guess."
                 break
-    
-            
+
+
 
 if SERIAL_PORT:
     build()
-else:         
+else:
     print "-----------------------------------------------------------------------------"
     print "ERROR: flash.py doesn't know what serial device to connect to!"
     print "On Linux or OSX this is something like '/dev/tty.usbmodemfd121' and on"
@@ -158,4 +158,3 @@ else:
     print "(3) Best guess. On Linux and OSX the app can guess the serial name by"
     print "    choosing the first device it finds starting with '"+ GUESS_PPREFIX +"'."
     print "-----------------------------------------------------------------------------"
-    

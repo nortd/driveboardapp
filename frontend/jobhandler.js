@@ -93,7 +93,7 @@ jobhandler = {
     this.clear();
 
     this.name = name
-    $('title').html("LasaurApp - " + name)
+    $('title').html("DriveboardApp - " + name)
 
     // handle json string representations as well
     if (typeof(job) === 'string') {

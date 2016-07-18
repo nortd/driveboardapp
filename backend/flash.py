@@ -1,4 +1,4 @@
-# Super Awesome LasaurGrbl python flash script.
+# Super Awesome DriveboardFirmware python flash script.
 #
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
@@ -9,7 +9,7 @@ from config import conf
 
 thislocation = os.path.dirname(os.path.realpath(__file__))
 resources_dir = os.path.abspath(os.path.join(thislocation, '..'))
-firmware_file = "LasaurGrbl.hex"
+firmware_file = "DriveboardFirmware.hex"
 serial_port = "/dev/ttyACM0"
 
 

@@ -1,15 +1,15 @@
 /*
   protocol.c - Lasersaur protocol parser.
-  Part of LasaurApp
+  Part of DriveboardFirmware
 
   Copyright (c) 2014 Stefan Hechenberger
 
-  LasaurApp is free software: you can redistribute it and/or modify
+  DriveboardFirmware is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version. <http://www.gnu.org/licenses/>
 
-  LasaurApp is distributed in the hope that it will be useful,
+  DriveboardFirmware is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -37,7 +37,7 @@
 #define CMD_DWELL 'C'
 #define CMD_RASTER 'D'
 
-#define CMD_REF_RELATIVE 'E' 
+#define CMD_REF_RELATIVE 'E'
 #define CMD_REF_ABSOLUTE 'F'
 
 #define CMD_HOMING 'G'
@@ -56,8 +56,8 @@
 
 
 #define PARAM_TARGET_X 'x'
-#define PARAM_TARGET_Y 'y' 
-#define PARAM_TARGET_Z 'z' 
+#define PARAM_TARGET_Y 'y'
+#define PARAM_TARGET_Z 'z'
 #define PARAM_FEEDRATE 'f'
 #define PARAM_INTENSITY 's'
 #define PARAM_DURATION 'd'
@@ -123,7 +123,7 @@ void protocol_init();
 // Processes serial rx buffer and queues commands for stepper interrupt.
 void protocol_loop();
 
-// Called to make protocol_idle report 
+// Called to make protocol_idle report
 // (super)status the next time it runs.
 void protocol_request_status();
 void protocol_request_superstatus();

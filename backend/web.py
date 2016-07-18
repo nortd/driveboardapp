@@ -507,7 +507,7 @@ def unstop():
 @bottle.auth_basic(checkuser)
 def build(firmware_name=None):
     """Build firmware from firmware/src files."""
-    buildname = "LasaurGrbl_from_src"
+    buildname = "DriveboardFirmware_from_src"
     return_code = driveboard.build(firmware_name=buildname)
     if return_code != 0:
         bottle.abort(400, "Build failed.")
@@ -615,7 +615,7 @@ def start(threaded=True, browser=False, debug=False):
     if not driveboard.connected():
         print "---------------"
         print "HOW TO configure the SERIAL PORT:"
-        print "in LasaurApp/backend/ create a configuration file"
+        print "in DriveboardApp/backend/ create a configuration file"
         print "userconfig.py, and add something like:"
         print "conf = {"
         print "    'serial_port': 'COM3',"
@@ -657,4 +657,4 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             break
     stop()
-    print "END of LasaurApp"
+    print "END of DriveboardApp"

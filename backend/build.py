@@ -1,4 +1,4 @@
-# Super Awesome LasaurGrbl python flash script.
+# Super Awesome DriveboardFirmware python flash script.
 #
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
@@ -40,7 +40,7 @@ elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
 # No need to edit anything below this line
 
 
-def build_firmware(firmware_name="LasaurGrbl"):
+def build_firmware(firmware_name="DriveboardFirmware"):
     """Build the firmware and name it firmware_name.hex.
     The source code is assumed to be in ../firmware/src/
     And the hex file will be placed in ../firmware/

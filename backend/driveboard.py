@@ -740,7 +740,7 @@ def flash(serial_port=conf['serial_port'], firmware_file=conf['firmware']):
     return ret
 
 
-def build(firmware_name="LasaurGrbl"):
+def build(firmware_name="DriveboardFirmware"):
     import build
     ret = build.build_firmware(firmware_name=firmware_name)
     if ret != 0:
