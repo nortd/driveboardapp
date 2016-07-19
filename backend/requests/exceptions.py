@@ -80,7 +80,11 @@ class InvalidSchema(RequestException, ValueError):
 
 
 class InvalidURL(RequestException, ValueError):
-    """ The URL provided was somehow invalid. """
+    """The URL provided was somehow invalid."""
+
+
+class InvalidHeader(RequestException, ValueError):
+    """The header value provided was somehow invalid."""
 
 
 class ChunkedEncodingError(RequestException):
@@ -90,5 +94,25 @@ class ChunkedEncodingError(RequestException):
 class ContentDecodingError(RequestException, BaseHTTPError):
     """Failed to decode response content"""
 
+
 class StreamConsumedError(RequestException, TypeError):
     """The content for this response was already consumed"""
+
+
+class RetryError(RequestException):
+    """Custom retries logic failed"""
+
+
+# Warnings
+
+
+class RequestsWarning(Warning):
+    """Base warning for Requests."""
+    pass
+
+
+class FileModeWarning(RequestsWarning, DeprecationWarning):
+    """
+    A file was opened in text mode, but Requests determined its binary length.
+    """
+    pass

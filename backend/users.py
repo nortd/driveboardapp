@@ -1,5 +1,0 @@
-
-allowed = {
-"admin":"",
-"yourname":"password"
-}

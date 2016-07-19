@@ -44,7 +44,7 @@ Flow Control
 ------------
 
 The firmware has a serial rx buffer which receives the instructions
-byte-by-byte. The client sends a maximum number of bytes that is equvalent
+byte-by-byte. The client sends a maximum number of bytes that is equivalent
 to the buffer size. Whenever the firmware processes bytes from the
 buffer it lets the client know it can send more bytes. Latter notification
 does not happen for every byte but for a certain chunk of bytes.

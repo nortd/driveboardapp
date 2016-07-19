@@ -282,7 +282,7 @@ def _add(job, name):
         fp.write(job)
         print "file saved: " + namepath
     # delete excessive job files
-    num_to_del = (len(_get_sorted('*.dba')) +1) - conf['max_jobs_in_list']
+    num_to_del = len(_get_sorted('*.dba')) - conf['max_jobs_in_list']
     _clear(num_to_del)
 
 def _unique_name(jobname):
