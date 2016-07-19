@@ -186,14 +186,13 @@ inline void on_cmd(uint8_t command) {
   switch(command) {
     case CMD_NONE:
       break;
-    case CMD_LINE: case CMD_RASTER:
-        if(command == CMD_RASTER) {
-          planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
-                        st.feedrate, st.intensity, st.pixel_width );
-        } else {
-          planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
-                        st.feedrate, st.intensity, 0 );
-        }
+    case CMD_LINE:
+      planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
+        st.feedrate, st.intensity, 0 );
+      break;
+    case CMD_RASTER:
+        planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
+                      st.feedrate, st.intensity, st.pixel_width );
       break;
     case CMD_DWELL:
       planner_dwell(st.duration, st.intensity);

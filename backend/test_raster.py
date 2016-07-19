@@ -1,25 +1,54 @@
 
 import os
-import sys
 import time
 import random
 import unittest
 import json
 import threading
-import base64
-import Image
+import pprint
 
 import web
-from config import conf 
 import lasersaur
-import driveboard
+from config import conf
+
+
+# assertEqual(a, b)
+# assertNotEqual(a, b)
+# assertTrue(x)
+# assertFalse(x)
+# assertIsNone(x)
+
+# assertIsInstance(a, b)
+# assertNotIsInstance(a, b)
+
+# assertAlmostEqual(a, b)
+# assertNotAlmostEqual(a, b)
+# assertGreater(a, b)
+# assertGreaterEqual(a, b)
+# assertLess(a, b)
+# assertLessEqual(a, b)
+
+
+# assertListEqual(a, b)
+# assertIn(a, b)
+# assertDictEqual(a, b)
+# assertDictContainsSubset(a, b)
 
 
 thislocation = os.path.dirname(os.path.realpath(__file__))
 
-laser = None
 
-class TestRaster(unittest.TestCase):
+def setUpModule():
+    web.start(threaded=True, debug=False)
+    time.sleep(0.5)
+    lasersaur.local()
+
+def tearDownModule():
+    web.stop()
+
+
+
+class TestOpenRaster(unittest.TestCase):
     def test_config(self):
         img = Image.open(os.path.join(thislocation, 'testjobs', 'bat.png'))
         # img_g = img.convert('LA')  # to grayscale
@@ -29,97 +58,44 @@ class TestRaster(unittest.TestCase):
         img_s = img_g.resize((w,h), resample=Image.BICUBIC)
         # img_s.show()
         data = img_s.getdata()
-
         for lx in xrange(h):
             for rx in xrange(w):
                 x = data[w*lx+rx]
-                if x < 150:
+                if x < 100:
                     sys.stdout.write('.')
-                elif x < 200:
+                elif x < 150:
                     sys.stdout.write('o')
+                elif x < 200:
+                    sys.stdout.write('0')
                 else:
                     sys.stdout.write('X')
             sys.stdout.write('\n')
 
 
-class TestEncode(unittest.TestCase):
-    def test_encode(self):
-        filein = os.path.join(thislocation, 'testjobs', 'bat.png')
-        fileout = os.path.join(thislocation, 'testjobs', 'bat--.svg')
-        with open(filein,"rb") as fp:
-            b64 = base64.encodestring(fp.read()).decode("utf8")
-        with open(fileout,"w") as fp:
-            fp.write(header+b64+footer)
-        # print b64
 
+class TestRaster(unittest.TestCase):
 
-
-header = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   version="1.1"
-   width="744.09448"
-   height="1052.3622"
-   id="svg2">
-  <defs
-     id="defs4" />
-  <metadata
-     id="metadata7">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     id="layer1">
-    <image
-       xlink:href="data:image/png;base64,"""
-
-footer = """"
-       x="112.85717"
-       y="125.21935"
-       width="500"
-       height="540"
-       id="image3082" />
-  </g>
-</svg>"""
-
-
-class Testdba(unittest.TestCase):
-    def test_encode(self):
-        filein = os.path.join(thislocation, 'testjobs', 'bat.png')
-        fileout = os.path.join(thislocation, 'testjobs', 'bat--.dba')
-        with open(filein,"rb") as fp:
-            b64 = base64.encodestring(fp.read()).decode("utf8")
-        with open(fileout,"w") as fp:
-            fp.write(header+b64+footer)
-        # print b64
-
-
-
-def setUpModule():
-    global laser
-    # start web interface
-    # web.start(threaded=True, debug=False)
-    # time.sleep(0.5)
-    laser = lasersaur.Lasersaur("127.0.0.1")
-
-def tearDownModule():
-    # stop web interface
-    # web.stop()
-    pass
+    def testLoad(self):
+        jobfile = os.path.join(thislocation,'testjobs','raster_bat.svg')
+        job = lasersaur.open_file(jobfile)
+        # if 'vector' in job:
+        #     job['vector']['passes'] = [{
+        #             "paths":[0],
+        #             "feedrate":4000,
+        #             "intensity":53
+        #         }]
+        if 'raster' in job:
+            job['raster']['passes'] = [{
+                    "images":[0],
+                    "feedrate":4000,
+                    "intensity":53
+                }]
+        print job.keys()
+        pprint.pprint(job['raster']['passes'])
+        jobname = lasersaur.load(job)
+        self.assertIn(jobname, lasersaur.listing())
+        lasersaur.run(jobname, progress=True)
+        print "done!"
 
 
 if __name__ == '__main__':
