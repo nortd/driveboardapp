@@ -908,6 +908,7 @@ def job(jobdict):
             passes = jobdict['raster']['passes']
             images = jobdict['raster']['images']
             for pass_ in passes:
+                pixelwidth(conf['raster_size'])
                 # assists on, beginning of pass if set to 'pass'
                 if 'air_assist' in pass_:
                     if pass_['air_assist'] == 'pass':

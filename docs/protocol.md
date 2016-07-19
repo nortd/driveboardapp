@@ -99,4 +99,4 @@ The **firmware** only sends a few things without requesting. Upon connecting the
 
 Error Detection
 ---------------
-To recognize a faulty connection quickly every byte is send twice. The firmware compares these two byte and reports a transmission error should they ever not match.
+To recognize a faulty connection quickly every byte is send twice. The firmware compares these two bytes and reports a transmission error should they ever not match.
