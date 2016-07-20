@@ -30,9 +30,7 @@ For details on the encoding of numbers see:
 #### Example
 move command:
 ```
-<parameter><parameter><parameter><command>
-more specifically ...
-<number>x<number>y<number>zB
+<number>x<number>y<number><move_command>
 ```
 
 Raster Data Mode
@@ -49,21 +47,13 @@ Raster data mode is typically used to laser-engrave an image. Each pixel is mapp
 #### Example
 Raster data mode works by sending a raster move instruction, enter raster data mode, send image line data, leave raster data mode:
 ```
-<parameter><parameter><parameter><command>
-<command>
+<number><pixelwidth_command>
+<number>x<number>y<number>z<rastermove_command>
+<data_start_command>
 <rasterpixel><rasterpixel>...<rasterpixel>
-<command>
+<data_end_command>
 ```
-more specifically ...
-```
-<number>x<number>y<number>zD
-\x07
-3
-4
-...
-f
-\x08
-```
+
 
 Status
 ------
