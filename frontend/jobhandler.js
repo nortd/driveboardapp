@@ -64,7 +64,6 @@ jobhandler = {
   stats : {},
   name : "",
   job_group : undefined,
-  scale : undefined,
 
   clear : function() {
     this.vector = {}
@@ -80,11 +79,14 @@ jobhandler = {
   },
 
   isEmpty : function() {
-    return (Object.keys(this.vector).length == 0 &&
-            Object.keys(this.raster).length == 0)
+    return !('paths' in this.vector && this.vector.paths.length > 0) &&
+           !('images' in this.raster && this.raster.images.length > 0)
   },
 
-
+  hasPasses : function() {
+    return ('passes' in this.vector && this.vector.passes.length > 0) ||
+           ('passes' in this.raster && this.raster.passes.length > 0)
+  },
 
 
   // readers //////////////////////////////////
@@ -116,9 +118,6 @@ jobhandler = {
           var img_base64 = image.data
           image.data = new Image()
           image.data.src = img_base64
-          // scale to have one pixel match raster_size (beam width for raster)
-          // image.data.width = Math.round(image.size[0]/app_config_main.raster_size);
-          // image.data.height = Math.round(image.size[1]/app_config_main.raster_size);
         }
       }
     }
@@ -182,58 +181,21 @@ jobhandler = {
   render : function () {
     var x = 0;
     var y = 0;
-    // clear canvas
-    // paper.project.clear()
     jobview_clear()
-    var scale = jobview_mm2px
-
     // rasters
     if ('images' in this.raster) {
+      jobview_feedLayer.activate()
       for (var k=0; k<this.raster.images.length; k++) {
-        var img = this.raster.images[k];
-        // alert(typeof(img.data))
-        var pos_x = img.pos[0]*scale;
-        var pos_y = img.pos[1]*scale;
-        var img_w = img.size[0]*scale;
-        var img_h = img.size[1]*scale;
-        var img_paper = new paper.Raster();
-        img_paper.image = img.data
-        img_paper.scale((img.size[0]*scale)/img.data.width)
+        var img = this.raster.images[k]
+        var pos_x = img.pos[0]*jobview_mm2px
+        var pos_y = img.pos[1]*jobview_mm2px
+        var img_w = img.size[0]*jobview_mm2px
+        var img_h = img.size[1]*jobview_mm2px
+        var img_paper = new paper.Raster(img.data)
+        img_paper.scale(img_w/img.data.width, img_h/img.data.height)
         img_paper.position = new paper.Point(pos_x+0.5*img_w, pos_y+0.5*img_h)
-
-        // var image = raster.image;
-        // var pixwidth = image.width;
-        // var pixheight = image.height;
-        // var offset = app_config_main.raster_offset;
-        //
-        // var ppmmX = pixwidth / width;
-        // var ppmmY = pixheight / height;
-
-        // canvas.stroke('#aaaaaa');
-        // canvas.line(x_prev, y_prev, x1-offset, y);
-        // for (var y = y1; y < y1 + height; y++) {
-        //   var line = Math.round(ppmmY * (y-y1)) * pixwidth;
-        //   for (var x=x1; x < x1 + width; x++) {
-        //     var pixel = Math.round(line + (x - x1) * ppmmX);
-        //     // convert pixel value from extended ascii to hex: [128,255] -> [0-ff]
-        //     // hexpx = ((image[pixel].charCodeAt()-128)*2).toString(16)
-
-        //     // convert pixel value from extended ascii to hex: [33,118] -> [0-ff]
-        //     hexpx = ((image[pixel].charCodeAt()-33)*3).toString(16)
-        //     canvas.stroke('#'+hexpx+hexpx+hexpx);
-        //     canvas.line(x, y, x+1, y);
-        //   }
-        //   canvas.stroke('#aaaaaa');
-        //   canvas.line(x1 + width, y, x1 + width + offset, y);
-        //   canvas.line(x1 - offset, y, x1, y);
-        // }
-
-        x = pos_x + img_w + app_config_main.raster_offset;
-        y = pos_y + img_h;
       }
     }
-
-
     // paths
     if ('paths' in this.vector) {
       jobview_feedLayer.activate()
@@ -251,8 +213,8 @@ jobhandler = {
             var p_seek = new paper.Path()
             p_seek.strokeColor = app_config_main.seek_color
             p_seek.add([x,y])
-            x = pathseg[0][0]*scale
-            y = pathseg[0][1]*scale
+            x = pathseg[0][0]*jobview_mm2px
+            y = pathseg[0][1]*jobview_mm2px
             p_seek.add([x,y])
 
             jobview_feedLayer.activate()
@@ -266,19 +228,14 @@ jobhandler = {
             p_feed.add([x,y])
 
             for (vertex=1; vertex<pathseg.length; vertex++) {
-              x = pathseg[vertex][0]*scale
-              y = pathseg[vertex][1]*scale
+              x = pathseg[vertex][0]*jobview_mm2px
+              y = pathseg[vertex][1]*jobview_mm2px
               p_feed.add([x,y])
             }
           }
         }
-        // // draw group's bounding box
-        // jobview_boundsLayer.activate()
-        // var group_bounds = new paper.Path.Rectangle(group.bounds)
-        // group_bounds.strokeColor = app_config_main.bounds_color
       }
     }
-
   },
 
 
@@ -287,11 +244,10 @@ jobhandler = {
     jobview_boundsLayer.activate()
     // var all_bounds = new paper.Path.Rectangle(this.job_group.bounds)
     // var bbox_all = this.stats['_all_'].bbox
-    var scale = jobview_mm2px
     var bbox = this.getActivePassesBbox()
     var all_bounds = new paper.Path.Rectangle(
-                                    new paper.Point(bbox[0]*scale,bbox[1]*scale),
-                                    new paper.Point(bbox[2]*scale,bbox[3]*scale) )
+                                    new paper.Point(bbox[0]*jobview_mm2px,bbox[1]*jobview_mm2px),
+                                    new paper.Point(bbox[2]*jobview_mm2px,bbox[3]*jobview_mm2px) )
     // all_bounds.strokeColor = app_config_main.bounds_color
     all_bounds.strokeWidth = 2
     all_bounds.strokeColor = '#666666'

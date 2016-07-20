@@ -64,14 +64,12 @@ function jobview_resize() {
     var aspect_workspace = wk_width/wk_height
     var aspect_canvas_void = max_canvas_width/max_canvas_height
     if (aspect_canvas_void > aspect_workspace) {  // workspace is narrower
-      console.log("fit by height")
       // canvas wider, fit by height
       jobview_mm2px = max_canvas_height/wk_height
       $("#job_canvas").width(Math.floor(wk_width*jobview_mm2px))
       $("#main_container").height(max_canvas_height)
       $("#info_panel").height(max_canvas_height)
     } else if (aspect_workspace > aspect_canvas_void) {  // workspace is wider
-      console.log("fit by width!")
       // canvas taller, fit by width
       jobview_mm2px = max_canvas_width/wk_width
       $("#job_canvas").width(max_canvas_width)

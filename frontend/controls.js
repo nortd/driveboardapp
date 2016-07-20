@@ -39,7 +39,7 @@ function controls_ready() {
       // })
       // $('#hamburger').dropdown("toggle")
     } else {
-      $().uxmessage('error', "Cannot export. No job loaded.")
+      $().uxmessage('notice', "Cannot Export. No job loaded.")
     }
     $("body").trigger("click")
     return false
@@ -126,7 +126,19 @@ function controls_ready() {
   $("#run_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#run_btn").click(function(e){
     app_run_btn.start()
+    $('#boundary_btn').prop('disabled', true)
+    status_cache.ready = undefined  // force nect status to update ready state
     jobhandler.setPassesFromGUI()
+    // check for job
+    if (jobhandler.isEmpty()) {
+      $().uxmessage('notice', "Cannot run. No job loaded.")
+      return false
+    }
+    // check for passes
+    if (!jobhandler.hasPasses()) {
+      $().uxmessage('notice', "No passes assigned to this job.")
+      return false
+    }
     // save job to queue, in-place
     var load_request = {
       'job':jobhandler.getJson(),

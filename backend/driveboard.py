@@ -4,7 +4,9 @@ import sys
 import time
 import json
 import copy
+import base64
 import threading
+import itertools
 import serial
 import serial.tools.list_ports
 from config import conf
@@ -823,11 +825,11 @@ def rastermove(x, y, z=0.0):
         SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_RASTER)
 
-def rasterdata(data):
+def rasterdata(data, start, end):
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_RASTER_DATA_START)
-        for char in data:
+        for char in itertools.islice(data, start, end):
             SerialLoop.send_command(char)
         SerialLoop.send_command(CMD_RASTER_DATA_END)
 
@@ -940,7 +942,18 @@ def job(jobdict):
                         img = images[img_index]
                         pos = img["pos"]
                         size = img["size"]
-                        data = img["data"]
+                        data = img["data"]  # in base64, format: jpg, png, gif
+                        px_w = size[0]/conf['raster_size']
+                        px_h = size[1]/conf['raster_size']
+                        # create image obj, convert to grayscale, scale, loop through lines
+                        imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
+                        imgobj = imgobj.convert("L")
+                        imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                        imgobj.show()
+                        break
+
+
+
                         posx = pos[0]
                         posy = pos[1]
                         # calc leadin/out
@@ -962,18 +975,19 @@ def job(jobdict):
                         if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
                             aux1_on()
                         ### go through image lines ####
-                        if len(img) % size[0] != 0:
+                        pxarray = imgobj.getdata()
+                        if len(pxarray) % size[0] != 0:
                             print "ERROR: img length not divisable by width"
                         start = end = 0
                         line_y = posy
-                        while start < len(img):  # line-by-line
+                        while start < len(pxarray):  # line-by-line
                             end += size[0]
                             # lead-in
                             move(leadinpos, line_y)
                             # raster
                             feedrate(feedrate_)
                             rastermove(posright, line_y)
-                            rasterdata(img[start:end])
+                            rasterdata(pxarray, start, end)
                             # lead-out
                             feedrate(seekrate)
                             move(leadoutpos, line_y)
@@ -1045,8 +1059,8 @@ def job(jobdict):
                                     move(polyline[0][0], polyline[0][1], polyline[0][2])
                                 # remaining verteces -> feed
                                 if len(polyline) > 1:
-                                    feedrate(feedrate)
-                                    passintensity(intensity_)
+                                    feedrate(feedrate_)
+                                    intensity(intensity_)
                                     # turn on assists if set to 'feed'
                                     # also air_assist defaults to 'feed'
                                     if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
