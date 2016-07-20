@@ -47,6 +47,8 @@ Raster data mode is typically used to laser-engrave an image. Each pixel is mapp
 #### Example
 Raster data mode works by sending a raster move instruction, enter raster data mode, send image line data, leave raster data mode:
 ```
+<number><intensity_command>
+<number><feedrate_command>
 <number><pixelwidth_command>
 <number>x<number>y<number>z<rastermove_command>
 <data_start_command>

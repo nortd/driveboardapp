@@ -1,5 +1,6 @@
 
 import os
+import io
 import sys
 import time
 import json
@@ -829,8 +830,8 @@ def rasterdata(data, start, end):
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_RASTER_DATA_START)
-        for char in itertools.islice(data, start, end):
-            SerialLoop.send_command(char)
+        for val in itertools.islice(data, start, end):
+            SerialLoop.send_command(chr(val))
         SerialLoop.send_command(CMD_RASTER_DATA_END)
 
 
@@ -874,7 +875,7 @@ def job(jobdict):
             "passes":
             [
                 {
-                    "images": [0]
+                    "images": [0],
                     "seekrate": 6000,      # optional
                     "feedrate": 3000,
                     "intensity": 100,
@@ -910,6 +911,7 @@ def job(jobdict):
             passes = jobdict['raster']['passes']
             images = jobdict['raster']['images']
             for pass_ in passes:
+                intensity(0.0)
                 pixelwidth(conf['raster_size'])
                 # assists on, beginning of pass if set to 'pass'
                 if 'air_assist' in pass_:
@@ -943,32 +945,25 @@ def job(jobdict):
                         pos = img["pos"]
                         size = img["size"]
                         data = img["data"]  # in base64, format: jpg, png, gif
-                        px_w = size[0]/conf['raster_size']
-                        px_h = size[1]/conf['raster_size']
+                        px_w = int(size[0]/float(conf['raster_size']))
+                        px_h = int(size[1]/float(conf['raster_size']))
                         # create image obj, convert to grayscale, scale, loop through lines
+                        import Image
                         imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                         imgobj = imgobj.convert("L")
-                        imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
-                        imgobj.show()
-                        break
-
-
-
+                        imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                        # imgobj.show()
                         posx = pos[0]
                         posy = pos[1]
                         # calc leadin/out
                         leadinpos = posx - conf['raster_leadin']
                         if leadinpos < 0:
-                            print "ERROR: not enough leadin space"
-                            leadinpos = posx
-                        posright = posx + size[0]
-                        leadoutpos = posright + conf['raster_leadin']
+                            print "WARN: not enough leadin space"
+                            leadinpos = 0
+                        leadoutpos = posx + size[0] + conf['raster_leadin']
                         if leadoutpos > conf['workspace'][0]:
-                            print "ERROR: not enough leadout space"
-                            leadoutpos = posright
-                        # move to start
-                        feedrate(seekrate)
-                        move(leadinpos, posy)
+                            print "WARN: not enough leadout space"
+                            leadoutpos = conf['workspace'][0]
                         # assists on, beginning of feed if set to 'feed'
                         if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                             air_on()
@@ -979,16 +974,30 @@ def job(jobdict):
                         if len(pxarray) % size[0] != 0:
                             print "ERROR: img length not divisable by width"
                         start = end = 0
-                        line_y = posy
+                        line_y = posy + 0.5*conf['raster_size']
+                        posleft = posx + 0.5*conf['raster_size']
+                        posright = posx + size[0] - 0.5*conf['raster_size']
+                        print len(pxarray)
+                        print (px_w*px_h)
+                        # break
+
                         while start < len(pxarray):  # line-by-line
                             end += size[0]
-                            # lead-in
+                            # move to start of line
+                            feedrate(seekrate)
                             move(leadinpos, line_y)
+                            # lead-in
+                            move(posleft, line_y)
                             # raster
+                            intensity(intensity_)
                             feedrate(feedrate_)
-                            rastermove(posright, line_y)
-                            rasterdata(pxarray, start, end)
+
+                            move(posright, line_y)
+                            # rastermove(posright, line_y)
+                            # rasterdata(pxarray, start, end)
+
                             # lead-out
+                            intensity(0.0)
                             feedrate(seekrate)
                             move(leadoutpos, line_y)
                             # prime for next line

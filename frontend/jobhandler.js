@@ -36,7 +36,7 @@
 //           "passes":
 //           [
 //               {
-//                   "images": [0]
+//                   "images": [0],
 //                   "seekrate": 6000,      # optional
 //                   "feedrate": 3000,
 //                   "intensity": 100,
