@@ -8,7 +8,7 @@
 
   Inspired by the wiring_serial module by David A. Mellis which
   used to be a part of the Arduino project.
-   
+
   DriveboardFirmware is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -32,6 +32,8 @@ void serial_write_param(uint8_t param, double val);
 uint8_t serial_protocol_read();
 uint8_t serial_raster_read();
 uint8_t serial_data_available();
+
+void serial_consume_data();
 
 // void printString(const char *s);
 // void printPgmString(const char *s);

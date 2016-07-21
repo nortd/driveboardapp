@@ -369,8 +369,8 @@ ISR(TIMER1_COMPA_vect) {
           // Special case raster line.
           // Adjust intensity according raster buffer.
           if (current_block->type == TYPE_RASTER_LINE) {
-            if ((step_events_completed % current_block->pixel_steps) == 1) {
-              // after every pixel width get the next raster value
+            if ((step_events_completed % current_block->pixel_steps) == 0) {
+              // for every pixel width get the next raster value
               // disable nested interrupts
               // this is to prevent race conditions with the serial interrupt
               // over the rx_buffer variables.
@@ -378,12 +378,16 @@ ISR(TIMER1_COMPA_vect) {
               uint8_t chr = serial_raster_read();
               sei();
               // map [128,255] -> [0, nominal_laser_intensity]
-              // (chr-128)*2 * (255/current_block->nominal_laser_intensity)
-              adjust_intensity( (510*(chr-128))/current_block->nominal_laser_intensity );
+              // (chr-128)*2 * (current_block->nominal_laser_intensity/255)
+              adjust_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );
             }
           }
         }
       } else {  // block finished
+        if (current_block->type == TYPE_RASTER_LINE) {
+          // make sure all raster data is consumed
+          serial_consume_data();
+        }
         current_block = NULL;
         planner_discard_current_block();
       }

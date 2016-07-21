@@ -8,7 +8,7 @@
 
   Inspired by the wiring_serial module by David A. Mellis which
   used to be a part of the Arduino project.
-   
+
   DriveboardFirmware is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -59,20 +59,12 @@ uint8_t data_prev = 0;
 
 bool buffer_underrun_marked = false;
 
-/** protocol *************************************
-* The sending app initiates any stream by        *
-* requesting a ready byte. This serial code then *
-* sends one as soon as there are RX_CHUNK_SIZE   *
-* slots available in the rx buffer. The sending  *
-* app can then send this amount of bytes.        *
-* Thereafter it can again request a ready byte   *
-* and apon receiving it send the next chunk.     *
-*************************************************/
 #define RX_CHUNK_SIZE 16
 volatile bool notify_chunk_processed = false;
 uint8_t rx_buffer_processed = 0;
 
 volatile bool raster_mode = false;
+volatile bool consume_data = false;
 
 uint8_t serial_read();
 
@@ -87,17 +79,17 @@ static void set_baud_rate(long baud) {
 
 void serial_init() {
   set_baud_rate(BAUD_RATE);
-  
+
 	/* baud doubler off  - Only needed on Uno XXX */
   UCSR0A &= ~(1 << U2X0);
-          
+
 	// enable rx and tx
   UCSR0B |= 1<<RXEN0;
   UCSR0B |= 1<<TXEN0;
-	
+
 	// enable interrupt on complete reception of a byte
   UCSR0B |= 1<<RXCIE0;
-	  
+
 	// defaults to 8-bit, no parity, 1 stop bit
 
   serial_write(INFO_HELLO);
@@ -119,8 +111,8 @@ inline void serial_write(uint8_t data) {
   // Store data and advance head
   tx_buffer[tx_buffer_head] = data;
   tx_buffer_head = next_head;
-  
-	UCSR0B |=  (1 << UDRIE0);  // enable tx interrupt 
+
+	UCSR0B |=  (1 << UDRIE0);  // enable tx interrupt
 }
 
 
@@ -139,25 +131,25 @@ inline void serial_write_param(uint8_t param, double val) {
 // tx interrupt, called when UDR0 gets empty
 SIGNAL(USART_UDRE_vect) {
   uint8_t tail = tx_buffer_tail;  // optimize for volatile
-  
+
   if (notify_chunk_processed) {
     UDR0 = CMD_CHUNK_PROCESSED ;
     notify_chunk_processed = false;
-  } else {                    // Send a byte from the buffer 
+  } else {                    // Send a byte from the buffer
     UDR0 = tx_buffer[tail];
     if (++tail == TX_BUFFER_SIZE) {tail = 0;}  // increment
     tx_buffer_tail = tail;
   }
-  
+
   // disable tx interrupt, if buffer empty
-  if (tail == tx_buffer_head) { UCSR0B &= ~(1 << UDRIE0); }  
+  if (tail == tx_buffer_head) { UCSR0B &= ~(1 << UDRIE0); }
 }
 
 
 inline uint8_t serial_read() {
   // return data, advance tail
   uint8_t data = rx_buffer[rx_buffer_tail];
-  if (++rx_buffer_tail == RX_BUFFER_SIZE) {rx_buffer_tail = 0;}  // increment  
+  if (++rx_buffer_tail == RX_BUFFER_SIZE) {rx_buffer_tail = 0;}  // increment
   rx_buffer_open_slots++;
   // ATOMIC_BLOCK(ATOMIC_FORCEON) {
     rx_buffer_processed++;
@@ -186,7 +178,7 @@ SIGNAL(USART_RX_vect) {
     }
   }
   // handle char
-  if (data < 32) {  // handle controls chars
+  if (data < 16) {  // handle controls chars
     if (data == CMD_STOP) {
       // special stop character, bypass buffer
       stepper_request_stop(STOPERROR_SERIAL_STOP_REQUEST);
@@ -201,7 +193,7 @@ SIGNAL(USART_RX_vect) {
       stepper_request_stop(STOPERROR_INVALID_MARKER);
     }
   } else {
-    uint8_t head = rx_buffer_head;  // optimize for volatile    
+    uint8_t head = rx_buffer_head;  // optimize for volatile
     uint8_t next_head = head + 1;
     if (next_head == RX_BUFFER_SIZE) {next_head = 0;}
     if (next_head == rx_buffer_tail) {
@@ -224,6 +216,23 @@ inline uint8_t serial_protocol_read() {
     // in the rx_buffer which get directly consumed
     // by the stepper interrupt.
     // sleep_mode();  // sleep a tiny bit
+    if (consume_data) {
+      // wait, buffer empty
+      buffer_underrun_marked = false;
+      while (rx_buffer_tail == rx_buffer_head) {
+        // sleep_mode();
+        if (!buffer_underrun_marked) {
+          protocol_mark_underrun();
+          buffer_underrun_marked = true;
+        }
+        protocol_idle();
+      }
+      // read a byte from the rx buffer
+      uint8_t data = serial_read();
+      if (data == CMD_RASTER_DATA_END) {
+        raster_mode = false;
+      }
+    }
     protocol_idle();
   }
   // wait, buffer empty
@@ -236,28 +245,14 @@ inline uint8_t serial_protocol_read() {
     }
     protocol_idle();
   }
-  // we have non-raster data
+  // read a byte from the rx buffer
   uint8_t data = serial_read();
+  // we have non-raster data
   if (data == CMD_RASTER_DATA_START) {
     raster_mode = true;
-    // comsume the byte, return next non-raster byte
-    // wait, raster mode
-    while (raster_mode) {
-      // sleep_mode();
-      protocol_idle();
-    }
-    // wait, buffer empty
-    buffer_underrun_marked = false;
-    while (rx_buffer_tail == rx_buffer_head) {
-      // sleep_mode();
-      if (!buffer_underrun_marked) {
-        protocol_mark_underrun();
-        buffer_underrun_marked = true;
-      }
-      protocol_idle();
-    }
-    // back to normal mode
-    return serial_read();
+    consume_data = false;
+    // comsume the byte
+    return CMD_NONE;
   } else {
     return data;
   }
@@ -284,12 +279,12 @@ inline uint8_t serial_raster_read() {
       // oops, no raster data, sending side is flaking
       // rastering too fast or serial transmission too slow
       protocol_mark_underrun();
-      return 0;
+      return 128;    // 128 encodes 0 intensity
     } else {
       uint8_t data = serial_read();
       if (data == CMD_RASTER_DATA_END) {
         raster_mode = false;
-        return 0;
+        return 128;  // 128 encodes 0 intensity
       } else {
         return data;
       }
@@ -297,13 +292,18 @@ inline uint8_t serial_raster_read() {
   } else {
     // oops, not even in raster mode
     // sending side seems to be flaking
-    return 0;
+    return 128;     // 128 encodes 0 intensity
   }
 }
 
 
 inline uint8_t serial_data_available() {
   return rx_buffer_tail != rx_buffer_head;
+}
+
+
+inline void serial_consume_data() {
+  consume_data = true;
 }
 
 
@@ -357,13 +357,13 @@ inline uint8_t serial_data_available() {
 //     n = -n;
 //   }
 //   n += 0.5/1000; // Add rounding factor
- 
+
 //   long integer_part;
 //   integer_part = (int)n;
 //   printIntegerInBase(integer_part,10);
-  
+
 //   serial_write('.');
-  
+
 //   n -= integer_part;
 //   int decimals = 3;
 //   uint8_t decimal_part;
@@ -374,4 +374,3 @@ inline uint8_t serial_data_available() {
 //     n -= decimal_part;
 //   }
 // }
-

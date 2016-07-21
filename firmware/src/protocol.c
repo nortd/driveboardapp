@@ -188,7 +188,7 @@ inline void on_cmd(uint8_t command) {
       break;
     case CMD_LINE:
       planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
-        st.feedrate, st.intensity, 0 );
+        st.feedrate, st.intensity, 0.0 );
       break;
     case CMD_RASTER:
         planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],

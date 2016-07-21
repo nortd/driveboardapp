@@ -19,14 +19,14 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 ################ SENDING PROTOCOL
-CMD_STOP = "\x01"
-CMD_RESUME = "\x02"
-CMD_STATUS = "\x03"
-CMD_SUPERSTATUS = "\x04"
-CMD_CHUNK_PROCESSED = "\x05"
-CMD_RASTER_DATA_START = "\x07"
-CMD_RASTER_DATA_END = "\x08"
-STATUS_END = '\x09'
+CMD_STOP = chr(1)
+CMD_RESUME = chr(2)
+CMD_STATUS = chr(3)
+CMD_SUPERSTATUS = chr(4)
+CMD_CHUNK_PROCESSED = chr(5)
+CMD_RASTER_DATA_START = chr(16)
+CMD_RASTER_DATA_END = chr(17)
+STATUS_END = chr(6)
 
 CMD_NONE = "A"
 CMD_LINE = "B"
@@ -314,6 +314,15 @@ class SerialLoopClass(threading.Thread):
         self.job_size += 5
 
 
+    def send_data(self, data, start, end):
+        count = 2
+        self.tx_buffer.append(CMD_RASTER_DATA_START)
+        for val in itertools.islice(data, start, end):
+            self.tx_buffer.append(chr(val))
+            count += 1
+        self.tx_buffer.append(CMD_RASTER_DATA_END)
+        self.job_size += count
+
 
     def run(self):
         """Main loop of the serial thread."""
@@ -443,7 +452,7 @@ class SerialLoopClass(threading.Thread):
                         elif 127 < ord(char) < 256:
                             print "\t(data byte)"
                         else:
-                            print "\t(invalid)"
+                            print "\t(raster data ?)"
                     print "----------------"
                 # stop mode housekeeping
                 self.tx_buffer = []
@@ -829,10 +838,7 @@ def rastermove(x, y, z=0.0):
 def rasterdata(data, start, end):
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_RASTER_DATA_START)
-        for val in itertools.islice(data, start, end):
-            SerialLoop.send_command(chr(val))
-        SerialLoop.send_command(CMD_RASTER_DATA_END)
+        SerialLoop.send_data(data, start, end)
 
 
 
@@ -948,10 +954,12 @@ def job(jobdict):
                         px_w = int(size[0]/float(conf['raster_size']))
                         px_h = int(size[1]/float(conf['raster_size']))
                         # create image obj, convert to grayscale, scale, loop through lines
+                        print "--- start of image processing ---"
                         import Image
                         imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                         imgobj = imgobj.convert("L")
                         imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                        print "---- end of image processing ----"
                         # imgobj.show()
                         posx = pos[0]
                         posy = pos[1]
@@ -977,9 +985,10 @@ def job(jobdict):
                         line_y = posy + 0.5*conf['raster_size']
                         posleft = posx + 0.5*conf['raster_size']
                         posright = posx + size[0] - 0.5*conf['raster_size']
-                        print len(pxarray)
-                        print (px_w*px_h)
-                        # break
+                        print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
+                        print "px: |%s|  raster_size:%s" % (px_w, conf['raster_size'])
+                        # print len(pxarray)
+                        # print (px_w*px_h)
 
                         while start < len(pxarray):  # line-by-line
                             end += size[0]
@@ -988,18 +997,16 @@ def job(jobdict):
                             move(leadinpos, line_y)
                             # lead-in
                             move(posleft, line_y)
-                            # raster
+                            # raster move
                             intensity(intensity_)
                             feedrate(feedrate_)
-
-                            move(posright, line_y)
-                            # rastermove(posright, line_y)
-                            # rasterdata(pxarray, start, end)
-
+                            rastermove(posright, line_y)
                             # lead-out
                             intensity(0.0)
                             feedrate(seekrate)
                             move(leadoutpos, line_y)
+                            # stream raster data for previous rastermove
+                            rasterdata(pxarray, start, end)
                             # prime for next line
                             start = end
                             line_y += conf['raster_size']

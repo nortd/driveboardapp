@@ -20,11 +20,11 @@
 
 #ifndef planner_h
 #define planner_h
-                 
+
 #include "config.h"
 
 
-// Command types the planner and stepper can schedule for execution 
+// Command types the planner and stepper can schedule for execution
 #define TYPE_LINE 0
 #define TYPE_RASTER_LINE 1
 #define TYPE_AIR_ASSIST_ENABLE 2
@@ -41,7 +41,7 @@
 #define planner_control_aux2_assist_enable() planner_command(TYPE_AUX2_ASSIST_ENABLE)
 #define planner_control_aux2_assist_disable() planner_command(TYPE_AUX2_ASSIST_DISABLE)
 
-// This struct is used when buffering the setup for each linear movement "nominal" values are as specified in 
+// This struct is used when buffering the setup for each linear movement "nominal" values are as specified in
 // the source g-code and may never actually be reached if acceleration management is active.
 typedef struct {
   uint8_t type;                       // Type of command, eg: TYPE_LINE, TYPE_AIR_ASSIST_ENABLE
@@ -51,7 +51,7 @@ typedef struct {
   int32_t  step_event_count;          // The number of step events required to complete this block
   uint32_t nominal_rate;              // The nominal step rate for this block in step_events/minute
   // Fields used by the motion planner to manage acceleration
-  double nominal_speed;               // The nominal speed for this block in mm/min  
+  double nominal_speed;               // The nominal speed for this block in mm/min
   double entry_speed;                 // Entry speed at previous-current junction in mm/min
   double vmax_junction;               // max junction speed (mm/min) based on angle between segments, accel and deviation settings
   double millimeters;                 // The total travel of this block in mm
@@ -59,7 +59,7 @@ typedef struct {
   bool recalculate_flag;              // Planner flag to recalculate trapezoids on entry junction
   bool nominal_length_flag;           // Planner flag for nominal speed always reached
   // Settings for the trapezoid generator
-  uint32_t initial_rate;              // The jerk-adjusted step rate at start of block  
+  uint32_t initial_rate;              // The jerk-adjusted step rate at start of block
   uint32_t final_rate;                // The minimal rate at exit
   int32_t rate_delta;                 // The steps/minute to add or subtract when changing speed (must be positive)
   uint32_t accelerate_until;          // The index of the step event on which to stop acceleration
@@ -67,14 +67,14 @@ typedef struct {
 
   uint16_t pixel_steps;               // Number of steps for each raster pixel (only in TYPE_RASTER_LINE)
 } block_t;
-      
-// Initialize the motion plan subsystem      
+
+// Initialize the motion plan subsystem
 void planner_init();
 
 // Add a new linear movement to the buffer.
 // x, y and z is the signed, absolute target position in millimaters.
 // Feed rate specifies the speed of the motion.
-void planner_line(double x, double y, double z, double feed_rate, uint8_t nominal_laser_intensity, uint16_t pixel_width);
+void planner_line(double x, double y, double z, double feed_rate, uint8_t nominal_laser_intensity, double pixel_width);
 
 // Add a new piercing action, lasing at one spot.
 void planner_dwell(double seconds, uint8_t nominal_laser_intensity);

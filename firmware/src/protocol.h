@@ -21,14 +21,14 @@
 
 
 // commands, handled in serial.c
-#define CMD_STOP '\x01'
-#define CMD_RESUME '\x02'
-#define CMD_STATUS '\x03'
-#define CMD_SUPERSTATUS '\x04'
-#define CMD_CHUNK_PROCESSED '\x05'
-#define CMD_RASTER_DATA_START '\x07'
-#define CMD_RASTER_DATA_END '\x08'
-#define STATUS_END '\x09'
+#define CMD_STOP 1
+#define CMD_RESUME 2
+#define CMD_STATUS 3
+#define CMD_SUPERSTATUS 4
+#define CMD_CHUNK_PROCESSED 5
+#define CMD_RASTER_DATA_START 16
+#define CMD_RASTER_DATA_END 17
+#define STATUS_END 6
 
 
 // commands, handled in protocol.c
