@@ -16,3 +16,24 @@
 - raster
   - raster fills
   - image raster
+
+- PIL/Pillow dependancy
+  - apt-get update
+  - apt-get install python-imaging
+
+replace /etc/apt/sources.list
+-----------------------------
+deb http://old-releases.ubuntu.com/ubuntu/ raring main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ raring main universe restricted multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu/ raring-security main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ raring-security main universe restricted multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu/ raring-updates main universe restricted multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ raring-updates main universe restricted multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu/ raring-backports main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ raring-backports main restricted universe multiverse
+
+deb http://old-releases.ubuntu.com/ubuntu/ raring-proposed main restricted universe multiverse
+deb-src http://old-releases.ubuntu.com/ubuntu/ raring-proposed main restricted universe multiverse

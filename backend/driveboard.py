@@ -996,14 +996,13 @@ def job(jobdict):
                             feedrate(seekrate)
                             move(leadinpos, line_y)
                             # lead-in
+                            feedrate(feedrate_)
                             move(posleft, line_y)
                             # raster move
                             intensity(intensity_)
-                            feedrate(feedrate_)
                             rastermove(posright, line_y)
                             # lead-out
                             intensity(0.0)
-                            feedrate(seekrate)
                             move(leadoutpos, line_y)
                             # stream raster data for previous rastermove
                             rasterdata(pxarray, start, end)
