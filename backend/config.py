@@ -44,7 +44,7 @@ conf = {
     },
 
     'usb_reset_hack': False,
-    'raster_leadin': 100,
+    'raster_leadin': 40,
 
     'max_segment_length': 5.0,
 

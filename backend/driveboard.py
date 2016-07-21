@@ -452,7 +452,7 @@ class SerialLoopClass(threading.Thread):
                         elif 127 < ord(char) < 256:
                             print "\t(data byte)"
                         else:
-                            print "\t(raster data ?)"
+                            print "\t(invalid)"
                     print "----------------"
                 # stop mode housekeeping
                 self.tx_buffer = []
