@@ -97,6 +97,7 @@ function tools_tmove_init() {
     var y_mm = Math.ceil(event.point.y/jobview_mm2px-status_cache.offset[1])
     request_absolute_move(x_mm, y_mm, 0, app_config_main.seekrate, "Moving to "+x_mm+","+y_mm)
     $('#select_btn').trigger('click')
+    status_cache.ready = undefined  // force status update
     // setTimeout(function(){
     //   jobview_moveLayer.visible = false
     // },1000)
