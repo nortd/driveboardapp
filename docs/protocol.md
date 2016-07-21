@@ -18,7 +18,7 @@ Instruction Mode
 
 <lowbyte> ::= byte [0,127]
 
-<highbyte> ::= byte [128-255]
+<highbyte> ::= byte [128,255]
 ```
 #### Commands
 For details on the encoding of a command see: pound defs in [protocol.h](../firmware/src/protocol.h)
@@ -36,7 +36,9 @@ move command:
 Raster Data Mode
 ----------------
 ```
-<rasterpixel> ::= <byte>
+<rasterpixel> ::= <highbyte>
+
+<highbyte> ::= byte [128,255]
 ```
 Raster data mode is typically used to laser-engrave an image. Each pixel is mapped to the size of the laser focus (*raster_size* in [config.py](../backend/config.py)). Internally this means the raster data needs to have one pixel per physical pixel. For example:
 
@@ -72,7 +74,7 @@ The firmware replies with a status codes in a similar manner. The presence of a 
 
 <lowbyte> ::= byte [0,127]
 
-<highbyte> ::= byte [128-255]
+<highbyte> ::= byte [128,255]
 ```
 
 There a different kinds of status codes:

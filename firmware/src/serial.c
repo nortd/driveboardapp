@@ -282,11 +282,14 @@ inline uint8_t serial_raster_read() {
       return 128;    // 128 encodes 0 intensity
     } else {
       uint8_t data = serial_read();
-      if (data == CMD_RASTER_DATA_END) {
+      if (127 < data < 256) {
+        return data;
+      } else if (data == CMD_RASTER_DATA_END) {
         raster_mode = false;
         return 128;  // 128 encodes 0 intensity
       } else {
-        return data;
+        stepper_request_stop(STOPERROR_INVALID_MARKER);
+        return 128;
       }
     }
   } else {

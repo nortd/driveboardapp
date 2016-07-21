@@ -119,14 +119,14 @@ INFO_PIXEL_WIDTH = 'j'
 # reverse lookup for commands, for debugging
 # NOTE: have to be in sync with above definitions
 markers_tx = {
-    "\x01": "CMD_STOP",
-    "\x02": "CMD_RESUME",
-    "\x03": "CMD_STATUS",
-    "\x04": "CMD_SUPERSTATUS",
-    "\x05": "CMD_CHUNK_PROCESSED",
-    "\x07": "CMD_RASTER_DATA_START",
-    "\x08": "CMD_RASTER_DATA_END",
-    "\x09": "STATUS_END",
+    chr(1): "CMD_STOP",
+    chr(2): "CMD_RESUME",
+    chr(3): "CMD_STATUS",
+    chr(4): "CMD_SUPERSTATUS",
+    chr(5): "CMD_CHUNK_PROCESSED",
+    chr(16): "CMD_RASTER_DATA_START",
+    chr(17): "CMD_RASTER_DATA_END",
+    chr(6): "STATUS_END",
 
     "A": "CMD_NONE",
     "B": "CMD_LINE",
@@ -318,7 +318,7 @@ class SerialLoopClass(threading.Thread):
         count = 2
         self.tx_buffer.append(CMD_RASTER_DATA_START)
         for val in itertools.islice(data, start, end):
-            self.tx_buffer.append(chr(val))
+            self.tx_buffer.append(chr(int(0.5*val)+128))
             count += 1
         self.tx_buffer.append(CMD_RASTER_DATA_END)
         self.job_size += count
