@@ -6,6 +6,7 @@
     - no problem when doing a homing, move, raster
   - export svg with raster fails on import
   - queue not updated when loading from library
+- beauty bugs
   - stall between certain x-axis jogs
     - send a pierce command in between
 

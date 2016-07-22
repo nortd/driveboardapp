@@ -48,7 +48,6 @@
 uint8_t rx_buffer[RX_BUFFER_SIZE];
 volatile uint8_t rx_buffer_head = 0;
 volatile uint8_t rx_buffer_tail = 0;
-volatile uint8_t rx_buffer_open_slots = RX_BUFFER_SIZE - 1;
 
 uint8_t tx_buffer[TX_BUFFER_SIZE];
 volatile uint8_t tx_buffer_head = 0;
@@ -154,7 +153,6 @@ inline uint8_t serial_read() {
   // return data, advance tail
   uint8_t data = rx_buffer[rx_buffer_tail];
   if (++rx_buffer_tail == RX_BUFFER_SIZE) {rx_buffer_tail = 0;}  // increment
-  rx_buffer_open_slots++;
   // ATOMIC_BLOCK(ATOMIC_FORCEON) {
     rx_buffer_processed++;
     if (rx_buffer_processed == RX_CHUNK_SIZE) {
@@ -191,6 +189,7 @@ SIGNAL(USART_RX_vect) {
       raster_mode = false;
       consume_data = false;
       rx_buffer_head = rx_buffer_tail = 0;  // reset rx buffer
+      rx_buffer_processed = 0;
       stepper_stop_resume();
     } else if (data == CMD_STATUS) {
       protocol_request_status();
@@ -209,7 +208,6 @@ SIGNAL(USART_RX_vect) {
     } else {
       rx_buffer[head] = data;
       rx_buffer_head = next_head;
-      rx_buffer_open_slots--;
     }
   }
 }

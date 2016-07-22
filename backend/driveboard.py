@@ -542,6 +542,7 @@ class SerialLoopClass(threading.Thread):
 
         if self.request_resume:
             self._send_char(CMD_RESUME)
+            self.firmbuf_used = 0  # a resume resets the hardware's rx buffer
             self.request_resume = False
             self.reset_status()
             self.request_status = 2  # super request
