@@ -345,9 +345,10 @@ ISR(TIMER1_COMPA_vect) {
               adjusted_rate = current_block->nominal_rate;
             }
             adjust_speed( adjusted_rate );
-            if (current_block->type == TYPE_RASTER_LINE) {
-              adjust_intensity(0);  // set only through raster data
-            }
+            // if (current_block->type == TYPE_RASTER_LINE) {
+            //   adjust_intensity(0);  // set only through raster data
+            //   // NOTE: a bit redundant with adjust_speed, may want to optimize
+            // }
           }
 
         // deceleration start
@@ -364,9 +365,10 @@ ISR(TIMER1_COMPA_vect) {
               adjusted_rate = current_block->final_rate;
             }
             adjust_speed( adjusted_rate );
-            if (current_block->type == TYPE_RASTER_LINE) {
-              adjust_intensity(0);  // set only through raster data
-            }
+            // if (current_block->type == TYPE_RASTER_LINE) {
+            //   adjust_intensity(0);  // set only through raster data
+            //   // NOTE: a bit redundant with adjust_speed, may want to optimize
+            // }
           }
 
         // cruising
@@ -377,6 +379,7 @@ ISR(TIMER1_COMPA_vect) {
             adjust_speed( adjusted_rate );
             if (current_block->type == TYPE_RASTER_LINE) {
               adjust_intensity(0);  // set only through raster data
+              // NOTE: a bit redundant with adjust_speed, may want to optimize
             }
           }
           // Special case raster line.
