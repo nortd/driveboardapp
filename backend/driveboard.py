@@ -913,6 +913,18 @@ def job(jobdict):
 
     ### rasters
     if jobdict.has_key('raster'):
+
+        # HACK in default pass
+        if jobdict['raster'].has_key('images'):
+            jobdict['raster']['passes'] = [{
+                   "images": [0],
+                   "seekrate": 6000,
+                   "feedrate": 6000,
+                   "intensity": 100,
+                   "air_assist": "pass",
+                   "aux1_assist": "off"
+                }]
+
         if jobdict['raster'].has_key('passes') and jobdict['raster'].has_key('images'):
             passes = jobdict['raster']['passes']
             images = jobdict['raster']['images']
