@@ -366,6 +366,9 @@ ISR(TIMER1_COMPA_vect) {
           if (adjusted_rate != current_block->nominal_rate) {
             adjusted_rate = current_block->nominal_rate;
             adjust_speed( adjusted_rate );
+            if (current_block->type == TYPE_RASTER_LINE) {
+              adjust_intensity(0)  // set only through raster data
+            }
           }
           // Special case raster line.
           // Adjust intensity according raster buffer.

@@ -919,7 +919,8 @@ def job(jobdict):
             images = jobdict['raster']['images']
             for pass_ in passes:
                 intensity(0.0)
-                pixelwidth(conf['raster_size'])
+                raster_size_x4 = conf['raster_size']/4.0
+                pixelwidth(raster_size_x4)
                 # assists on, beginning of pass if set to 'pass'
                 if 'air_assist' in pass_:
                     if pass_['air_assist'] == 'pass':
@@ -952,7 +953,7 @@ def job(jobdict):
                         pos = img["pos"]
                         size = img["size"]
                         data = img["data"]  # in base64, format: jpg, png, gif
-                        px_w = int(size[0]/float(conf['raster_size']))
+                        px_w = int(size[0]/fraster_size_x4)
                         px_h = int(size[1]/float(conf['raster_size']))
                         # create image obj, convert to grayscale, scale, loop through lines
                         print "--- start of image processing ---"
