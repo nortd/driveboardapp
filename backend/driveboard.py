@@ -318,7 +318,7 @@ class SerialLoopClass(threading.Thread):
         count = 2
         self.tx_buffer.append(CMD_RASTER_DATA_START)
         for val in itertools.islice(data, start, end):
-            self.tx_buffer.append(chr(int(0.5*val)+128))
+            self.tx_buffer.append(chr(int(0.5*(255-val))+128))
             count += 1
         self.tx_buffer.append(CMD_RASTER_DATA_END)
         self.job_size += count
@@ -989,10 +989,8 @@ def job(jobdict):
                         print "px: |%s|  raster_size:%s" % (px_w, conf['raster_size'])
                         # print len(pxarray)
                         # print (px_w*px_h)
-
                         line_count = int(size[1]/conf['raster_size'])
                         for l in xrange(line_count):
-                        # while start < len(pxarray):  # line-by-line
                             print line_y
                             end += px_w
                             # move to start of line
