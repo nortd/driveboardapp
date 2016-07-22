@@ -109,7 +109,7 @@ function status_set_main_button(status) {
 
 function status_set_refresh() {
   if (status_websocket && status_websocket.readyState == 1) {  // connected
-    var every = 2
+    var every = 1
     if (app_visibility) {  // app focused
       if (!status_cache.ready) {  // focused and ready -> idle
         every = 4
@@ -119,6 +119,7 @@ function status_set_refresh() {
     }
     // send request to statserver
     status_websocket.send('{"status_every":'+every+'}')
+    // console.log("every: " + every)
   }
 }
 

@@ -990,8 +990,11 @@ def job(jobdict):
                         # print len(pxarray)
                         # print (px_w*px_h)
 
-                        while start < len(pxarray):  # line-by-line
-                            end += size[0]
+                        line_count = int(size[1]/conf['raster_size'])
+                        for l in xrange(line_count):
+                        # while start < len(pxarray):  # line-by-line
+                            print line_y
+                            end += px_w
                             # move to start of line
                             feedrate(seekrate)
                             move(leadinpos, line_y)
