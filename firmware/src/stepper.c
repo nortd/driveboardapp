@@ -279,6 +279,9 @@ ISR(TIMER1_COMPA_vect) {
       adjusted_rate = current_block->initial_rate;
       acceleration_tick_counter = CYCLES_PER_ACCELERATION_TICK/2; // start halfway, midpoint rule.
       adjust_speed( adjusted_rate ); // initialize cycles_per_step_event
+      if (current_block->type == TYPE_RASTER_LINE) {
+        adjust_intensity(0);  // set only through raster data
+      }
       counter_x = -(current_block->step_event_count >> 1);
       counter_y = counter_x;
       counter_z = counter_x;
