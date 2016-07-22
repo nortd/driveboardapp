@@ -395,7 +395,7 @@ inline void protocol_idle() {
 
   if (stepper_stop_requested()) {
     // TODO: make sure from the time triggered to time handled in protocol loop nothing weird happens
-    // WARN: this is contioously call during a stop condition
+    // WARN: this is contiuously call during a stop condition
     // TODO: reset serial rx buffer
     planner_reset_block_buffer();
     planner_set_position(stepper_get_position_x(), stepper_get_position_y(), stepper_get_position_z());

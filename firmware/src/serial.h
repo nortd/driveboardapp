@@ -24,6 +24,7 @@
 #define serial_h
 
 void serial_init();
+void serial_stop();
 
 // serial write functions, only call from main loop
 void serial_write(uint8_t data);

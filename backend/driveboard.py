@@ -979,14 +979,14 @@ def job(jobdict):
                             aux1_on()
                         ### go through image lines ####
                         pxarray = imgobj.getdata()
-                        if len(pxarray) % size[0] != 0:
-                            print "ERROR: img length not divisable by width"
+                        # if len(pxarray) % size[0] != 0:
+                        #     print "ERROR: img length not divisable by width"
                         start = end = 0
                         line_y = posy + 0.5*conf['raster_size']
                         posleft = posx + 0.5*conf['raster_size']
                         posright = posx + size[0] - 0.5*conf['raster_size']
-                        print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
-                        print "px: |%s|  raster_size:%s" % (px_w, conf['raster_size'])
+                        # print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
+                        # print "px: |%s|  raster_size:%s" % (px_w, conf['raster_size'])
                         # print len(pxarray)
                         # print (px_w*px_h)
                         line_count = int(size[1]/conf['raster_size'])

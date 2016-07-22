@@ -95,6 +95,10 @@ void serial_init() {
   serial_write(INFO_HELLO);
 }
 
+void serial_stop() {
+  raster_mode = false;
+  consume_data = false;
+}
 
 
 inline void serial_write(uint8_t data) {
@@ -184,6 +188,9 @@ SIGNAL(USART_RX_vect) {
       stepper_request_stop(STOPERROR_SERIAL_STOP_REQUEST);
     } else if (data == CMD_RESUME) {
       // special resume character, bypass buffer
+      raster_mode = false;
+      consume_data = false;
+      rx_buffer_head = rx_buffer_tail = 0;  // reset rx buffer
       stepper_stop_resume();
     } else if (data == CMD_STATUS) {
       protocol_request_status();
@@ -274,7 +281,7 @@ inline uint8_t serial_raster_read() {
   * and one more needs to be read.                 *
   *************************************************/
   // called from stepper interrupt
-  if (raster_mode) {
+  if (raster_mode && !consume_data) {
     if (rx_buffer_tail == rx_buffer_head) {
       // oops, no raster data, sending side is flaking
       // rastering too fast or serial transmission too slow

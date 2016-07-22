@@ -8,9 +8,6 @@
   - queue not updated when loading from library
   - stall between certain x-axis jogs
     - send a pierce command in between
-  - stop during raster does not recover
-    - possibly frontend
-    - ready state not set accordingly?
 
 
 - gcode editor

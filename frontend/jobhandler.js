@@ -102,23 +102,21 @@ jobhandler = {
       job = JSON.parse(job)
     }
 
-    if ('vector' in job) {
+    if ('vector' in job && 'paths' in job.vector && job.vector.paths.length > 0) {
       this.vector = job.vector
       if (optimize) {
         this.segmentizeLongLines();
       }
     }
 
-    if ('raster' in job) {
-      if ('images' in job.raster) {
-        this.raster = job.raster
-        // convert base64 to Image object
-        for (var i=0; i<this.raster.images.length; i++) {
-          var image = this.raster.images[i]
-          var img_base64 = image.data
-          image.data = new Image()
-          image.data.src = img_base64
-        }
+    if ('raster' in job && 'images' in job.raster && job.raster.images.length > 0) {
+      this.raster = job.raster
+      // convert base64 to Image object
+      for (var i=0; i<this.raster.images.length; i++) {
+        var image = this.raster.images[i]
+        var img_base64 = image.data
+        image.data = new Image()
+        image.data.src = img_base64
       }
     }
 
@@ -440,7 +438,7 @@ jobhandler = {
         for (var j = 0; j < pass.images.length; j++) {
           var image_idx = pass.images[j]
           if (image_idx >= 0 && image_idx < this.stats.images.length) {
-            length += his.stats.images[image_idx].length
+            length += this.stats.images[image_idx].length
           }
         }
       }

@@ -155,6 +155,7 @@ void stepper_request_stop(uint8_t status) {
   if (!stop_requested) {  // prevent retriggering
     stop_status = status;
     stop_requested = true;
+    serial_stop();
   }
 }
 
