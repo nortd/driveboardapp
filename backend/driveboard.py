@@ -953,7 +953,7 @@ def job(jobdict):
                         pos = img["pos"]
                         size = img["size"]
                         data = img["data"]  # in base64, format: jpg, png, gif
-                        px_w = int(size[0]/fraster_size_x4)
+                        px_w = int(size[0]/raster_size_x4)
                         px_h = int(size[1]/float(conf['raster_size']))
                         # create image obj, convert to grayscale, scale, loop through lines
                         print "--- start of image processing ---"
