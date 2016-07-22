@@ -991,7 +991,6 @@ def job(jobdict):
                         # print (px_w*px_h)
                         line_count = int(size[1]/conf['raster_size'])
                         for l in xrange(line_count):
-                            print line_y
                             end += px_w
                             # move to start of line
                             feedrate(seekrate)

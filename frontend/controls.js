@@ -129,6 +129,21 @@ function controls_ready() {
     $('#boundary_btn').prop('disabled', true)
     status_cache.ready = undefined  // force nect status to update ready state
     jobhandler.setPassesFromGUI()
+
+
+    // HACK in default pass
+    if ('images' in jobhandler.raster) {
+      jobhandler.raster.passes = [{
+        "images": [0],
+        "seekrate": 6000,
+        "feedrate": 6000,
+        "intensity": 100,
+        "air_assist": "pass",
+        "aux1_assist": "off"
+      }]
+    }
+
+
     // check for job
     if (jobhandler.isEmpty()) {
       $().uxmessage('notice', "Cannot run. No job loaded.")
