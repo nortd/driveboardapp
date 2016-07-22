@@ -919,7 +919,7 @@ def job(jobdict):
             images = jobdict['raster']['images']
             for pass_ in passes:
                 intensity(0.0)
-                raster_size_x4 = conf['raster_size']/4.0
+                raster_size_x4 = conf['raster_size']/4.0  # use 4x horiz resol.
                 pixelwidth(raster_size_x4)
                 # assists on, beginning of pass if set to 'pass'
                 if 'air_assist' in pass_:
