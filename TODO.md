@@ -10,20 +10,23 @@
 - beauty bugs
   - stall between certain x-axis jogs
     - send a pierce command in between
+  - png alpha channel
 
 - optimizations
   - compact statserver message
 
-- gcode editor
-
-- load dxf
-- load gcode
-
-- raster
+- features
+  - pass assignment for rasters
+  - gcode editor
+  - importers
+    - load dxf
+    - load gcode
   - raster fills
-  - image raster
 
-- PIL/Pillow dependancy
+
+
+PIL/Pillow dependancy
+----------------------
   - apt-get update
   - apt-get install python-imaging
 

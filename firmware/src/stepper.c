@@ -68,7 +68,7 @@ static int32_t counter_x,       // Counter variables for the bresenham line trac
                counter_y,
                counter_z;
 static uint32_t step_events_completed; // The number of step events executed in the current block
-static volatile bool busy;  // true whe stepper ISR is in already running
+static volatile bool busy;  // true when stepper ISR is in already running
 
 // Variables used by the trapezoid generation
 static uint32_t cycles_per_step_event;        // The number of machine cycles between each step event
@@ -621,21 +621,18 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
   return;
 }
 
-inline static void approach_limit_switch(bool x, bool y, bool z) {
-  homing_cycle(x, y, z,false, CONFIG_HOMINGRATE);
-}
-
-inline static void leave_limit_switch(bool x, bool y, bool z) {
-  homing_cycle(x, y, z, true, CONFIG_HOMINGRATE);
-}
 
 inline void stepper_homing_cycle() {
   // home the x and y axis
   #ifdef ENABLE_3AXES
-  approach_limit_switch(true, true, true);
-  leave_limit_switch(true, true, true);
+  // approach limit
+  homing_cycle(true, true, true, false, CONFIG_HOMINGRATE);
+  // leave limit
+  homing_cycle(true, true, true, true, CONFIG_HOMINGRATE);
   #else
-  approach_limit_switch(true, true, false);
-  leave_limit_switch(true, true, false);
+  // approach limit
+  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);
+  // leave limit
+  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);
   #endif
 }
