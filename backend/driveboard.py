@@ -1011,6 +1011,7 @@ def job(jobdict):
                             # prime for next line
                             start = end
                             line_y += conf['raster_size']
+                            move(leadoutpos, line_y) 
                         # assists off, end of feed if set to 'feed'
                         if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                             air_off()
