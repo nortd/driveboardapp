@@ -230,7 +230,7 @@ class SerialLoopClass(threading.Thread):
         # written to the device in one go. It needs to match the device.
         self.TX_CHUNK_SIZE = 16
         self.RX_CHUNK_SIZE = 32
-        self.FIRMBUF_SIZE = 255  # needs to match device firmware
+        self.FIRMBUF_SIZE = 256  # needs to match device firmware
         self.firmbuf_used = 0
 
         # used for calculating percentage done

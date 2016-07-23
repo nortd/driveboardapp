@@ -1,13 +1,6 @@
 
 
 - bugs
-  - buffer overflow
-    - only when
-      - powerup, homing, raster
-      - powerup, homing, offset, raster
-    - not when
-      - powerup, moving, homing, raster
-      - powerup, homing, moving, raster
   - export svg with raster fails on import
   - queue not updated when loading from library
 
