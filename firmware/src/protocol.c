@@ -212,7 +212,7 @@ inline void on_cmd(uint8_t command) {
       // now that we are at the physical home
       // zero all the position vectors
       clear_vector(st.target);
-      planner_set_position(0.0, 0.0, 0.0);
+      // planner_set_position(0.0, 0.0, 0.0);
       // move head to table offset
       st.offselect = OFFSET_TABLE;
       st.target[X_AXIS] = st.offsets[TABLEOFF_X];
