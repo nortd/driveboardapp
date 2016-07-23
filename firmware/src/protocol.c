@@ -220,10 +220,6 @@ inline void on_cmd(uint8_t command) {
       st.target[Z_AXIS] = st.offsets[TABLEOFF_Z];
       planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
                     st.feedrate, 0, 0.0 );
-      planner_line( 0, 0, 0,
-                    st.feedrate, 0, 0.0 );
-      planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
-                    st.feedrate, 0, 0.0 );
       break;
     case CMD_SET_OFFSET_TABLE: case CMD_SET_OFFSET_CUSTOM:
       while(stepper_processing()) {
