@@ -549,6 +549,7 @@ class SerialLoopClass(threading.Thread):
         ### send buffer chunk
         if self.tx_buffer and len(self.tx_buffer) > self.tx_pos:
             if not self._paused:
+                print "rx buffer: " + (self.FIRMBUF_SIZE - self.firmbuf_used)
                 if (self.FIRMBUF_SIZE - self.firmbuf_used) > self.TX_CHUNK_SIZE:
                     try:
                         # to_send = ''.join(islice(self.tx_buffer, 0, self.TX_CHUNK_SIZE))
@@ -1011,7 +1012,7 @@ def job(jobdict):
                             # prime for next line
                             start = end
                             line_y += conf['raster_size']
-                            move(leadoutpos, line_y) 
+                            move(leadoutpos, line_y)
                         # assists off, end of feed if set to 'feed'
                         if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                             air_off()
