@@ -30,6 +30,8 @@
 //           "colors": ["#FF0000"],         # color is matched to path by index
 //           "noreturn": True,              # do not return to origin, default: False
 //           "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
+//           "fills": [0],                  # paths by index
+//           "fillcolors": ["#FF00FF"]      # fill color is matched to fills by index
 //       }
 //       "raster":                          # optional
 //       {
@@ -123,7 +125,11 @@ jobhandler = {
     this.normalizeColors()
 
     // passes, show in gui
-    passes_set_assignments(job)
+    if ("passes" in this.vector && "colors" in this.vector) {
+      passes_set_assignments(this.vector.passes, this.vector.colors)
+    } else {
+      passes_set_assignments([], [])
+    }
 
     // stats
     if ('stats' in job) {

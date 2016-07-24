@@ -29,6 +29,25 @@ function tools_tselect_init() {
   }
 }
 
+function tools_addfill_init() {
+  // add color choices to addfill_btn
+  var colors = jobhandler.getAllColors()
+  var select_html = ''
+  for (var i = 0; i < colors.length; i++) {
+    select_html += '<li id="addfill_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+';"">'+
+    '<a href="#" class="addfill_color" style="color:'+colors[i]+'">Assign<span style="display:none">'+colors[i]+'</span></a></li>'
+  }
+  $('#addfill_colors').html(select_html)
+
+  // bind all color add buttons within dropdown
+  $('.addfill_color').click(function(e) {
+    var color = $(this).children('span').text()
+    $('#addfill_colors').dropdown("toggle")
+    fills_add_by_color(color)
+    return false
+  })
+}
+
 
 function tools_toffset_init() {
   // create layer
@@ -60,7 +79,6 @@ function tools_toffset_init() {
         jobview_offsetLayer.position = new paper.Point(status_cache.offset[0],status_cache.offset[1])
       }
     })
-    $("#offset_reset_btn").hide()
     $('#select_btn').trigger('click')
   }
   tools_toffset.onMouseMove = function(event) {

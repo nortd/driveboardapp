@@ -109,6 +109,18 @@ function passes_pass_html(num, feedrate, intensity, colors) {
   var html =
   '<div id="pass_'+num+'" class="row pass_widget" style="margin:0; margin-bottom:20px">'+
     '<label style="color:#666666">Pass '+num+'</label>'+
+    // '<a id="pass_conf_btn_'+num+'" style="margin-left:8px; position:relative; top:1px" role="button"'+
+    //   'data-toggle="collapse" href="#pass_conf_'+num+'" aria-expanded="false" aria-controls="pass_conf_'+num+'"'+
+    //   '<span class="glyphicon glyphicon-cog" style="color:#888888"></span>'+
+    // '</a>'+
+    // '<div class="collapse" id="pass_conf_'+num+'"><div class="well" style="margin-bottom:10px">'+
+    //   '<label class="checkbox-inline">'+
+    //     '<input type="checkbox" id="inlineCheckbox1" value="option1"> outline'+
+    //   '</label>'+
+    //   '<label class="checkbox-inline">'+
+    //     '<input type="checkbox" id="inlineCheckbox2" value="option2"> fill'+
+    //   '</label>'+
+    // '</div></div>'+
     '<form class="form-inline">'+
       '<div class="form-group">'+
         '<div class="input-group" style="margin-right:4px">'+
@@ -179,26 +191,23 @@ function passes_get_assignments() {
 }
 
 
-function passes_set_assignments(job) {
+function passes_set_assignments(passes, colors) {
   // set passes in gui from dba job dict
   // console.log(job)
   var not_set_flag = true
-  if ("vector" in job) {
-    if ("passes" in job.vector && "colors" in job.vector) {
-      for (var i = 0; i < job.vector.passes.length; i++) {
-        var pass = job.vector.passes[i]
-        not_set_flag = false
-        // convert path index to color
-        var colors = []
-        for (var ii = 0; ii < pass.paths.length; ii++) {
-          var pathidx = pass.paths[ii]
-          colors.push(job.vector.colors[pathidx])
-        }
-        passes_add(pass.feedrate, pass.intensity, colors)
+  if (passes.length && colors.length) {
+    for (var i = 0; i < passes.length; i++) {
+      var pass = passes[i]
+      not_set_flag = false
+      // convert path index to color
+      var colors = []
+      for (var ii = 0; ii < pass.paths.length; ii++) {
+        var pathidx = pass.paths[ii]
+        colors.push(job.vector.colors[pathidx])
       }
+      passes_add(pass.feedrate, pass.intensity, colors)
     }
-  }
-  if (not_set_flag) {
+  } else {
     passes_add(1500, 100, [])
     passes_add(1500, 100, [])
     passes_add(1500, 100, [])

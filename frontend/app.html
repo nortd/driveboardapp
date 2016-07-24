@@ -39,6 +39,7 @@
     <script src="queue.js"></script>
     <script src="library.js"></script>
     <script src="status.js"></script>
+    <script src="fills.js"></script>
 
   </head>
 
@@ -320,6 +321,16 @@
         </div>
 
         <div class="btn-group footer_btn">
+          <!-- add fill button -->
+          <div id="addfill_wgt" class="dropdown input-group dropup tool_extra_btn">
+            <button class="btn btn-default dropdown-toggle" type="button"
+              id="addfill_btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="add fill to paths">
+              <span class="glyphicon glyphicon-plus"></span> Fill
+            </button>
+            <ul id="addfill_colors" class="dropdown-menu dropdown-menu-right pass_color_dropdown" aria-labelledby="addfill_btn">
+              No job loaded.
+            </ul>
+          </div>
           <!-- offset reset button -->
           <button id="offset_reset_btn" class="btn btn-default tool_extra_btn" type="submit" style="display:none" title="reset offset [SHIFT-O]">
             Reset Offset

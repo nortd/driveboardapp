@@ -276,7 +276,18 @@ function controls_ready() {
     jobview_jogLayer.visible = false
     $(".tool_extra_btn").hide()
     tools_tselect.activate()
+    $("#addfill_wgt").show()
     return true
+  })
+
+  $("#addfill_btn").tooltip({placement:'right', delay: {show:1000, hide:100}})
+  $("#addfill_btn").click(function(e){
+    if (jobview_color_selected !== undefined) {
+      fills_add_by_color(jobview_color_selected)
+      return false
+    } else {
+      return true
+    }
   })
 
 
