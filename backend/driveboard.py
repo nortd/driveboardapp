@@ -959,8 +959,13 @@ def job(jobdict):
                         print "--- start of image processing ---"
                         import Image
                         imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
-                        imgobj = imgobj.convert("L")
                         imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                        if imgobj.mode == 'RGBA':
+                            imgbg = Image.new('RGBA', imgobj.size, (255, 255, 255))
+                            imgbg.paste(imgobj, imgobj)
+                            imgobj = imgbg.convert("L")
+                        else:
+                            imgobj = imgobj.convert("L")
                         print "---- end of image processing ----"
                         # imgobj.show()
                         posx = pos[0]

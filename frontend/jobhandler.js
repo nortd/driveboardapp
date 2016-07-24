@@ -29,7 +29,7 @@
 //           ],
 //           "colors": ["#FF0000"],         # color is matched to path by index
 //           "noreturn": True,              # do not return to origin, default: False
-//           "optimized": 0.08              # optional, tolerance to which it was optimized, default: 0 (not optimized)
+//           "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
 //       }
 //       "raster":                          # optional
 //       {

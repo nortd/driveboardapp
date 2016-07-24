@@ -1,6 +1,7 @@
 .toast-container {
 	width: 300px;
 	z-index: 9999;
+	pointer-events: none;
 }
 
 
@@ -107,8 +108,8 @@
 
 .toast-position-top-center {
     position: fixed;
-    top: 20px;
-    left: 50%;
+    top: 80px;
+    left: 56%;
     margin-left: -140px;
 }
 

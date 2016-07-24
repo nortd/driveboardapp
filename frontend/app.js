@@ -22,7 +22,7 @@ var app_visibility = true
       $('#log_content').children('div').first().show('blind')
       if ($("#log_content").is(':hidden')) {
         $().toastmessage('showToast',
-          {text: text, sticky: false, position: 'top-left', type: 'notice'}
+          {text: text, sticky: false, position: 'top-center', type: 'notice'}
         )
       }
     } else if (kind == 'success') {
@@ -30,7 +30,7 @@ var app_visibility = true
       $('#log_content').children('div').first().show('blind')
       if ($("#log_content").is(':hidden')) {
         $().toastmessage('showToast',
-          {text: text, sticky: false, position: 'top-left', type: 'success'}
+          {text: text, sticky: false, position: 'top-center', type: 'success'}
         )
       }
     } else if (kind == 'warning') {
@@ -38,7 +38,7 @@ var app_visibility = true
       $('#log_content').children('div').first().show('blind')
       if ($("#log_content").is(':hidden')) {
         $().toastmessage('showToast',
-          {text: text, sticky: false, position: 'top-left', type: 'warning'}
+          {text: text, sticky: false, position: 'top-center', type: 'warning'}
         )
       }
     } else if (kind == 'error') {
@@ -46,7 +46,7 @@ var app_visibility = true
       $('#log_content').children('div').first().show('blind');
       if ($("#log_content").is(':hidden')) {
         $().toastmessage('showToast',
-          {text: text, sticky: false, position: 'top-left', type: 'error'}
+          {text: text, sticky: false, position: 'top-center', type: 'error'}
         )
       }
     }

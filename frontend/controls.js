@@ -125,9 +125,6 @@ function controls_ready() {
 
   $("#run_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#run_btn").click(function(e){
-    app_run_btn.start()
-    $('#boundary_btn').prop('disabled', true)
-    status_cache.ready = undefined  // force nect status to update ready state
     jobhandler.setPassesFromGUI()
 
 
@@ -143,7 +140,6 @@ function controls_ready() {
       }]
     }
 
-
     // check for job
     if (jobhandler.isEmpty()) {
       $().uxmessage('notice', "Cannot run. No job loaded.")
@@ -154,6 +150,12 @@ function controls_ready() {
       $().uxmessage('notice', "No passes assigned to this job.")
       return false
     }
+
+    // button feedback
+    app_run_btn.start()
+    $('#boundary_btn').prop('disabled', true)
+    status_cache.ready = true  // prevent ready update
+
     // save job to queue, in-place
     var load_request = {
       'job':jobhandler.getJson(),
@@ -177,7 +179,7 @@ function controls_ready() {
             app_run_btn.stop()
           },
           complete: function (data) {
-
+            console.log("complete run")
           }
         })
       },
@@ -187,7 +189,8 @@ function controls_ready() {
         app_run_btn.stop()
       },
       complete: function (data) {
-
+        status_cache.ready = undefined  // allow ready update
+        console.log("complete load")
       }
     })
     return false
