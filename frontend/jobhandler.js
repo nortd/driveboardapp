@@ -174,7 +174,11 @@ jobhandler = {
   },
 
   getJson : function() {
-    return JSON.stringify(this.get());
+    // json stringify while limiting numbers to 3 decimals
+    return JSON.stringify(this.get() ,function(key, val) {
+        return val.toFixed ? Number(val.toFixed(3)) : val
+      })
+    // return JSON.stringify(this.get())
   },
 
 

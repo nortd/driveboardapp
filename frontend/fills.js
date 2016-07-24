@@ -5,9 +5,14 @@ function fills_add_by_color(color) {
   pathidx = jobhandler.vector.colors.indexOf(color)
   path = jobhandler.vector.paths[pathidx]
   // bounds =
+  // fillcolor =
   console.log(color)
   console.log(path)
 
+  // algo
+  //intersect horizontal lines with path
+  // sort intersections by x
+  // keep segments even to odd: 0st-1nd, 2rd-3th, ... (0 indexed)
 
   // // update pass widgets
   // passes_clear()
