@@ -199,12 +199,12 @@ function passes_set_assignments(passes, colors) {
       var pass = passes[i]
       not_set_flag = false
       // convert path index to color
-      var colors = []
+      var cols = []
       for (var ii = 0; ii < pass.paths.length; ii++) {
         var pathidx = pass.paths[ii]
-        colors.push(job.vector.colors[pathidx])
+        cols.push(colors[pathidx])
       }
-      passes_add(pass.feedrate, pass.intensity, colors)
+      passes_add(pass.feedrate, pass.intensity, cols)
     }
   } else {
     passes_add(1500, 100, [])
