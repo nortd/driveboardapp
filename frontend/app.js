@@ -1,6 +1,7 @@
 
 var app_config_main = undefined
 var app_run_btn = undefined
+var app_fill_btn = undefined
 var app_visibility = true
 
 
@@ -78,6 +79,7 @@ $(document).ready(function(){
   // run_btn, make a ladda progress spinner button
   // http://msurguy.github.io/ladda-bootstrap/
   app_run_btn = Ladda.create($("#run_btn")[0])
+  app_fill_btn = Ladda.create($("#addfill_btn")[0])
 
   // page visibility events
   window.onfocus = function() {
