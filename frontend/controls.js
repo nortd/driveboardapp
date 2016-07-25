@@ -285,8 +285,9 @@ function controls_ready() {
   $("#addfill_btn").click(function(e){
     if (jobview_color_selected !== undefined) {
       app_fill_btn.start()
-      fills_add_by_color(jobview_color_selected)
-      app_fill_btn.stop()
+      fills_add_by_color(jobview_color_selected, function() {
+        app_fill_btn.stop()
+      })
       return false
     } else {
       return true

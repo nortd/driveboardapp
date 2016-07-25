@@ -44,8 +44,9 @@ function tools_addfill_init() {
     var color = $(this).children('span').text()
     $('#addfill_colors').dropdown("toggle")
     app_fill_btn.start()
-    fills_add_by_color(color)
-    app_fill_btn.stop()
+    fills_add_by_color(color, function() {
+      app_fill_btn.stop()
+    })
     return false
   })
 }
