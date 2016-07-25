@@ -314,8 +314,16 @@ def load():
     load_request = json.loads(bottle.request.forms.get('load_request'))
     job = load_request.get('job')  # always a string
     name = load_request.get('name')
-    optimize = load_request.get('optimize') or True
-    overwrite = load_request.get('overwrite') or False
+    # optimize defaults
+    if 'optimize' in load_request:
+        optimize = load_request['optimize']
+    else:
+        optimize = True
+    # overwrite defaults
+    if 'overwrite' in load_request:
+        overwrite = load_request['overwrite']
+    else:
+        overwrite = False
     # sanity check
     if job is None or name is None:
         bottle.abort(400, "Invalid request data.")
