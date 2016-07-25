@@ -73,17 +73,6 @@ function fills_add_by_color(color) {
   // update pass widgets
   passes_clear()
   passes_set_assignments(jobhandler.vector.passes, jobhandler.vector.colors)
-  // job = {
-  //   "vector": {
-  //     "paths": [
-  //       // lines,
-  //       fillpolylines,
-  //       [[[bounds[0],bounds[1]],[bounds[2],bounds[3]]]],
-  //     ]
-  //   }
-  // }
-  // jobhandler.clear()
-  // jobhandler.set(job, "fill-test", false)
   jobhandler.render()
   jobhandler.draw()
 }

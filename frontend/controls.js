@@ -48,6 +48,7 @@ function controls_ready() {
   $("#clear_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#clear_btn").click(function(e){
     jobhandler.clear()
+    tools_addfill_init()
     $("body").trigger("click")
     return false
   })

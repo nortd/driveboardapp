@@ -172,6 +172,7 @@ jobhandler = {
   getJson : function() {
     // json stringify while limiting numbers to 3 decimals
     return JSON.stringify(this.get() ,function(key, val) {
+        if (isNaN(+key)) return val
         return val.toFixed ? Number(val.toFixed(3)) : val
       })
     // return JSON.stringify(this.get())
