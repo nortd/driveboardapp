@@ -8,20 +8,13 @@ function fills_add_by_color(color) {
   var leadin = app_config_main.raster_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
   var max_x = Math.min(bounds[2]+leadin, app_config_main.workspace[0])
-  // generate a new color shifted from the old
-  var fillcolor = new paper.Color()
-  fillcolor = color
-  fillcolor.hue += 30
-  fillcolor = fillcolor.toCSS(true)
-
-  console.log(color)
-  console.log(path)
-
   var line_delta = app_config_main.raster_size
-  // var num_lines = Math.floor((bounds[3]-bounds[1])/line_delta)
+  var fillpolylines = []
+  var lines = []
   for (var y = bounds[1]+0.001; y <= bounds[3]; y+=line_delta) {
     // for every fill line
     // intersect with all segments of path
+    lines.push([[min_x,y],[max_x,y]])
     var intersections = []
     for (var i = 0; i < path.length; i++) {
       var polyline = path[i]
@@ -38,19 +31,61 @@ function fills_add_by_color(color) {
       }
     }
     // sort intersection points by x
+    intersections = intersections.sort(function(a, b) {
+      return a[0] - b[0]
+    })
+    // generate cut path
+    if (intersections.length > 1) {
+      var pv = intersections[0]
+      var y_i = intersections[0][1]
+      fillpolylines.push([[min_x, y_i]])  // polyline of one
+      for (var k = 1; k < intersections.length; k++) {
+        var v = intersections[k]
+        if ((k % 2) == 1) {
+          fillpolylines.push([ [pv[0],pv[1]],[v[0],v[1]] ])  // polyline of two
+        }
+        pv = v
+      }
+      fillpolylines.push([[max_x, y_i]])    // polyline of one
+    }
+  }
+  // add to jobhandler
+  jobhandler.vector.paths.push(fillpolylines)
+  // generate a new color shifted from the old
+  var fillcolor = new paper.Color(color)
+  while (true) {
+    if (fillcolor.brightness > 0.5) {
+      fillcolor.brightness -= 0.3
+    } else {
+      fillcolor.brightness += 0.3
+    }
+    fillcolor.hue += 10+5*Math.random()
+    var col = fillcolor.toCSS(true)
+    if (!(col in jobhandler.vector.colors)) {
+      jobhandler.vector.colors.push(col)
+      break
+    }
   }
 
-  // algo
-  //intersect horizontal lines with path
-  // sort intersections by x
-  // keep segments even to odd: 0st-1nd, 2rd-3th, ... (0 indexed)
+
   // also make sure the feedrate and seekrate are equal
 
-  // // update pass widgets
-  // passes_clear()
-  // passes_set_assignments(jobhandler.vector.passes, jobhandler.vector.colors)
-  // jobhandler.render()
-  // jobhandler.draw()
+  // update pass widgets
+  passes_clear()
+  passes_set_assignments(jobhandler.vector.passes, jobhandler.vector.colors)
+  // job = {
+  //   "vector": {
+  //     "paths": [
+  //       // lines,
+  //       fillpolylines,
+  //       [[[bounds[0],bounds[1]],[bounds[2],bounds[3]]]],
+  //     ]
+  //   }
+  // }
+  // jobhandler.clear()
+  // jobhandler.set(job, "fill-test", false)
+  jobhandler.render()
+  jobhandler.draw()
 }
 
 

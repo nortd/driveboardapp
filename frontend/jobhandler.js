@@ -125,11 +125,7 @@ jobhandler = {
     this.normalizeColors()
 
     // passes, show in gui
-    if ("passes" in this.vector && "colors" in this.vector) {
-      passes_set_assignments(this.vector.passes, this.vector.colors)
-    } else {
-      passes_set_assignments([], [])
-    }
+    passes_set_assignments(this.vector.passes, this.vector.colors)
 
     // stats
     if ('stats' in job) {

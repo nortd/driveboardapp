@@ -193,9 +193,8 @@ function passes_get_assignments() {
 
 function passes_set_assignments(passes, colors) {
   // set passes in gui from dba job dict
-  // console.log(job)
   var not_set_flag = true
-  if (passes.length && colors.length) {
+  if (passes && colors && passes.length && colors.length) {
     for (var i = 0; i < passes.length; i++) {
       var pass = passes[i]
       not_set_flag = false
