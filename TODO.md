@@ -1,6 +1,7 @@
 
 
 - bugs
+  - laser burst in tight turns (forward port)
 
 - beauty bugs
   - stall between certain x-axis jogs
@@ -10,7 +11,9 @@
   - compact statserver message
 
 - features
+  - quick fill, slow fill
   - pass assignment for rasters
+  - raster_size should probably go into the dba file
   - gcode editor
   - importers
     - load dxf
