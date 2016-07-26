@@ -161,7 +161,8 @@ function controls_ready() {
     var load_request = {
       'job':jobhandler.getJson(),
       'name':jobhandler.name,
-      'optimize':false,
+      'optimize':true,
+      // 'optimize':false,
       'overwrite':true
     }
     request_post({
