@@ -7,7 +7,7 @@
 
 bugs
 ----
-
+- boundary/length/stats does not include fills, raster
 
 beauty bugs
 -----------

@@ -861,7 +861,6 @@ def job(jobdict):
                     "feedrate": 2000,      # optional, rate to other vertices
                     "intensity": 100,      # optional, default: 0 (in percent)
                     "pierce_time": 0,      # optional, default: 0
-                    "pixel_size": 0.4,     # optional
                     "air_assist": "pass",  # optional (feed, pass, off), default: pass
                     "aux1_assist": "off",  # optional (feed, pass, off), default: off
                 }
@@ -878,6 +877,7 @@ def job(jobdict):
             "noreturn": True,              # do not return to origin, default: False
             "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
             "fills": [0],                  # paths by index
+            "fillpxsize": [0.4]            # size is matched to fills by index
         }
         "raster":                          # optional
         {
@@ -888,20 +888,20 @@ def job(jobdict):
                     "seekrate": 6000,      # optional
                     "feedrate": 3000,
                     "intensity": 100,
-                    "pixel_size": 0.4,     # optional
                     "air_assist": "pass",  # optional (feed, pass, off), default: pass
                     "aux1_assist": "off",  # optional (feed, pass, off), default: off
                 },
-            ]
+            ],
             "images":
             [
-                [pos, size, <data>],               # pos: [x,y], size: [w,h], data in base64
+                [pos, size, <data>],           # pos: [x,y], size: [w,h], data in base64
                 {
                     "pos": (100,50),
                     "size": (320,240),
                     "data": <data in base64>
                 }
-            ]
+            ],
+            "rasterpxsize": [0.4]              # size is matched to fills by index
         }
     }
     ###########################################################################
@@ -920,10 +920,15 @@ def job(jobdict):
         if jobdict['raster'].has_key('passes') and jobdict['raster'].has_key('images'):
             passes = jobdict['raster']['passes']
             images = jobdict['raster']['images']
+            if 'rasterpxsize' in jobdict['raster']:
+                rasterpxsize = float(jobdict['raster']['rasterpxsize'])
+            else:
+                rasterpxsize = float(conf['raster_size'])
+            rasterpxsize = max(rasterpxsize, 0.01)  # prevent div by 0
             for pass_ in passes:
                 intensity(0.0)
-                raster_size_x4 = conf['raster_size']/4.0  # use 4x horiz resol.
-                pixelwidth(raster_size_x4)
+                rasterpxsize_4 = rasterpxsize/4.0  # use 4x horiz resol.
+                pixelwidth(rasterpxsize_4)
                 # assists on, beginning of pass if set to 'pass'
                 if 'air_assist' in pass_:
                     if pass_['air_assist'] == 'pass':
@@ -956,8 +961,8 @@ def job(jobdict):
                         pos = img["pos"]
                         size = img["size"]
                         data = img["data"]  # in base64, format: jpg, png, gif
-                        px_w = int(size[0]/raster_size_x4)
-                        px_h = int(size[1]/float(conf['raster_size']))
+                        px_w = int(size[0]/rasterpxsize_4)
+                        px_h = int(size[1]/rasterpxsize)
                         # create image obj, convert to grayscale, scale, loop through lines
                         print "--- start of image processing ---"
                         import Image
@@ -992,14 +997,14 @@ def job(jobdict):
                         # if len(pxarray) % size[0] != 0:
                         #     print "ERROR: img length not divisable by width"
                         start = end = 0
-                        line_y = posy + 0.5*conf['raster_size']
-                        posleft = posx + 0.5*conf['raster_size']
-                        posright = posx + size[0] - 0.5*conf['raster_size']
+                        line_y = posy + 0.5*rasterpxsize
+                        posleft = posx + 0.5*rasterpxsize
+                        posright = posx + size[0] - 0.5*rasterpxsize
                         # print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
-                        # print "px: |%s|  raster_size:%s" % (px_w, conf['raster_size'])
+                        # print "px: |%s|  raster_size:%s" % (px_w, rasterpxsize)
                         # print len(pxarray)
                         # print (px_w*px_h)
-                        line_count = int(size[1]/conf['raster_size'])
+                        line_count = int(size[1]/rasterpxsize)
                         for l in xrange(line_count):
                             end += px_w
                             # move to start of line
@@ -1018,7 +1023,7 @@ def job(jobdict):
                             rasterdata(pxarray, start, end)
                             # prime for next line
                             start = end
-                            line_y += conf['raster_size']
+                            line_y += rasterpxsize
                             move(leadoutpos, line_y)
                         # assists off, end of feed if set to 'feed'
                         if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':

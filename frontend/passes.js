@@ -79,9 +79,9 @@ function passes_add(feedrate, intensity, colors_assigned) {
 
 function passes_color_html(num, color, is_fill) {
   if (is_fill) {
-    var tag = '<span class="badge">fill</span>'
+    var tag = '<span class="label label-default">fill</span>'
   } else {
-    var tag = '<span class="badge">stroke</span>'
+    var tag = '<span class="label label-default">path</span>'
   }
   var html =
   '<div id="pass_'+num+'_'+color.slice(1)+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
@@ -105,9 +105,9 @@ function passes_pass_html(num, feedrate, intensity, colors) {
   for (var i = 0; i < colors.length; i++) {
     var is_fill = jobhandler.isColorFill(colors[i])
     if (is_fill) {
-      tag = '<span class="badge">fill</span>'
+      var tag = '<span class="label label-default">fill</span>'
     } else {
-      tag = '<span class="badge">stroke</span>'
+      var tag = '<span class="label label-default">path</span>'
     }
     // add color selectors
     select_html += '<li id="passsel_'+num+'_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+'">'+
