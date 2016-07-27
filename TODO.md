@@ -12,6 +12,7 @@ bugs
 
 beauty bugs
 -----------
+- pass colors added do not unblur
 - stall between certain x-axis jogs
   - send a pierce command in between
 - dba files: optimize should maybe split up into simplified and sorted

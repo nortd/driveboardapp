@@ -54,13 +54,15 @@ function tools_addfill_init() {
   for (var i = 0; i < allpaths.length; i++) {
     var idx = allpaths[i]
     select_html += '<li id="addfill_'+idx+'" style="background-color:'+allcolors[idx]+';"">'+
-    '<a href="#" class="addfill_color" style="color:'+allcolors[idx]+'"><span style="display:none">'+idx+'</span></a></li>'
+    '<a href="#" class="addfill_color" style="color:'+allcolors[idx]+'">'+
+    '<span class="label label-default kindmem">path</span>'
+    '<span style="display:none" class="idxmem">'+idx+'</span></a></li>'
   }
   $('#addfill_colors').html(select_html)
 
   // bind all color add buttons within dropdown
   $('.addfill_color').click(function(e) {
-    var idx = $(this).children('span').text()
+    var idx = $(this).children('span.idxmem').text()
     $('#addfill_colors').dropdown("toggle")
     app_fill_btn.start()
     fills_add_by_item(idx, "path", function() {
