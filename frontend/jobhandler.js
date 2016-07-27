@@ -280,6 +280,7 @@ jobhandler = {
     var x = 0;
     var y = 0;
     jobview_clear()
+    jobview_feedLayer.activate()
     // rasters
     this.image_group = new paper.Group()
     if ('images' in this.raster) {
