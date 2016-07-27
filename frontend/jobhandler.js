@@ -124,9 +124,6 @@ jobhandler = {
 
     this.normalizeColors()
 
-    // passes, show in gui
-    passes_set_assignments(this.vector.passes, this.vector.colors)
-
     // stats
     if ('stats' in job) {
       this.stats = job['stats']
@@ -148,6 +145,9 @@ jobhandler = {
       html += "raster images : " + this.raster.images.length + "<br>"
     }
     $('#info_content').html(html)
+
+    // passes, show in gui
+    passes_set_assignments()
   },
 
 

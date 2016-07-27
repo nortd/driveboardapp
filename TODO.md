@@ -11,9 +11,9 @@ bugs
 
 beauty bugs
 -----------
-
 - stall between certain x-axis jogs
   - send a pierce command in between
+- probably should handling of vector paths in pass widget: track by index
 
 optimizations
 -------------

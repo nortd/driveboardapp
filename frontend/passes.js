@@ -4,12 +4,12 @@ function passes_clear() {
   $('#job_passes').html("")
 }
 
-function passes_add(feedrate, intensity, colors_assigned) {
+function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
   // multiple = typeof multiple !== 'undefined' ? multiple : 1  // default to 1
-  var colors = jobhandler.getAllColors()
+  // var image =  jobhandler.raster.images[images_assigned[0]].data
   var num_passes_already = $('#job_passes').children('.pass_widget').length
   var num = num_passes_already + 1
-  var html = passes_pass_html(num, feedrate, intensity, colors)
+  var html = passes_pass_html(num, feedrate, intensity)
   if ($('#pass_add_widget').length) {
     var pass_elem = $(html).insertBefore('#pass_add_widget')
   } else {
@@ -77,61 +77,29 @@ function passes_add(feedrate, intensity, colors_assigned) {
 }
 
 
-function passes_color_html(num, color, is_fill) {
-  if (is_fill) {
-    var tag = '<span class="label label-default">fill</span>'
-  } else {
-    var tag = '<span class="label label-default">path</span>'
-  }
-  var html =
-  '<div id="pass_'+num+'_'+color.slice(1)+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
-    '<span style="display:none" class="colmem">'+color+'</span>'+
-    '<button id="color_btn" class="btn btn-default btn-sm color_select_btn_'+num+'" '+
-      'type="submit" style="width:175px; background-color:'+color+'">'+
-      tag +
-    '</button>'+
-    '<button class="btn btn-default btn-sm color_remove_btn_'+num+'" type="submit" style="width:34px">'+
-      '<span class="glyphicon glyphicon-remove"></span>'+
-    '</button>'+
-  '</div>'
-  return html
-}
 
-
-function passes_pass_html(num, feedrate, intensity, colors) {
+function passes_pass_html(num, feedrate, intensity) {
   // add all color selectors
   var select_html = ''
   var colors_html = ''
-  for (var i = 0; i < colors.length; i++) {
-    var is_fill = jobhandler.isColorFill(colors[i])
+  var allcolors = jobhandler.getAllColors()
+  for (var i = 0; i < allcolors.length; i++) {
+    var color = allcolors[i]
+    var is_fill = jobhandler.isColorFill(color)
     if (is_fill) {
       var tag = '<span class="label label-default">fill</span>'
     } else {
       var tag = '<span class="label label-default">path</span>'
     }
-    // add color selectors
-    select_html += '<li id="passsel_'+num+'_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+'">'+
-    '<a href="#" class="color_add_btn_'+num+'" style="color:'+colors[i]+'">'+
-    tag + '<span class="colmem" style="display:none">'+colors[i]+'</span></a></li>'
-    // add colors added
-    colors_html += passes_color_html(num, colors[i], is_fill)
+    // add color selectors, will be hidden and shown accordingly
+    select_html += passes_select_html(num, color, tag)
+    // add colors added, will be hidden and shown accordingly
+    added_html += passes_added_html(num, color, tag)
   }
   // html template like it's 1999
   var html =
   '<div id="pass_'+num+'" class="row pass_widget" style="margin:0; margin-bottom:20px">'+
     '<label style="color:#666666">Pass '+num+'</label>'+
-    // '<a id="pass_conf_btn_'+num+'" style="margin-left:8px; position:relative; top:1px" role="button"'+
-    //   'data-toggle="collapse" href="#pass_conf_'+num+'" aria-expanded="false" aria-controls="pass_conf_'+num+'"'+
-    //   '<span class="glyphicon glyphicon-cog" style="color:#888888"></span>'+
-    // '</a>'+
-    // '<div class="collapse" id="pass_conf_'+num+'"><div class="well" style="margin-bottom:10px">'+
-    //   '<label class="checkbox-inline">'+
-    //     '<input type="checkbox" id="inlineCheckbox1" value="option1"> outline'+
-    //   '</label>'+
-    //   '<label class="checkbox-inline">'+
-    //     '<input type="checkbox" id="inlineCheckbox2" value="option2"> fill'+
-    //   '</label>'+
-    // '</div></div>'+
     '<form class="form-inline">'+
       '<div class="form-group">'+
         '<div class="input-group" style="margin-right:4px">'+
@@ -153,10 +121,34 @@ function passes_pass_html(num, feedrate, intensity, colors) {
         '</div>'+
       '</div>'+
     '</form>'+
-    '<div class="pass_colors">'+colors_html+'</div>'+
+    '<div class="pass_colors">'+added_html+'</div>'+
   '</div>'
   return html
 }
+
+function passes_select_html(num, color, tag) {
+  var html =
+  '<li id="passsel_'+num+'_'+color.slice(1)+'" style="background-color:'+color+'">'+
+  '<a href="#" class="color_add_btn_'+num+'" style="color:'+color+'">'+
+  tag + '<span class="colmem" style="display:none">'+color+'</span></a></li>'
+  return html
+}
+
+function passes_added_html(num, color, tag) {
+  var html =
+  '<div id="pass_'+num+'_'+color.slice(1)+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
+    '<span style="display:none" class="colmem">'+color+'</span>'+
+    '<button id="color_btn" class="btn btn-default btn-sm color_select_btn_'+num+'" '+
+      'type="submit" style="width:175px; background-color:'+color+'">'+
+      tag +
+    '</button>'+
+    '<button class="btn btn-default btn-sm color_remove_btn_'+num+'" type="submit" style="width:34px">'+
+      '<span class="glyphicon glyphicon-remove"></span>'+
+    '</button>'+
+  '</div>'
+  return html
+}
+
 
 
 function passes_add_widget() {
@@ -174,7 +166,7 @@ function passes_add_widget() {
 
   // bind pass_add_btn
   $('#pass_add_btn').click(function(e) {
-    passes_add(1500, 100, [])
+    passes_add(1500, 100, [], [])
     return false
   })
 
@@ -202,26 +194,47 @@ function passes_get_assignments() {
 }
 
 
-function passes_set_assignments(passes, colors) {
-  // set passes in gui from dba job dict
-  var not_set_flag = true
-  if (passes && colors && passes.length && colors.length) {
-    for (var i = 0; i < passes.length; i++) {
-      var pass = passes[i]
-      not_set_flag = false
+function passes_set_assignments() {
+  // set passes in gui from current job
+  var any_passes_set = false
+  // raster passes in job
+  if ('passes' in jobhandler.raster && jobhandler.raster.passes.length ) {
+    var raster_passes = jobhandler.raster.passes
+    for (var i = 0; i < raster_passes.length; i++) {
+      var pass = raster_passes[i]
+      var images_assigned = []
+      for (var ii = 0; ii < pass.images.length; ii++) {
+        var imgidx = pass.images[ii]
+        images_assigned.push(imgidx)
+        any_passes_set = true
+      }
+      passes_add(pass.feedrate, pass.intensity, [], images_assigned)
+    }
+  }
+  // vector passes in job
+  if ('passes' in jobhandler.vector && jobhandler.vector.passes.length &&
+      'colors' in jobhandler.vector && jobhandler.vector.colors.length ) {
+    var vector_passes = jobhandler.vector.passes
+    var colors = jobhandler.vector.colors
+    for (var i = 0; i < vector_passes.length; i++) {
+      var pass = vector_passes[i]
       // convert path index to color
-      var cols = []
+      var colors_assigned = []
       for (var ii = 0; ii < pass.paths.length; ii++) {
         var pathidx = pass.paths[ii]
-        cols.push(colors[pathidx])
+        colors_assigned.push(colors[pathidx])
+        any_passes_set = true
       }
-      passes_add(pass.feedrate, pass.intensity, cols)
+      passes_add(pass.feedrate, pass.intensity, colors_assigned, [])
     }
-  } else {
-    passes_add(1500, 100, [])
-    passes_add(1500, 100, [])
-    passes_add(1500, 100, [])
   }
+  // empty pass widets
+  if (!(any_passes_set)) {
+    passes_add(1500, 100, [], [])
+    passes_add(1500, 100, [], [])
+    passes_add(1500, 100, [], [])
+  }
+  // add another pass widget
   passes_add_widget()
 }
 

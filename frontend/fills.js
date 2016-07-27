@@ -83,7 +83,7 @@ function fills_add_by_color(color, callback) {
     }
     // update pass widgets
     passes_clear()
-    passes_set_assignments(jobhandler.vector.passes, jobhandler.vector.colors)
+    passes_set_assignments()
     jobhandler.render()
     jobhandler.draw()
     callback()
