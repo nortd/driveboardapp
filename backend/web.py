@@ -315,11 +315,10 @@ def load():
     job = load_request.get('job')  # always a string
     name = load_request.get('name')
     # optimize defaults
-    # if 'optimize' in load_request:
-    #     optimize = load_request['optimize']
-    # else:
-    #     optimize = True
-    optimize = True
+    if 'optimize' in load_request:
+        optimize = load_request['optimize']
+    else:
+        optimize = True
     # overwrite defaults
     if 'overwrite' in load_request:
         overwrite = load_request['overwrite']

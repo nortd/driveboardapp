@@ -861,6 +861,7 @@ def job(jobdict):
                     "feedrate": 2000,      # optional, rate to other vertices
                     "intensity": 100,      # optional, default: 0 (in percent)
                     "pierce_time": 0,      # optional, default: 0
+                    "pixel_size": 0.4,     # optional
                     "air_assist": "pass",  # optional (feed, pass, off), default: pass
                     "aux1_assist": "off",  # optional (feed, pass, off), default: off
                 }
@@ -877,7 +878,6 @@ def job(jobdict):
             "noreturn": True,              # do not return to origin, default: False
             "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
             "fills": [0],                  # paths by index
-            "fillcolors": ["#FF00FF"]      # fill color is matched to fills by index
         }
         "raster":                          # optional
         {
@@ -888,6 +888,7 @@ def job(jobdict):
                     "seekrate": 6000,      # optional
                     "feedrate": 3000,
                     "intensity": 100,
+                    "pixel_size": 0.4,     # optional
                     "air_assist": "pass",  # optional (feed, pass, off), default: pass
                     "aux1_assist": "off",  # optional (feed, pass, off), default: off
                 },

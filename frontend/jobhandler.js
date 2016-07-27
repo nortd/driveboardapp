@@ -31,7 +31,7 @@
 //           "noreturn": True,              # do not return to origin, default: False
 //           "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
 //           "fills": [0],                  # paths by index
-//           "fillcolors": ["#FF00FF"]      # fill color is matched to fills by index
+//           "fillpxsize": [0.4]            # size is matched to fills by index
 //       }
 //       "raster":                          # optional
 //       {
@@ -45,7 +45,7 @@
 //                   "air_assist": "pass",  # optional (feed, pass, off), default: pass
 //                   "aux1_assist": "off",  # optional (feed, pass, off), default: off
 //               },
-//           ]
+//           ],
 //           "images":
 //           [
 //               {
@@ -53,7 +53,8 @@
 //                   "size": (300,200),        # size in mm
 //                   "data": <data in base64>  # internally this is a js Image
 //               }
-//           ]
+//           ],
+//           "rasterpxsize": [0.4]             # size is matched to fills by index
 //       }
 //   }
 
@@ -344,6 +345,20 @@ jobhandler = {
       }
     }
     paper.view.draw()
+  },
+
+
+  isColorFill : function(color) {
+    var ret = false
+    if ('fills' in this.vector && 'colors' in this.vector) {
+      var colidx = jobhandler.vector.colors.indexOf(color)
+      if (colidx != -1) {
+        if (jobhandler.vector.fills.indexOf(colidx) != -1) {
+          ret = true
+        }
+      }
+    }
+    return ret
   },
 
 

@@ -44,7 +44,7 @@ function passes_add(feedrate, intensity, colors_assigned) {
 
   // bind all color add buttons within dropdown
   $('.color_add_btn_'+num).click(function(e) {
-    var color = $(this).children('span').text()
+    var color = $(this).children('span.colmem').text()
     $('#passsel_'+num+'_'+color.slice(1)).hide()
     $('#pass_'+num+'_'+color.slice(1)).show(300)
     $('#passdp_'+num).dropdown("toggle")
@@ -77,13 +77,18 @@ function passes_add(feedrate, intensity, colors_assigned) {
 }
 
 
-function passes_color_html(num, color) {
+function passes_color_html(num, color, is_fill) {
+  if (is_fill) {
+    var tag = '<span class="badge">fill</span>'
+  } else {
+    var tag = '<span class="badge">stroke</span>'
+  }
   var html =
   '<div id="pass_'+num+'_'+color.slice(1)+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
     '<span style="display:none" class="colmem">'+color+'</span>'+
     '<button id="color_btn" class="btn btn-default btn-sm color_select_btn_'+num+'" '+
       'type="submit" style="width:175px; background-color:'+color+'">'+
-      '<span class="glyphicon glyphicon-eye-open"></span>'+
+      tag +
     '</button>'+
     '<button class="btn btn-default btn-sm color_remove_btn_'+num+'" type="submit" style="width:34px">'+
       '<span class="glyphicon glyphicon-remove"></span>'+
@@ -96,14 +101,20 @@ function passes_color_html(num, color) {
 function passes_pass_html(num, feedrate, intensity, colors) {
   // add all color selectors
   var select_html = ''
-  for (var i = 0; i < colors.length; i++) {
-    select_html += '<li id="passsel_'+num+'_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+';"">'+
-    '<a href="#" class="color_add_btn_'+num+'" style="color:'+colors[i]+'">Assign<span style="display:none">'+colors[i]+'</span></a></li>'
-  }
-  // add all selectable colors
   var colors_html = ''
   for (var i = 0; i < colors.length; i++) {
-    colors_html += passes_color_html(num, colors[i])
+    var is_fill = jobhandler.isColorFill(colors[i])
+    if (is_fill) {
+      tag = '<span class="badge">fill</span>'
+    } else {
+      tag = '<span class="badge">stroke</span>'
+    }
+    // add color selectors
+    select_html += '<li id="passsel_'+num+'_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+'">'+
+    '<a href="#" class="color_add_btn_'+num+'" style="color:'+colors[i]+'">'+
+    tag + '<span class="colmem" style="display:none">'+colors[i]+'</span></a></li>'
+    // add colors added
+    colors_html += passes_color_html(num, colors[i], is_fill)
   }
   // html template like it's 1999
   var html =

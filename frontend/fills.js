@@ -8,7 +8,7 @@ function fills_add_by_color(color, callback) {
   var leadin = app_config_main.raster_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
   var max_x = Math.min(bounds[2]+leadin, app_config_main.workspace[0])
-  var line_delta = app_config_main.raster_size
+  var line_delta = parseFloat($('#fillpxsize').val())
   var fillpolylines = []  // polylines aka path
   var lines = []
   // setup loop function
@@ -62,6 +62,11 @@ function fills_add_by_color(color, callback) {
   function finalize() {
     // add to jobhandler
     jobhandler.vector.paths.push(fillpolylines)
+    jobhandler.vector.fillpxsize = $('#fillpxsize').val()
+    if (!('fills' in jobhandler.vector)) {
+      jobhandler.vector.fills = []
+    }
+    jobhandler.vector.fills.push(jobhandler.vector.paths.length-1)
     // generate a new color shifted from the old
     var fillcolor = new paper.Color(color)
     while (true) {
@@ -72,7 +77,7 @@ function fills_add_by_color(color, callback) {
       }
       fillcolor.hue += 10+5*Math.random()
       var col = fillcolor.toCSS(true)
-      if (!(col in jobhandler.vector.colors)) {
+      if (jobhandler.vector.colors.indexOf(col) == -1) {
         jobhandler.vector.colors.push(col)
         break
       }

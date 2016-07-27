@@ -33,6 +33,19 @@ function tools_addfill_init() {
   // add color choices to addfill_btn
   var colors = jobhandler.getAllColors()
   var select_html = ''
+  // params
+  select_html += '<li>'+
+      '<form class="form-inline">'+
+        '<div class="form-group">'+
+          '<div class="input-group" style="margin:10px">'+
+            '<div class="input-group-addon" style="width:10px">Pixel Size [mm]</div>'+
+            '<input id="fillpxsize" type="text" class="form-control input-sm" style="width:40px;"'+
+              'value="'+app_config_main.raster_size+'" title="match this to laser focus size">'+
+          '</div>'+
+        '</div>'+
+      '</form>'+
+    '</li>'
+  // colors
   for (var i = 0; i < colors.length; i++) {
     select_html += '<li id="addfill_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+';"">'+
     '<a href="#" class="addfill_color" style="color:'+colors[i]+'">Assign<span style="display:none">'+colors[i]+'</span></a></li>'

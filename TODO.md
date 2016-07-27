@@ -1,24 +1,31 @@
 
 
-- bugs
-  - laser burst in tight turns (forward port)
+- quick fill, slow fill
+- pass assignment for rasters
+- raster_size should probably go into the dba file
 
-- beauty bugs
-  - stall between certain x-axis jogs
-    - send a pierce command in between
 
-- optimizations
-  - compact statserver message
+bugs
+----
 
-- features
-  - quick fill, slow fill
-  - pass assignment for rasters
-  - raster_size should probably go into the dba file
+
+beauty bugs
+-----------
+- stall between certain x-axis jogs
+  - send a pierce command in between
+
+
+optimizations
+-------------
+- compact statserver message
+
+
+features
+--------
   - gcode editor
   - importers
     - load dxf
     - load gcode
-  - raster fills
 
 
 
