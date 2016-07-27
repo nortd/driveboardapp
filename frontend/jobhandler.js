@@ -65,7 +65,8 @@ jobhandler = {
   raster : {},
   stats : {},
   name : "",
-  job_group : undefined,
+  vector_group : undefined,
+  image_group : undefined,
 
   clear : function() {
     this.vector = {}
@@ -280,28 +281,32 @@ jobhandler = {
     var y = 0;
     jobview_clear()
     // rasters
+    this.image_group = new paper.Group()
     if ('images' in this.raster) {
       jobview_feedLayer.activate()
       for (var k=0; k<this.raster.images.length; k++) {
         var img = this.raster.images[k]
+        var group = new paper.Group()
+        this.image_group.addChild(group)
         var pos_x = img.pos[0]*jobview_mm2px
         var pos_y = img.pos[1]*jobview_mm2px
         var img_w = img.size[0]*jobview_mm2px
         var img_h = img.size[1]*jobview_mm2px
         var img_paper = new paper.Raster(img.data)
+        group.addChild(img_paper);
         img_paper.scale(img_w/img.data.width, img_h/img.data.height)
         img_paper.position = new paper.Point(pos_x+0.5*img_w, pos_y+0.5*img_h)
       }
     }
     // paths
+    this.vector_group = new paper.Group()
     if ('paths' in this.vector) {
       jobview_feedLayer.activate()
-      this.job_group = new paper.Group()
       for (var i=0; i<this.vector.paths.length; i++) {
         var path = this.vector.paths[i]
         jobview_feedLayer.activate()
         var group = new paper.Group()
-        this.job_group.addChild(group)
+        this.vector_group.addChild(group)
         for (var j=0; j<path.length; j++) {
           var pathseg = path[j]
           if (pathseg.length > 0) {
@@ -339,8 +344,6 @@ jobhandler = {
   renderBounds : function () {
     jobview_boundsLayer.removeChildren()
     jobview_boundsLayer.activate()
-    // var all_bounds = new paper.Path.Rectangle(this.job_group.bounds)
-    // var bbox_all = this.stats['_all_'].bbox
     var bbox = this.getActivePassesBbox()
     var all_bounds = new paper.Path.Rectangle(
                                     new paper.Point(bbox[0]*jobview_mm2px,bbox[1]*jobview_mm2px),
@@ -353,6 +356,28 @@ jobhandler = {
 
 
   draw : function () {
+    paper.view.draw()
+  },
+
+
+  selectItem : function(idx, kind) {
+    if (kind == "path" || kind == "fill") {
+      var pgroup = this.vector_group
+    } else if (kind == "image") {
+      var pgroup = this.image_group
+    }
+    if (idx < pgroup.children.length) {
+      var group = pgroup.children[idx]
+      group.selected = true
+      jobview_item_selected = [idx, kind]
+      setTimeout(function() {
+        group.selected = false
+        jobview_item_selected = undefined
+        paper.view.draw()
+      }, 1500);
+    } else {
+      pgroup.children[idx].selected = false
+    }
     paper.view.draw()
   },
 

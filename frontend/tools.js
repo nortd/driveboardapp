@@ -20,18 +20,23 @@ function tools_tselect_init() {
       jobview_deselect_all()
       path = hitResult.item
       path.parent.selected = !path.parent.selected
-      // show info on this group
-      jobview_color_selected = path.strokeColor.toCSS(true)
+      if (path.parent.parent === jobhandler.vector_group) {
+        var kind = "path"
+      } else if (path.parent.parent === jobhandler.image_group) {
+        var kind = "image"
+      }
+      jobview_item_selected = [path.parent.index, kind]
     } else {
       jobview_deselect_all()
-      jobview_color_selected = undefined
+      jobview_item_selected = undefined
     }
   }
 }
 
 function tools_addfill_init() {
   // add color choices to addfill_btn
-  var colors = jobhandler.getAllColors()
+  var allpaths = jobhandler.getPathIndices()
+  var allcolors = jobhandler.getAllColors()
   var select_html = ''
   // params
   select_html += '<li>'+
@@ -46,18 +51,19 @@ function tools_addfill_init() {
       '</form>'+
     '</li>'
   // colors
-  for (var i = 0; i < colors.length; i++) {
-    select_html += '<li id="addfill_'+colors[i].slice(1)+'" style="background-color:'+colors[i]+';"">'+
-    '<a href="#" class="addfill_color" style="color:'+colors[i]+'">Assign<span style="display:none">'+colors[i]+'</span></a></li>'
+  for (var i = 0; i < allpaths.length; i++) {
+    var idx = allpaths[i]
+    select_html += '<li id="addfill_'+idx+'" style="background-color:'+allcolors[idx]+';"">'+
+    '<a href="#" class="addfill_color" style="color:'+allcolors[idx]+'"><span style="display:none">'+idx+'</span></a></li>'
   }
   $('#addfill_colors').html(select_html)
 
   // bind all color add buttons within dropdown
   $('.addfill_color').click(function(e) {
-    var color = $(this).children('span').text()
+    var idx = $(this).children('span').text()
     $('#addfill_colors').dropdown("toggle")
     app_fill_btn.start()
-    fills_add_by_color(color, function() {
+    fills_add_by_item(idx, "path", function() {
       app_fill_btn.stop()
     })
     return false

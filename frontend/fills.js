@@ -1,10 +1,14 @@
 
 
 
-function fills_add_by_color(color, callback) {
-  var pathidx = jobhandler.vector.colors.indexOf(color)
-  var path = jobhandler.vector.paths[pathidx]
-  var bounds = jobhandler.stats.paths[pathidx].bbox
+function fills_add_by_item(idx, kind, callback) {
+  if (kind != "path") {
+    callback()
+    return
+  }
+  var color = jobhandler.vector.colors[idx]
+  var path = jobhandler.vector.paths[idx]
+  var bounds = jobhandler.stats.paths[idx].bbox
   var leadin = app_config_main.raster_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
   var max_x = Math.min(bounds[2]+leadin, app_config_main.workspace[0])
@@ -22,7 +26,7 @@ function fills_add_by_color(color, callback) {
       return
     }
     // for every fill line
-    // intersect with all segments of path of this color
+    // intersect with all segments of path
     lines.push([[min_x,y],[max_x,y]])
     var intersections = []
     for (var i = 0; i < path.length; i++) {

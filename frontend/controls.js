@@ -284,10 +284,11 @@ function controls_ready() {
 
   $("#addfill_btn").tooltip({placement:'right', delay: {show:1000, hide:100}})
   $("#addfill_btn").click(function(e){
-    if (jobview_color_selected !== undefined) {
+    if (jobview_item_selected !== undefined) {
       app_fill_btn.start()
-      fills_add_by_color(jobview_color_selected, function() {
-        app_fill_btn.stop()
+      fills_add_by_item(jobview_item_selected[0], jobview_item_selected[1],
+        function() {
+          app_fill_btn.stop()
       })
       return false
     } else {

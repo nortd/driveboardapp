@@ -7,8 +7,6 @@
 bugs
 ----
 - images selection wonky, not grouped correctly in jobview
-- path selection not read out correctly
-- boundary/length/stats does not include fills, raster
 - move when no machine does not recover, false feedback
 
 

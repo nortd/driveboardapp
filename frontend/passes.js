@@ -31,11 +31,12 @@ function passes_add(feedrate, intensity, items_assigned) {
 
   // bind color assign button
   $('#assign_btn_'+num).click(function(e) {
-    if (jobview_color_selected !== undefined) {
-      var col_sliced = jobview_color_selected.slice(1)
-      $('#passsel_'+num+'_'+col_sliced).hide()
-      $('#pass_'+num+'_'+col_sliced).hide()
-      $('#pass_'+num+'_'+col_sliced).show(300)
+    if (jobview_item_selected !== undefined) {
+      var idx = jobview_item_selected[0]
+      var kind = jobview_item_selected[1]
+      $('#passsel_'+num+'_'+idx+'_'+kind).hide()
+      $('#pass_'+num+'_'+idx+'_'+kind).hide()
+      $('#pass_'+num+'_'+idx+'_'+kind).show(300)
       passes_update_handler()
       return false
     } else {
@@ -67,7 +68,8 @@ function passes_add(feedrate, intensity, items_assigned) {
   // bind all color select buttons
   $('.color_select_btn_'+num).click(function(e) {
     var idx = $(this).parent().find('span.idxmem').text()
-    jobview_select_path(idx)
+    var kind = $(this).children('span.kindmem').text()
+    jobhandler.selectItem(idx, kind)
     return false
   })
 

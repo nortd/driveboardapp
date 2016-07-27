@@ -18,7 +18,7 @@ var info_width_init = 0
 var jobview_width_last = 0
 var jobview_height_last = 0
 
-var jobview_color_selected = undefined
+var jobview_item_selected = undefined
 
 
 
@@ -27,7 +27,7 @@ function jobview_clear(){
   jobview_seekLayer.removeChildren()
   jobview_feedLayer.removeChildren()
   paper.view.draw()
-  jobview_color_selected = undefined
+  jobview_item_selected = undefined
 }
 
 
@@ -253,25 +253,4 @@ function jobview_testpath(){
   path2.strokeColor = 'red'
   path2.closed = true
   path2.add([60,60],[width-60,60],[width-60,height-60],[60,height-60])
-}
-
-
-function jobview_select_path(index) {
-  // select paths by color in job view
-  for (var i = 0; i < this.job_group.children.length; i++) {
-    if (i==index) {
-      this.job_group.children[i].selected = true
-      var group = this.job_group.children[i]
-      jobview_color_selected =
-      jobview_path_selected = index
-      setTimeout(function() {
-        group.selected = false
-        jobview_color_selected = undefined
-        paper.view.draw()
-      }, 1500);
-    } else {
-      this.job_group.children[i].selected = false
-    }
-  }
-  paper.view.draw()
 }
