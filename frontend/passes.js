@@ -105,8 +105,8 @@ function passes_pass_html(num, feedrate, intensity) {
   }
   for (var i = 0; i < allpaths.length; i++) {
     var idx = allpaths[i]
-    select_html += passes_select_html(num, idx, "paths", allcolors[idx])
-    added_html += passes_added_html(num, idx, "paths", allcolors[idx])
+    select_html += passes_select_html(num, idx, "path", allcolors[idx])
+    added_html += passes_added_html(num, idx, "path", allcolors[idx])
   }
 
   // html template like it's 1999
@@ -197,13 +197,16 @@ function passes_get_assignments() {
   $('#job_passes').children('.pass_widget').each(function(i) { // each pass
     var feedrate = Math.round(parseFloat($(this).find("input.feedrate").val()))
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
-    assignments.push({"items":[], "feedrate":feedrate, "intensity":intensity})
+    var assign = {"items":[], "feedrate":feedrate, "intensity":intensity}
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
       var idx = $(this).find('.idxmem').text()
       var kind = $(this).find('.kindmem').text()
-      assignments[i].items.push([idx,kind])
+      assign.items.push([idx,kind])
       // console.log('assign '+color+' -> '+(i+1))
     })
+    if (assign.items.length) {
+      assignments.push(assign)
+    }
   })
   return assignments
 }

@@ -1,6 +1,6 @@
 
 
-- quick fill, slow fill
+- quick fill, slow fill, or better optimized sorted line fill
 - pass assignment for rasters
 - rename raster_size
 
@@ -16,10 +16,12 @@ beauty bugs
 -----------
 - stall between certain x-axis jogs
   - send a pierce command in between
+- dba files: optimize should maybe split up into simplified and sorted
 
 optimizations
 -------------
 - compact statserver message
+- take offset feature out of API
 
 
 features

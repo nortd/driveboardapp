@@ -70,9 +70,9 @@ function fills_add_by_color(color, callback) {
     var fillcolor = new paper.Color(color)
     while (true) {
       if (fillcolor.brightness > 0.5) {
-        fillcolor.brightness -= 0.3
+        fillcolor.brightness -= 0.3+0.1*Math.random()
       } else {
-        fillcolor.brightness += 0.3
+        fillcolor.brightness += 0.3+0.1*Math.random()
       }
       fillcolor.hue += 10+5*Math.random()
       var col = fillcolor.toCSS(true)

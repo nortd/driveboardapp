@@ -388,7 +388,7 @@ jobhandler = {
                             "feedrate":feedrate, "intensity":intensity})
       }
       if (img_indices.length) {
-        image_passes.push({"paths":img_indices,
+        image_passes.push({"images":img_indices,
                             "feedrate":feedrate, "intensity":intensity})
       }
     }
@@ -448,10 +448,8 @@ jobhandler = {
     // {'_all_':{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral},
     //  'paths':[{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral}, ...],
     //  'images':[{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral}, ...] }
-
     var length_all = 0
     var bbox_all = [Infinity, Infinity, -Infinity, -Infinity]
-
     // paths
     if ('paths' in this.vector) {
       this.stats.paths = []
@@ -486,26 +484,25 @@ jobhandler = {
         this.bboxExpand(bbox_all, path_bbox[2], path_bbox[3])
       }
     }
-
     // images
     if ('images' in this.raster) {
       this.stats.images = []
       for (var k=0; k<this.raster.images.length; k++) {
-        var image = this.raster.images[k]
-        var image_length = (2*app_config_main.raster_offset + image.size[0])
-                         * Math.floor(image.size[1]/app_config_main.raster_size)
-        var image_bbox = [image.pos[0] - app_config_main.raster_offset,
-                          image.pos[1],
-                          image.pos[0] + image.size[0] + app_config_main.raster_offset,
-                          image.pos[1] + image.size[1]
-                         ]
+        var img = this.raster.images[k]
+        var width = img.size[0]
+        var height = img.size[1]
+        var left = img.pos[0]
+        var right = img.pos[0]+width
+        var top = img.pos[1]
+        var bottom = img.pos[1]+height
+        var line_count = Math.floor(height/app_config_main.raster_size)
+        var image_length = width * line_count
+        var image_bbox = [left, top, right, bottom]
         this.stats.images.push({'bbox':image_bbox, 'length':image_length})
         length_all += image_length
-        this.bboxExpand(bbox_all, image_bbox[0], image_bbox[1])
-        this.bboxExpand(bbox_all, image_bbox[2], image_bbox[3])
+        this.bboxExpand2(bbox_all, image_bbox)
       }
     }
-
     // store in object var
     this.stats['_all_'] = {
       'bbox':bbox_all,
@@ -513,58 +510,56 @@ jobhandler = {
     }
   },
 
+
   getActivePassesLength : function() {
     var length = 0
     // vector
-    if ('passes' in this.vector) {
-      for (var i = 0; i < this.vector.passes.length; i++) {
-        var pass = this.vector.passes[i]
-        for (var j = 0; j < pass.paths.length; j++) {
-          var path_idx = pass.paths[j]
-          if (path_idx >= 0 && path_idx < this.stats.paths.length) {
-            length += this.stats.paths[path_idx].length
-          }
+    var vectorpasses = this.getVectorPasses()
+    for (var i = 0; i < vectorpasses.length; i++) {
+      var pass = vectorpasses[i]
+      for (var j = 0; j < pass.paths.length; j++) {
+        var path_idx = pass.paths[j]
+        if (path_idx >= 0 && path_idx < this.stats.paths.length) {
+          length += this.stats.paths[path_idx].length
         }
       }
     }
     // raster
-    if ('passes' in this.raster) {
-      for (var i = 0; i < this.raster.passes.length; i++) {
-        var pass = this.raster.passes[i]
-        for (var j = 0; j < pass.images.length; j++) {
-          var image_idx = pass.images[j]
-          if (image_idx >= 0 && image_idx < this.stats.images.length) {
-            length += this.stats.images[image_idx].length
-          }
+    var imagepasses = this.getImagePasses()
+    for (var i = 0; i < imagepasses.length; i++) {
+      var pass = imagepasses[i]
+      for (var j = 0; j < pass.images.length; j++) {
+        var image_idx = pass.images[j]
+        if (image_idx >= 0 && image_idx < this.stats.images.length) {
+          length += this.stats.images[image_idx].length
         }
       }
     }
     return length
   },
 
+
   getActivePassesBbox : function() {
     var bbox = [Infinity, Infinity, -Infinity, -Infinity]
     // vector
-    if ('passes' in this.vector) {
-      for (var i = 0; i < this.vector.passes.length; i++) {
-        var pass = this.vector.passes[i]
-        for (var j = 0; j < pass.paths.length; j++) {
-          var path_idx = pass.paths[j]
-          if (path_idx >= 0 && path_idx < this.stats.paths.length) {
-            this.bboxExpand2(bbox, this.stats.paths[path_idx].bbox)
-          }
+    var vectorpasses = this.getVectorPasses()
+    for (var i = 0; i < vectorpasses.length; i++) {
+      var pass = vectorpasses[i]
+      for (var j = 0; j < pass.paths.length; j++) {
+        var path_idx = pass.paths[j]
+        if (path_idx >= 0 && path_idx < this.stats.paths.length) {
+          this.bboxExpand2(bbox, this.stats.paths[path_idx].bbox)
         }
       }
     }
     // raster
-    if ('passes' in this.raster) {
-      for (var i = 0; i < this.raster.passes.length; i++) {
-        var pass = this.raster.passes[i]
-        for (var j = 0; j < pass.images.length; j++) {
-          var image_idx = pass.images[j]
-          if (image_idx >= 0 && image_idx < this.stats.images.length) {
-            this.bboxExpand2(bbox, this.stats.images[image_idx].bbox)
-          }
+    var imagepasses = this.getImagePasses()
+    for (var i = 0; i < imagepasses.length; i++) {
+      var pass = imagepasses[i]
+      for (var j = 0; j < pass.images.length; j++) {
+        var image_idx = pass.images[j]
+        if (image_idx >= 0 && image_idx < this.stats.images.length) {
+          this.bboxExpand2(bbox, this.stats.images[image_idx].bbox)
         }
       }
     }
