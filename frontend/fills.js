@@ -62,7 +62,6 @@ function fills_add_by_color(color, callback) {
   function finalize() {
     // add to jobhandler
     jobhandler.vector.paths.push(fillpolylines)
-    jobhandler.vector.fillpxsize = $('#fillpxsize').val()
     if (!('fills' in jobhandler.vector)) {
       jobhandler.vector.fills = []
     }

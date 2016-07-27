@@ -31,7 +31,6 @@
 //           "noreturn": True,              # do not return to origin, default: False
 //           "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
 //           "fills": [0],                  # paths by index
-//           "fillpxsize": [0.4]            # size is matched to fills by index
 //       }
 //       "raster":                          # optional
 //       {

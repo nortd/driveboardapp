@@ -2,18 +2,18 @@
 
 - quick fill, slow fill
 - pass assignment for rasters
-- raster_size should probably go into the dba file
-
+- rename raster_size
 
 bugs
 ----
 - boundary/length/stats does not include fills, raster
+- move when no machine does not recover, false feedback
 
 beauty bugs
 -----------
+
 - stall between certain x-axis jogs
   - send a pierce command in between
-
 
 optimizations
 -------------
