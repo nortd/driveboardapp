@@ -4,7 +4,7 @@ function passes_clear() {
   $('#job_passes').html("")
 }
 
-function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
+function passes_add(feedrate, intensity, items_assigned) {
   // multiple = typeof multiple !== 'undefined' ? multiple : 1  // default to 1
   // var image =  jobhandler.raster.images[images_assigned[0]].data
   var num_passes_already = $('#job_passes').children('.pass_widget').length
@@ -21,10 +21,11 @@ function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
   })
 
   // assign colors
-  for (var i = 0; i < colors_assigned.length; i++) {
-    var col_sliced = colors_assigned[i].slice(1)
-    $('#passsel_'+num+'_'+col_sliced).hide()
-    $('#pass_'+num+'_'+col_sliced).show(300)
+  for (var i = 0; i < items_assigned.length; i++) {
+    var idx = items_assigned[i][0]
+    var kind = items_assigned[i][1]
+    $('#passsel_'+num+'_'+idx+'_'+kind).hide()
+    $('#pass_'+num+'_'+idx+'_'+kind).show(300)
     passes_update_handler()
   }
 
@@ -44,9 +45,10 @@ function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
 
   // bind all color add buttons within dropdown
   $('.color_add_btn_'+num).click(function(e) {
-    var color = $(this).children('span.colmem').text()
-    $('#passsel_'+num+'_'+color.slice(1)).hide()
-    $('#pass_'+num+'_'+color.slice(1)).show(300)
+    var idx = $(this).children('span.idxmem').text()
+    var kind = $(this).children('span.kindmem').text()
+    $('#passsel_'+num+'_'+idx+'_'+kind).hide()
+    $('#pass_'+num+'_'+idx+'_'+kind).show(300)
     $('#passdp_'+num).dropdown("toggle")
     passes_update_handler()
     return false
@@ -54,17 +56,18 @@ function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
 
   // bind all color remove buttons
   $('.color_remove_btn_'+num).click(function(e) {
-    var color = $(this).parent().find('span.colmem').text()
-    $('#passsel_'+num+'_'+color.slice(1)).show(0)
-    $('#pass_'+num+'_'+color.slice(1)).hide(300)
+    var idx = $(this).parent().find('span.idxmem').text()
+    var kind = $(this).parent().find('span.kindmem').text()
+    $('#passsel_'+num+'_'+idx+'_'+kind).show(0)
+    $('#pass_'+num+'_'+idx+'_'+kind).hide(300)
     passes_update_handler()
     return false
   })
 
   // bind all color select buttons
   $('.color_select_btn_'+num).click(function(e) {
-    var color = $(this).parent().find('span.colmem').text()
-    jobhandler.selectColor(color)
+    var idx = $(this).parent().find('span.idxmem').text()
+    jobview_select_path(idx)
     return false
   })
 
@@ -81,21 +84,31 @@ function passes_add(feedrate, intensity, colors_assigned, images_assigned) {
 function passes_pass_html(num, feedrate, intensity) {
   // add all color selectors
   var select_html = ''
-  var colors_html = ''
+  var added_html = ''
+  // var allcolors = jobhandler.getAllColors()
+
+  var allimages = jobhandler.getImageIndices()
+  var allfills = jobhandler.getFillIndices()
+  var allpaths = jobhandler.getPathIndices()
   var allcolors = jobhandler.getAllColors()
-  for (var i = 0; i < allcolors.length; i++) {
-    var color = allcolors[i]
-    var is_fill = jobhandler.isColorFill(color)
-    if (is_fill) {
-      var tag = '<span class="label label-default">fill</span>'
-    } else {
-      var tag = '<span class="label label-default">path</span>'
-    }
-    // add color selectors, will be hidden and shown accordingly
-    select_html += passes_select_html(num, color, tag)
-    // add colors added, will be hidden and shown accordingly
-    added_html += passes_added_html(num, color, tag)
+
+  for (var i = 0; i < allimages.length; i++) {
+    var idx = allimages[i]
+    var color = '#ffffff'
+    select_html += passes_select_html(num, idx, "image", color)
+    added_html += passes_added_html(num, idx, "image", color)
   }
+  for (var i = 0; i < allfills.length; i++) {
+    var idx = allfills[i]
+    select_html += passes_select_html(num, idx, "fill", allcolors[idx])
+    added_html += passes_added_html(num, idx, "fill", allcolors[idx])
+  }
+  for (var i = 0; i < allpaths.length; i++) {
+    var idx = allpaths[i]
+    select_html += passes_select_html(num, idx, "paths", allcolors[idx])
+    added_html += passes_added_html(num, idx, "paths", allcolors[idx])
+  }
+
   // html template like it's 1999
   var html =
   '<div id="pass_'+num+'" class="row pass_widget" style="margin:0; margin-bottom:20px">'+
@@ -126,21 +139,22 @@ function passes_pass_html(num, feedrate, intensity) {
   return html
 }
 
-function passes_select_html(num, color, tag) {
+function passes_select_html(num, idx, kind, color) {
   var html =
-  '<li id="passsel_'+num+'_'+color.slice(1)+'" style="background-color:'+color+'">'+
+  '<li id="passsel_'+num+'_'+idx+'_'+kind+'" style="background-color:'+color+'">'+
   '<a href="#" class="color_add_btn_'+num+'" style="color:'+color+'">'+
-  tag + '<span class="colmem" style="display:none">'+color+'</span></a></li>'
+  '<span class="label label-default kindmem">'+kind+'</span>'+
+  '<span class="idxmem" style="display:none">'+idx+'</span></a></li>'
   return html
 }
 
-function passes_added_html(num, color, tag) {
+function passes_added_html(num, idx, kind, color) {
   var html =
-  '<div id="pass_'+num+'_'+color.slice(1)+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
-    '<span style="display:none" class="colmem">'+color+'</span>'+
+  '<div id="pass_'+num+'_'+idx+'_'+kind+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
+    '<span style="display:none" class="idxmem">'+idx+'</span>'+
     '<button id="color_btn" class="btn btn-default btn-sm color_select_btn_'+num+'" '+
       'type="submit" style="width:175px; background-color:'+color+'">'+
-      tag +
+      '<span class="label label-default kindmem">'+kind+'</span>'+
     '</button>'+
     '<button class="btn btn-default btn-sm color_remove_btn_'+num+'" type="submit" style="width:34px">'+
       '<span class="glyphicon glyphicon-remove"></span>'+
@@ -166,7 +180,7 @@ function passes_add_widget() {
 
   // bind pass_add_btn
   $('#pass_add_btn').click(function(e) {
-    passes_add(1500, 100, [], [])
+    passes_add(1500, 100, [])
     return false
   })
 
@@ -183,10 +197,11 @@ function passes_get_assignments() {
   $('#job_passes').children('.pass_widget').each(function(i) { // each pass
     var feedrate = Math.round(parseFloat($(this).find("input.feedrate").val()))
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
-    assignments.push({"colors":[], "feedrate":feedrate, "intensity":intensity})
+    assignments.push({"items":[], "feedrate":feedrate, "intensity":intensity})
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
-      var color = $(this).find('.colmem').text()
-      assignments[i].colors.push(color)
+      var idx = $(this).find('.idxmem').text()
+      var kind = $(this).find('.kindmem').text()
+      assignments[i].items.push([idx,kind])
       // console.log('assign '+color+' -> '+(i+1))
     })
   })
@@ -196,43 +211,30 @@ function passes_get_assignments() {
 
 function passes_set_assignments() {
   // set passes in gui from current job
-  var any_passes_set = false
-  // raster passes in job
-  if ('passes' in jobhandler.raster && jobhandler.raster.passes.length ) {
-    var raster_passes = jobhandler.raster.passes
-    for (var i = 0; i < raster_passes.length; i++) {
-      var pass = raster_passes[i]
-      var images_assigned = []
-      for (var ii = 0; ii < pass.images.length; ii++) {
-        var imgidx = pass.images[ii]
-        images_assigned.push(imgidx)
-        any_passes_set = true
+  var allimagepasses = jobhandler.getImagePasses()
+  var allfillpasses = jobhandler.getFillPasses()
+  var allpathpasses = jobhandler.getPathPasses()
+  var passes_total = Math.max(allimagepasses.length,
+                              allfillpasses.length, allpathpasses.length)
+  if (passes_total) {
+    // zip up the passes of different kinds
+    for (var i = 0; i < passes_total; i++) {
+      var items_assigned = []
+      if (i < allimagepasses.length) {
+        items_assigned.push([allimagepasses[i], "image"])  // item
       }
-      passes_add(pass.feedrate, pass.intensity, [], images_assigned)
-    }
-  }
-  // vector passes in job
-  if ('passes' in jobhandler.vector && jobhandler.vector.passes.length &&
-      'colors' in jobhandler.vector && jobhandler.vector.colors.length ) {
-    var vector_passes = jobhandler.vector.passes
-    var colors = jobhandler.vector.colors
-    for (var i = 0; i < vector_passes.length; i++) {
-      var pass = vector_passes[i]
-      // convert path index to color
-      var colors_assigned = []
-      for (var ii = 0; ii < pass.paths.length; ii++) {
-        var pathidx = pass.paths[ii]
-        colors_assigned.push(colors[pathidx])
-        any_passes_set = true
+      if (i < allfillpasses.length) {
+        items_assigned.push([allfillasses[i], "fill"])     // item
       }
-      passes_add(pass.feedrate, pass.intensity, colors_assigned, [])
+      if (i < allpathpasses.length) {
+        items_assigned.push([allpathpasses[i], "path"])    // item
+      }
+      passes_add(pass.feedrate, pass.intensity, items_assigned)
     }
-  }
-  // empty pass widets
-  if (!(any_passes_set)) {
-    passes_add(1500, 100, [], [])
-    passes_add(1500, 100, [], [])
-    passes_add(1500, 100, [], [])
+  } else {
+    passes_add(1500, 100, [])
+    passes_add(1500, 100, [])
+    passes_add(1500, 100, [])
   }
   // add another pass widget
   passes_add_widget()

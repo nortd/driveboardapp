@@ -6,14 +6,16 @@
 
 bugs
 ----
+- images selection wonky, not grouped correctly in jobview
+- path selection not read out correctly
 - boundary/length/stats does not include fills, raster
 - move when no machine does not recover, false feedback
+
 
 beauty bugs
 -----------
 - stall between certain x-axis jogs
   - send a pierce command in between
-- probably should handling of vector paths in pass widget: track by index
 
 optimizations
 -------------

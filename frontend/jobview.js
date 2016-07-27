@@ -254,3 +254,24 @@ function jobview_testpath(){
   path2.closed = true
   path2.add([60,60],[width-60,60],[width-60,height-60],[60,height-60])
 }
+
+
+function jobview_select_path(index) {
+  // select paths by color in job view
+  for (var i = 0; i < this.job_group.children.length; i++) {
+    if (i==index) {
+      this.job_group.children[i].selected = true
+      var group = this.job_group.children[i]
+      jobview_color_selected =
+      jobview_path_selected = index
+      setTimeout(function() {
+        group.selected = false
+        jobview_color_selected = undefined
+        paper.view.draw()
+      }, 1500);
+    } else {
+      this.job_group.children[i].selected = false
+    }
+  }
+  paper.view.draw()
+}

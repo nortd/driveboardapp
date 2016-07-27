@@ -91,7 +91,7 @@ jobhandler = {
   },
 
 
-  // readers //////////////////////////////////
+  // setters //////////////////////////////////
 
   set : function(job, name, optimize) {
     this.clear();
@@ -152,7 +152,7 @@ jobhandler = {
 
 
 
-  // writers //////////////////////////////////
+  // getters //////////////////////////////////
 
   get : function() {
     var images_base64 = []
@@ -178,7 +178,99 @@ jobhandler = {
     // return JSON.stringify(this.get())
   },
 
+  getImageIndices : function() {
+    if ('images' in this.raster && this.raster.images.length ) {
+      images = []
+      for (var i = 0; i < this.raster.images.length; i++) {
+        images.push(i)
+      }
+      return images
+    } else {
+      return []
+    }
+  },
 
+  getFillIndices : function() {
+    // list of path indices that are marked as fills
+    if ('paths' in this.vector && this.vector.paths.length &&
+        'fills' in this.vector && this.vector.fills.length) {
+      fills = []
+      for (var i = 0; i < this.vector.fills.length; i++) {
+        fills.push(this.vector.fills[i])
+      }
+      return fills
+    } else {
+      return []
+    }
+  },
+
+  getPathIndices : function() {
+    // path indices minus the ones maked as fills
+    if ('paths' in this.vector && this.vector.paths.length ) {
+      var fillsDefined = 'fills' in this.vector && this.vector.fills.length
+      paths = []
+      for (var i = 0; i < this.vector.paths.length; i++) {
+        var path = this.vector.paths[i]
+        if (!fillsDefined || this.vector.fills.indexOf(i) == -1) {
+          paths.push(i)
+        }
+      }
+      return paths
+    } else {
+      return []
+    }
+  },
+
+  getAllColors : function() {
+    // return list of colors
+    if ('colors' in this.vector) {
+      return this.vector.colors
+    } else {
+      return []
+    }
+  },
+
+
+  getImagePasses : function() {
+    if ('passes' in this.raster && this.raster.passes.length ) {
+      return this.raster.passes
+    } else {
+      return []
+    }
+  },
+
+  getFillPasses : function() {
+    if ('passes' in this.vector && this.vector.passes.length &&
+        'fills' in this.vector && this.vector.fills.length ) {
+      return this.vector.fills
+    } else {
+      return []
+    }
+  },
+
+  getPathPasses : function() {
+    if ('passes' in this.vector && this.vector.passes.length ) {
+      var fillsDefined = 'fills' in this.vector && this.vector.fills.length
+      passes = []
+      for (var i = 0; i < this.vector.passes.length; i++) {
+        var pass = this.vector.passes[i]
+        if (!fillsDefined || this.vector.fills.indexOf(pass) == -1) {
+          passes.push(pass)
+        }
+      }
+      return passes
+    } else {
+      return []
+    }
+  },
+
+  getVectorPasses : function() {
+    if ('passes' in this.vector && this.vector.passes.length) {
+      return this.vector.passes
+    } else {
+      return []
+    }
+  },
 
 
   // rendering //////////////////////////////////
@@ -268,24 +360,38 @@ jobhandler = {
   // passes and colors //////////////////////////
 
   setPassesFromGUI : function() {
-    // read pass/color assinments from gui and set in this.vector.passes
-    // assigns paths to passes and sets feedrate and intensity
+    // read pass/color assinments from gui
+    // and set in this.vector.passes and this.raster.passes
+    // assigns images/fills/paths to passes and set feedrate and intensity
     var assignments = passes_get_assignments()
-    // [{"colors":[], "feedrate":1500, "intensity":100}, ...]
-    var passes = this.vector.passes = []
+    // [{"items":[[idx, kind],], "feedrate":1500, "intensity":100}, ...]
+    var vector_passes = this.vector.passes = []
+    var image_passes = this.raster.passes = []
     for (var i = 0; i < assignments.length; i++) {
-      var assignment = assignments[i]
+      var items = assignments[i].items
+      var feedrate = assignments[i].feedrate
+      var intensity = assignments[i].intensity
       //convert corlors to path indices
       var path_indices = []
-      for (var ii = 0; ii < assignment.colors.length; ii++) {
-        path_indices.push(this.vector.colors.indexOf(assignment.colors[ii]))
+      var img_indices = []
+      for (var ii = 0; ii < items.length; ii++) {
+        var idx = items[ii][0]
+        var kind = items[ii][1]
+        if (kind == "path" || kind == "fill") {
+          path_indices.push(idx)
+        } else if (kind == "image" ) {
+          img_indices.push(idx)
+        }
       }
       if (path_indices.length) {
-        passes.push({"paths":path_indices, "feedrate":assignment.feedrate,
-        "intensity":assignment.intensity})
+        vector_passes.push({"paths":path_indices,
+                            "feedrate":feedrate, "intensity":intensity})
+      }
+      if (img_indices.length) {
+        image_passes.push({"paths":img_indices,
+                            "feedrate":feedrate, "intensity":intensity})
       }
     }
-    // console.log(this.vector.passes)
   },
 
 
@@ -313,37 +419,6 @@ jobhandler = {
         this.vector.colors.push(random_color)
       }
     }
-  },
-
-
-  getAllColors : function() {
-    // return list of colors
-    if ('colors' in this.vector) {
-      return this.vector.colors
-    } else {
-      return []
-    }
-  },
-
-
-  selectColor : function(color) {
-    // select paths by color in job view
-    var index = this.vector.colors.indexOf(color)
-    for (var i = 0; i < this.job_group.children.length; i++) {
-      if (i==index) {
-        this.job_group.children[i].selected = true
-        var color_group = this.job_group.children[i]
-        jobview_color_selected = color
-        setTimeout(function() {
-          color_group.selected = false
-          jobview_color_selected = undefined
-          paper.view.draw()
-        }, 1500);
-      } else {
-        this.job_group.children[i].selected = false
-      }
-    }
-    paper.view.draw()
   },
 
 
