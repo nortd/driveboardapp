@@ -29,6 +29,16 @@ function passes_add(feedrate, intensity, items_assigned) {
     passes_update_handler()
   }
 
+  // assign image thumbs
+  var allimages = jobhandler.getImageIndices()
+  for (var i = 0; i < allimages.length; i++) {
+    var idx = allimages[i]
+    var img1 = jobhandler.getImageThumb(idx, -100, 50)
+    $(img1).appendTo('#passsel_'+num+'_'+idx+'_image a')
+    var img2 = jobhandler.getImageThumb(idx, -100, 50)
+    $(img2).appendTo('#pass_'+num+'_'+idx+'_image .color_select_btn_'+num)
+  }
+
   // bind color assign button
   $('#assign_btn_'+num).click(function(e) {
     if (jobview_item_selected !== undefined) {
@@ -229,7 +239,7 @@ function passes_set_assignments() {
         items_assigned.push([allimagepasses[i], "image"])  // item
       }
       if (i < allfillpasses.length) {
-        items_assigned.push([allfillasses[i], "fill"])     // item
+        items_assigned.push([allfillpasses[i], "fill"])     // item
       }
       if (i < allpathpasses.length) {
         items_assigned.push([allpathpasses[i], "path"])    // item

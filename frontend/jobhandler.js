@@ -273,6 +273,36 @@ jobhandler = {
     }
   },
 
+  getImageThumb : function(imageidx, width, height) {
+    var img = this.raster.images[imageidx]
+    if (width <= 0 ) {
+      // scale proportionally by height
+      var w = img.size[0]*(height/img.size[1])
+      if (width < 0) {
+        // use this negative value for max width
+        width = Math.min(w, -width)
+      } else {
+        width = w
+      }
+    } else if (height <= 0) {
+      // scale proportionally by width
+      var h = img.size[1]*(width/img.size[0])
+      if (height < 0) {
+        // use this negative value for max height
+        height = Math.min(h, -height)
+      } else {
+        height = h
+      }
+    }
+    var canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    canvas.getContext('2d').drawImage(img.data, 0, 0, width, height)
+    var thumb = new Image()
+  	thumb.src = canvas.toDataURL("image/png")
+    return thumb
+  },
+
 
   // rendering //////////////////////////////////
 
