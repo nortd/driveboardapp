@@ -1,3 +1,31 @@
+{
+     "head": {
+       "noreturn": True,            # do not return to origin, default: False
+       "optimized": 0.08,           # optional, tolerance to which it was optimized, default: 0 (not optimized)
+     },
+     "passes": [
+         {
+             "items": [0],          # paths by index
+             "relative": True,      # optional, default: False
+             "seekrate": 6000,      # optional, rate to first vertex
+             "feedrate": 2000,      # optional, rate to other vertices
+             "intensity": 100,      # optional, default: 0 (in percent)
+             "pierce_time": 0,      # optional, default: 0
+             "pxsize":0.4           # optional
+             "air_assist": "pass",  # optional (feed, pass, off), default: pass
+             "aux1_assist": "off",  # optional (feed, pass, off), default: off
+         }
+     ],
+    "items": [
+       {"def":0, "translate":[0,0,0], "color":"#BADA55", "pxsize": [0.4]}
+    ],
+    "defs": [
+       {"kind":"path", "data":[[[0,10,0]]]},
+       {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
+       {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
+    ],
+   "stats":{}
+}
 
 
 - quick fill, slow fill, or better optimized sorted line fill

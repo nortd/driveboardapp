@@ -23,22 +23,20 @@ function passes_add(feedrate, intensity, items_assigned) {
   console.log(items_assigned)
   // assign colors
   for (var i = 0; i < items_assigned.length; i++) {
-    var idx = items_assigned[i][0]
-    var kind = items_assigned[i][1]
+    var idx = items_assigned[i]
+    var kind =
     $('#passsel_'+num+'_'+idx+'_'+kind).hide()
     $('#pass_'+num+'_'+idx+'_'+kind).show(300)
     passes_update_handler()
   }
 
   // assign image thumbs
-  var allimages = jobhandler.getImageIndices()
-  for (var i = 0; i < allimages.length; i++) {
-    var idx = allimages[i]
-    var img1 = jobhandler.getImageThumb(idx, -100, 50)
+  jobhandler.loopItems(function(item, idx){
+    var img1 = jobhandler.getImageThumb(item, -100, 50)
     $(img1).appendTo('#passsel_'+num+'_'+idx+'_image a')
-    var img2 = jobhandler.getImageThumb(idx, -100, 50)
+    var img2 = jobhandler.getImageThumb(item, -100, 50)
     $(img2).appendTo('#pass_'+num+'_'+idx+'_image .color_select_btn_'+num)
-  }
+  }, "image")
 
   // bind color assign button
   $('#assign_btn_'+num).click(function(e) {
@@ -98,29 +96,22 @@ function passes_pass_html(num, feedrate, intensity) {
   // add all color selectors
   var select_html = ''
   var added_html = ''
-  // var allcolors = jobhandler.getAllColors()
 
-  var allimages = jobhandler.getImageIndices()
-  var allfills = jobhandler.getFillIndices()
-  var allpaths = jobhandler.getPathIndices()
-  var allcolors = jobhandler.getAllColors()
-
-  for (var i = 0; i < allimages.length; i++) {
-    var idx = allimages[i]
+  jobhandler.loopItems(function(item, idx){
     var color = '#ffffff'
     select_html += passes_select_html(num, idx, "image", color)
     added_html += passes_added_html(num, idx, "image", color)
-  }
-  for (var i = 0; i < allfills.length; i++) {
-    var idx = allfills[i]
-    select_html += passes_select_html(num, idx, "fill", allcolors[idx])
-    added_html += passes_added_html(num, idx, "fill", allcolors[idx])
-  }
-  for (var i = 0; i < allpaths.length; i++) {
-    var idx = allpaths[i]
-    select_html += passes_select_html(num, idx, "path", allcolors[idx])
-    added_html += passes_added_html(num, idx, "path", allcolors[idx])
-  }
+  }, "image")
+
+  jobhandler.loopItems(function(item, idx){
+    select_html += passes_select_html(num, idx, "fill", item.color)
+    added_html += passes_added_html(num, idx, "fill", item.color)
+  }, "fill")
+
+  jobhandler.loopItems(function(item, idx){
+    select_html += passes_select_html(num, idx, "path", item.color)
+    added_html += passes_added_html(num, idx, "path", item.color)
+  }, "path")
 
   // html template like it's 1999
   var html =
@@ -227,41 +218,15 @@ function passes_get_assignments() {
 
 function passes_set_assignments() {
   // set passes in gui from current job
-  var allimagepasses = jobhandler.getImagePasses()
-  var allfillpasses = jobhandler.getFillPasses()
-  var allpathpasses = jobhandler.getPathPasses()
-  var passes_total = Math.max(allimagepasses.length,
-                              allfillpasses.length, allpathpasses.length)
-  if (passes_total) {
-    // zip up the passes of different kinds
-    for (var i = 0; i < passes_total; i++) {
-      var items_assigned = []
-      if (i < allimagepasses.length) {
-        var pass = allimagepasses[i]
-        for (var j = 0; j < pass.images.length; j++) {
-          items_assigned.push([j, "image"])    // item
-        }
-      }
-      if (i < allfillpasses.length) {
-        var pass = allfillpasses[i]
-        for (var j = 0; j < pass.paths.length; j++) {
-          items_assigned.push([j, "fill"])     // item
-        }
-      }
-      if (i < allpathpasses.length) {
-        var pass = allpathpasses[i]
-        for (var j = 0; j < pass.paths.length; j++) {
-          items_assigned.push([pass, "path"])    // item
-        }
-      }
-      passes_add(pass.feedrate, pass.intensity, items_assigned)
-    }
+  if (jobhandler.hasPasses()) {
+    jobhandler.loopPasses(function(pass, items){
+      passes_add(pass.feedrate, pass.intensity, items)
+    })
   } else {
     passes_add(1500, 100, [])
     passes_add(1500, 100, [])
     passes_add(1500, 100, [])
   }
-  // add another pass widget
   passes_add_widget()
 }
 

@@ -35,8 +35,6 @@ function tools_tselect_init() {
 
 function tools_addfill_init() {
   // add color choices to addfill_btn
-  var allpaths = jobhandler.getPathIndices()
-  var allcolors = jobhandler.getAllColors()
   var select_html = ''
   // params
   select_html += '<li>'+
@@ -51,13 +49,12 @@ function tools_addfill_init() {
       '</form>'+
     '</li>'
   // colors
-  for (var i = 0; i < allpaths.length; i++) {
-    var idx = allpaths[i]
-    select_html += '<li id="addfill_'+idx+'" style="background-color:'+allcolors[idx]+';"">'+
-    '<a href="#" class="addfill_color" style="color:'+allcolors[idx]+'">'+
+  jobhandler.loopItems(function(item, idx){
+    select_html += '<li id="addfill_'+idx+'" style="background-color:'+item.color+';"">'+
+    '<a href="#" class="addfill_color" style="color:'+item.color+'">'+
     '<span class="label label-default kindmem">path</span>'
     '<span style="display:none" class="idxmem">'+idx+'</span></a></li>'
-  }
+  }, "path")
   $('#addfill_colors').html(select_html)
 
   // bind all color add buttons within dropdown

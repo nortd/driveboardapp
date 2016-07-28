@@ -2,6 +2,34 @@
 // module to handle job data
 // read, write, draw, stats, cleanup/filter
 
+// {
+//      "head": {
+//          "noreturn": True,          # do not return to origin, default: False
+//          "optimized": 0.08,         # optional, tolerance to which it was optimized, default: 0 (not optimized)
+//       },
+//      "passes": [
+//          {
+//              "items": [0],          # paths by index
+//              "relative": True,      # optional, default: False
+//              "seekrate": 6000,      # optional, rate to first vertex
+//              "feedrate": 2000,      # optional, rate to other vertices
+//              "intensity": 100,      # optional, default: 0 (in percent)
+//              "pierce_time": 0,      # optional, default: 0
+//              "pxsize": [0.4],       # optional
+//              "air_assist": "pass",  # optional (feed, pass, off), default: pass
+//              "aux1_assist": "off",  # optional (feed, pass, off), default: off
+//          }
+//      ],
+//     "items": [
+//        {"def":0, "translate":[0,0,0], "color":"#BADA55"}
+//     ],
+//     "defs": [
+//        {"kind":"path", "data":[[[0,10,0]]]},
+//        {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
+//        {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
+//     ],
+//     "stats":{}
+// }
 
 // {
 //       "vector":                          # optional
@@ -61,16 +89,18 @@
 
 jobhandler = {
 
-  vector : {},
-  raster : {},
+  passes : [],
+  items : [],
+  defs : [],
   stats : {},
   name : "",
   vector_group : undefined,
   image_group : undefined,
 
   clear : function() {
-    this.vector = {}
-    this.raster = {}
+    this.passes = []
+    this.items = []
+    this.defs = []
     this.stats = {}
     name = ""
     jobview_clear()
@@ -82,73 +112,83 @@ jobhandler = {
   },
 
   isEmpty : function() {
-    return !('paths' in this.vector && this.vector.paths.length > 0) &&
-           !('images' in this.raster && this.raster.images.length > 0)
+    return (!this.defs.length || !this.items.length)
   },
 
   hasPasses : function() {
-    return ('passes' in this.vector && this.vector.passes.length > 0) ||
-           ('passes' in this.raster && this.raster.passes.length > 0)
+    return (!this.passes)
+  },
+
+  loopItems : function(func, kind) {
+    if (kind === undefined) {
+      for (var i = 0; i < this.items.length; i++) {
+        func(this.items[i], i)
+      }
+    } else {
+      for (var i = 0; i < this.items.length; i++) {
+        if (this.defs[this.items[i].def].kind == kind) {
+          func(this.items[i], i)
+        }
+      }
+    }
+  },
+
+  loopPasses : function(func) {
+    for (var i = 0; i < this.passes.length; i++) {
+      var pass = this.passes[i]
+      var item_idxs = []
+      for (var j = 0; j < pass.items.length; j++) {
+        item_idxs.push(pass.items[j])
+      }
+      func(pass, item_idxs)
+    }
   },
 
 
   // setters //////////////////////////////////
 
   set : function(job, name, optimize) {
-    this.clear();
-
+    this.clear()
     this.name = name
-    $('title').html("DriveboardApp - " + name)
-
+    $('title').html("DriveboardApp - "+name)
     // handle json string representations as well
     if (typeof(job) === 'string') {
       job = JSON.parse(job)
     }
-
-    if ('vector' in job && 'paths' in job.vector && job.vector.paths.length > 0) {
-      this.vector = job.vector
+    // defs and items
+    if (job.defs.length && this.items.length) {
+      this.defs = job.defs
+      this.items = job.items
       if (optimize) {
-        this.segmentizeLongLines();
+        this.segmentizeLongLines()
       }
-    }
-
-    if ('raster' in job && 'images' in job.raster && job.raster.images.length > 0) {
-      this.raster = job.raster
-      // convert base64 to Image object
-      for (var i=0; i<this.raster.images.length; i++) {
-        var image = this.raster.images[i]
-        var img_base64 = image.data
-        image.data = new Image()
-        image.data.src = img_base64
+      // convert base64 image data to Image objects
+      for (var i = 0; i < this.defs.length; i++) {
+        var def = this.defs[i]
+        if (def.kind == "image") {
+          var img_base64 = def.data
+          def.data = new Image()
+          def.data.src = img_base64
+        }
       }
+      // colors
+      this.normalizeColors()
+      // stats
+      if ('stats' in job) {
+        this.stats = job.stats
+      } else {
+        this.calculateStats()
+      }
+      // job info
+      $('#job_info_name').html(this.name)
+      $('#info_btn').show()
+      // info modal
+      var html = ''
+      html += "name : " + this.name + "<br>"
+      $('#info_content').html(html)
+      // passes, show in gui
+      passes_set_assignments()
     }
-
-    this.normalizeColors()
-
-    // stats
-    if ('stats' in job) {
-      this.stats = job['stats']
-    } else {
-      this.calculateBasicStats()
-    }
-
-    // job info
-    $('#job_info_name').html(this.name)
-    $('#info_btn').show()
-    // info modal
-    var html = ''
-    html += "name : " + this.name + "<br>"
-    // html += "length : " + job_length_m + "m<br>"
-    if ('paths' in this.vector) {
-      html += "vector paths : " + this.vector.paths.length + "<br>"
-    }
-    if ('raster' in this.vector) {
-      html += "raster images : " + this.raster.images.length + "<br>"
-    }
-    $('#info_content').html(html)
-
-    // passes, show in gui
-    passes_set_assignments()
   },
 
 
@@ -156,18 +196,20 @@ jobhandler = {
   // getters //////////////////////////////////
 
   get : function() {
-    var images_base64 = []
-    if ('images' in this.raster) {
-      // convert Image object to base64
-      for (var i=0; i<this.raster.images.length; i++) {
-        var image = this.raster.images[i]
-        images_base64.push({'pos':image.pos,
-                            'size':image.size,
-                            'data':image.data.src})
+    // convert images back to base64
+    var defs_out = []
+    for (var i = 0; i < this.defs.length; i++) {
+      var def = this.defs[i]
+      if (def.kind == "image") {
+        defs_out.push({'pos':def.pos,
+                        'size':def.size,
+                        'data':def.data.src})
+      } else {
+        defs_out.push(def)
       }
     }
-    var raster_base64 = {'passes':this.raster.passes, 'images':images_base64}
-    return {'vector':this.vector, 'raster':raster_base64, 'stats':this.stat}
+    return {'head':this.head, 'passes':this.passes,
+            'items':this.items, 'defs':defs_out 'stats':this.stat}
   },
 
   getJson : function() {
@@ -176,105 +218,14 @@ jobhandler = {
         if (isNaN(+key)) return val
         return val.toFixed ? Number(val.toFixed(3)) : val
       })
-    // return JSON.stringify(this.get())
   },
 
-  getImageIndices : function() {
-    if ('images' in this.raster && this.raster.images.length ) {
-      images = []
-      for (var i = 0; i < this.raster.images.length; i++) {
-        images.push(i)
-      }
-      return images
-    } else {
-      return []
-    }
+  getKind : function(item) {
+    return this.defs[item.def].kind
   },
 
-  getFillIndices : function() {
-    // list of path indices that are marked as fills
-    if ('paths' in this.vector && this.vector.paths.length &&
-        'fills' in this.vector && this.vector.fills.length) {
-      fills = []
-      for (var i = 0; i < this.vector.fills.length; i++) {
-        fills.push(this.vector.fills[i])
-      }
-      return fills
-    } else {
-      return []
-    }
-  },
-
-  getPathIndices : function() {
-    // path indices minus the ones maked as fills
-    if ('paths' in this.vector && this.vector.paths.length ) {
-      var fillsDefined = 'fills' in this.vector && this.vector.fills.length
-      paths = []
-      for (var i = 0; i < this.vector.paths.length; i++) {
-        var path = this.vector.paths[i]
-        if (!fillsDefined || this.vector.fills.indexOf(i) == -1) {
-          paths.push(i)
-        }
-      }
-      return paths
-    } else {
-      return []
-    }
-  },
-
-  getAllColors : function() {
-    // return list of colors
-    if ('colors' in this.vector) {
-      return this.vector.colors
-    } else {
-      return []
-    }
-  },
-
-
-  getImagePasses : function() {
-    if ('passes' in this.raster && this.raster.passes.length ) {
-      return this.raster.passes
-    } else {
-      return []
-    }
-  },
-
-  getFillPasses : function() {
-    if ('passes' in this.vector && this.vector.passes.length &&
-        'fills' in this.vector && this.vector.fills.length ) {
-      return this.vector.fills
-    } else {
-      return []
-    }
-  },
-
-  getPathPasses : function() {
-    if ('passes' in this.vector && this.vector.passes.length ) {
-      var fillsDefined = 'fills' in this.vector && this.vector.fills.length
-      passes = []
-      for (var i = 0; i < this.vector.passes.length; i++) {
-        var pass = this.vector.passes[i]
-        if (!fillsDefined || this.vector.fills.indexOf(pass) == -1) {
-          passes.push(pass)
-        }
-      }
-      return passes
-    } else {
-      return []
-    }
-  },
-
-  getVectorPasses : function() {
-    if ('passes' in this.vector && this.vector.passes.length) {
-      return this.vector.passes
-    } else {
-      return []
-    }
-  },
-
-  getImageThumb : function(imageidx, width, height) {
-    var img = this.raster.images[imageidx]
+  getImageThumb : function(imgitem, width, height) {
+    var img = this.defs[imgitem.def]
     if (width <= 0 ) {
       // scale proportionally by height
       var w = img.size[0]*(height/img.size[1])
@@ -302,6 +253,15 @@ jobhandler = {
   	thumb.src = canvas.toDataURL("image/png")
     return thumb
   },
+
+
+
+
+
+
+
+
+
 
 
   // rendering //////////////////////////////////
@@ -496,7 +456,7 @@ jobhandler = {
 
   // stats //////////////////////////////////////
 
-  calculateBasicStats : function() {
+  calculateStats : function() {
     // calculate bounding boxes and path lengths
     // for each path, image, and also for '_all_'
     // bbox and length only account for feed lines
