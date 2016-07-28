@@ -16,7 +16,7 @@ function passes_add(feedrate, intensity, items_assigned) {
     var pass_elem = $(html).appendTo('#job_passes')
   }
   // unblur buttons after pressing
-  $("#pass_add_widget > .btn").mouseup(function(){
+  $("#pass_"+num+" .btn").mouseup(function(){
       $(this).blur();
   })
 
@@ -154,7 +154,7 @@ function passes_added_html(num, idx, kind, color) {
   var html =
   '<div id="pass_'+num+'_'+idx+'_'+kind+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
     '<span style="display:none" class="idxmem">'+idx+'</span>'+
-    '<button id="color_btn" class="btn btn-default btn-sm color_select_btn_'+num+'" '+
+    '<button class="btn btn-default btn-sm color_select_btn_'+num+'" '+
       'type="submit" style="width:175px; background-color:'+color+'">'+
       '<span class="label label-default kindmem">'+kind+'</span>'+
     '</button>'+

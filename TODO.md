@@ -1,7 +1,7 @@
 
 
 - quick fill, slow fill, or better optimized sorted line fill
-- pass assignment for rasters
+- pixel size assignment for image rasters
 - rename raster_size
 
 bugs
@@ -19,6 +19,7 @@ beauty bugs
 
 optimizations
 -------------
+- consider flipping y-axis
 - compact statserver message
 - take offset feature out of API
 
