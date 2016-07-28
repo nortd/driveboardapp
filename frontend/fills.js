@@ -9,7 +9,7 @@ function fills_add_by_item(idx, kind, callback) {
   var color = jobhandler.vector.colors[idx]
   var path = jobhandler.vector.paths[idx]
   var bounds = jobhandler.stats.paths[idx].bbox
-  var leadin = app_config_main.raster_leadin
+  var leadin = app_config_main.fill_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
   var max_x = Math.min(bounds[2]+leadin, app_config_main.workspace[0])
   var line_delta = parseFloat($('#fillpxsize').val())
@@ -48,8 +48,13 @@ function fills_add_by_item(idx, kind, callback) {
     // generate cut path
     if (intersections.length > 1) {
       var pv = intersections[0]
+      var x_i = intersections[0][0]
       var y_i = intersections[0][1]
-      fillpolylines.push([[min_x, y_i]])  // polyline of one
+      var min_x_opti = Math.max(x_i-leadin, 0)
+      var max_x_opti = Math.min(intersections[intersections.length-1][0]+leadin,
+                                app_config_main.workspace[0])
+      // fillpolylines.push([[min_x, y_i]])  // polyline of one
+      fillpolylines.push([[min_x_opti, y_i]])  // polyline of one
       for (var k = 1; k < intersections.length; k++) {
         var v = intersections[k]
         if ((k % 2) == 1) {
@@ -57,7 +62,8 @@ function fills_add_by_item(idx, kind, callback) {
         }
         pv = v
       }
-      fillpolylines.push([[max_x, y_i]])  // polyline of one
+      // fillpolylines.push([[max_x, y_i]])  // polyline of one
+      fillpolylines.push([[max_x_opti, y_i]])  // polyline of one
     }
     y+=line_delta
     setTimeout(loop_lines, 0)

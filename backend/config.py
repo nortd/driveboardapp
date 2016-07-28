@@ -44,9 +44,11 @@ conf = {
     },
 
     'usb_reset_hack': False,
+    'fill_leadin': 10,
     'raster_leadin': 40,
 
     'max_segment_length': 5.0,
+
 
     'raster_size': 0.4,                 # size (mm) of beam for rastering
     'raster_offset': 40,

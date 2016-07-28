@@ -20,6 +20,7 @@ function passes_add(feedrate, intensity, items_assigned) {
       $(this).blur();
   })
 
+  console.log(items_assigned)
   // assign colors
   for (var i = 0; i < items_assigned.length; i++) {
     var idx = items_assigned[i][0]
@@ -236,13 +237,22 @@ function passes_set_assignments() {
     for (var i = 0; i < passes_total; i++) {
       var items_assigned = []
       if (i < allimagepasses.length) {
-        items_assigned.push([allimagepasses[i], "image"])  // item
+        var pass = allimagepasses[i]
+        for (var j = 0; j < pass.images.length; j++) {
+          items_assigned.push([j, "image"])    // item
+        }
       }
       if (i < allfillpasses.length) {
-        items_assigned.push([allfillpasses[i], "fill"])     // item
+        var pass = allfillpasses[i]
+        for (var j = 0; j < pass.paths.length; j++) {
+          items_assigned.push([j, "fill"])     // item
+        }
       }
       if (i < allpathpasses.length) {
-        items_assigned.push([allpathpasses[i], "path"])    // item
+        var pass = allpathpasses[i]
+        for (var j = 0; j < pass.paths.length; j++) {
+          items_assigned.push([pass, "path"])    // item
+        }
       }
       passes_add(pass.feedrate, pass.intensity, items_assigned)
     }
