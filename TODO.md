@@ -1,9 +1,7 @@
 
 
-- thumbnail image in passes
 - quick fill, slow fill, or better optimized sorted line fill
-- pixel size assignment for image rasters
-- rename raster_size
+- clean up config.py, rename raster_size
 
 bugs
 ----
@@ -25,10 +23,11 @@ optimizations
 
 features
 --------
-  - gcode editor
-  - importers
-    - load dxf
-    - load gcode
+- pixel size assignment for image rasters
+- gcode editor
+- importers
+  - load dxf
+  - load gcode
 
 
 
