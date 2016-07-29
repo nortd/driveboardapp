@@ -20,7 +20,7 @@ function controls_ready() {
       } else {
         filename = filename+'.dba'
       }
-      jobhandler.setPassesFromGUI()
+      jobhandler.passes = passes_get_active()
       var blob = new Blob([jobhandler.getJson()], {type: "application/json;charset=utf-8"})
       saveAs(blob, filename)
       // var load_request = {'job':jobhandler.getJson()}
@@ -126,7 +126,7 @@ function controls_ready() {
 
   $("#run_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#run_btn").click(function(e){
-    jobhandler.setPassesFromGUI()
+    jobhandler.passes = passes_get_active()
 
 
     // HACK in default pass
@@ -200,7 +200,7 @@ function controls_ready() {
 
   $("#boundary_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#boundary_btn").click(function(e){
-    jobhandler.setPassesFromGUI()
+    jobhandler.passes = passes_get_active()
     var bounds = jobhandler.getActivePassesBbox()
     request_boundary(bounds, app_config_main.seekrate)
     return false

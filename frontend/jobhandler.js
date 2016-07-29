@@ -94,7 +94,8 @@ jobhandler = {
   defs : [],
   stats : {},
   name : "",
-  vector_group : undefined,
+  path_group : undefined,
+  fill_group : undefined,
   image_group : undefined,
 
   clear : function() {
@@ -255,76 +256,64 @@ jobhandler = {
   },
 
 
-
-
-
-
-
-
-
-
-
   // rendering //////////////////////////////////
 
   render : function () {
-    var x = 0;
-    var y = 0;
+    var x = 0
+    var y = 0
     jobview_clear()
     jobview_feedLayer.activate()
-    // rasters
     this.image_group = new paper.Group()
-    if ('images' in this.raster) {
-      jobview_feedLayer.activate()
-      for (var k=0; k<this.raster.images.length; k++) {
-        var img = this.raster.images[k]
-        var group = new paper.Group()
-        this.image_group.addChild(group)
-        var pos_x = img.pos[0]*jobview_mm2px
-        var pos_y = img.pos[1]*jobview_mm2px
-        var img_w = img.size[0]*jobview_mm2px
-        var img_h = img.size[1]*jobview_mm2px
-        var img_paper = new paper.Raster(img.data)
-        group.addChild(img_paper);
-        img_paper.scale(img_w/img.data.width, img_h/img.data.height)
-        img_paper.position = new paper.Point(pos_x+0.5*img_w, pos_y+0.5*img_h)
-      }
-    }
+    this.fill_group = new paper.Group()
+    this.path_group = new paper.Group()
+    // images
+    this.loopItems(function(img, i){
+      var img = this.raster.images[k]
+      var group = new paper.Group()
+      this.image_group.addChild(group)
+      var pos_x = img.pos[0]*jobview_mm2px
+      var pos_y = img.pos[1]*jobview_mm2px
+      var img_w = img.size[0]*jobview_mm2px
+      var img_h = img.size[1]*jobview_mm2px
+      var img_paper = new paper.Raster(img.data)
+      group.addChild(img_paper);
+      img_paper.scale(img_w/img.data.width, img_h/img.data.height)
+      img_paper.position = new paper.Point(pos_x+0.5*img_w, pos_y+0.5*img_h)
+    }, "image")
+    // fills
+    this.loopItems(function(fill, i){
+      add_path(fill, this.fill_group)
+    }, "fill")
     // paths
-    this.vector_group = new paper.Group()
-    if ('paths' in this.vector) {
+    this.loopItems(function(path, i){
+      add_path(fill, this.path_group)
+    }, "path")
+    // fills, paths helper function
+    function add_path(path, parent_group) {
       jobview_feedLayer.activate()
-      for (var i=0; i<this.vector.paths.length; i++) {
-        var path = this.vector.paths[i]
-        jobview_feedLayer.activate()
-        var group = new paper.Group()
-        this.vector_group.addChild(group)
-        for (var j=0; j<path.length; j++) {
-          var pathseg = path[j]
-          if (pathseg.length > 0) {
-
-            jobview_seekLayer.activate()
-            var p_seek = new paper.Path()
-            p_seek.strokeColor = app_config_main.seek_color
-            p_seek.add([x,y])
-            x = pathseg[0][0]*jobview_mm2px
-            y = pathseg[0][1]*jobview_mm2px
-            p_seek.add([x,y])
-
-            jobview_feedLayer.activate()
-            var p_feed = new paper.Path()
-            group.addChild(p_feed);
-            if ('colors' in this.vector && i < this.vector.colors.length) {
-              p_feed.strokeColor = this.vector.colors[i]
-            } else {
-              p_feed.strokeColor = '#000000'
-            }
+      var group = new paper.Group()
+      parent_group.addChild(group)
+      for (var j=0; j<path.length; j++) {
+        var pathseg = path[j]
+        if (pathseg.length > 0) {
+          // seek move
+          jobview_seekLayer.activate()
+          var p_seek = new paper.Path()
+          p_seek.strokeColor = '#dddddd'
+          p_seek.add([x,y])
+          x = pathseg[0][0]*jobview_mm2px
+          y = pathseg[0][1]*jobview_mm2px
+          p_seek.add([x,y])
+          // feed move
+          jobview_feedLayer.activate()
+          var p_feed = new paper.Path()
+          group.addChild(p_feed)
+          p_feed.strokeColor = path.color || '#000000'
+          p_feed.add([x,y])
+          for (vertex=1; vertex<pathseg.length; vertex++) {
+            x = pathseg[vertex][0]*jobview_mm2px
+            y = pathseg[vertex][1]*jobview_mm2px
             p_feed.add([x,y])
-
-            for (vertex=1; vertex<pathseg.length; vertex++) {
-              x = pathseg[vertex][0]*jobview_mm2px
-              y = pathseg[vertex][1]*jobview_mm2px
-              p_feed.add([x,y])
-            }
           }
         }
       }
@@ -337,9 +326,8 @@ jobhandler = {
     jobview_boundsLayer.activate()
     var bbox = this.getActivePassesBbox()
     var all_bounds = new paper.Path.Rectangle(
-                                    new paper.Point(bbox[0]*jobview_mm2px,bbox[1]*jobview_mm2px),
-                                    new paper.Point(bbox[2]*jobview_mm2px,bbox[3]*jobview_mm2px) )
-    // all_bounds.strokeColor = app_config_main.bounds_color
+        new paper.Point(bbox[0]*jobview_mm2px,bbox[1]*jobview_mm2px),
+        new paper.Point(bbox[2]*jobview_mm2px,bbox[3]*jobview_mm2px))
     all_bounds.strokeWidth = 2
     all_bounds.strokeColor = '#666666'
     all_bounds.dashArray = [2, 4]
@@ -352,8 +340,10 @@ jobhandler = {
 
 
   selectItem : function(idx, kind) {
-    if (kind == "path" || kind == "fill") {
-      var pgroup = this.vector_group
+    if (kind == "path") {
+      var pgroup = this.path_group
+    } else if ( kind == "fill") {
+      var pgroup = this.fill_group
     } else if (kind == "image") {
       var pgroup = this.image_group
     }
@@ -375,81 +365,29 @@ jobhandler = {
 
   // passes and colors //////////////////////////
 
-  setPassesFromGUI : function() {
-    // read pass/color assinments from gui
-    // and set in this.vector.passes and this.raster.passes
-    // assigns images/fills/paths to passes and set feedrate and intensity
-    var assignments = passes_get_assignments()
-    // [{"items":[[idx, kind],], "feedrate":1500, "intensity":100}, ...]
-    var vector_passes = this.vector.passes = []
-    var image_passes = this.raster.passes = []
-    for (var i = 0; i < assignments.length; i++) {
-      var items = assignments[i].items
-      var feedrate = assignments[i].feedrate
-      var intensity = assignments[i].intensity
-      //convert corlors to path indices
-      var path_indices = []
-      var img_indices = []
-      for (var ii = 0; ii < items.length; ii++) {
-        var idx = items[ii][0]
-        var kind = items[ii][1]
-        if (kind == "path" || kind == "fill") {
-          path_indices.push(idx)
-        } else if (kind == "image" ) {
-          img_indices.push(idx)
-        }
-      }
-      if (path_indices.length) {
-        vector_passes.push({"paths":path_indices,
-                            "feedrate":feedrate, "intensity":intensity})
-      }
-      if (img_indices.length) {
-        image_passes.push({"images":img_indices,
-                            "feedrate":feedrate, "intensity":intensity})
-      }
-    }
-  },
-
-
   normalizeColors : function() {
-    var random_color_flag = false
-    // randomized colors if no colors assigned
-    if (!('colors' in this.vector)) {
-      if ('paths' in this.vector && this.vector.paths.length > 0) {
-        // no color assignments, paths exist
-        random_color_flag = true
-      }
-    } else if ('paths' in this.vector && this.vector.paths.length > 0) {
-      if (this.vector.paths.length != this.vector.colors.length) {
-        // pass-color assignments do not match
-        console.log("jobhandler.normalizeColors: colors-paths mismatch")
-        random_color_flag = true
-      }
-    }
-    // assign random colors
-    if (random_color_flag) {
-      this.vector.colors = []
-      this.vector.colors.push('#000000')  // first always black
-      for (var i = 1; i < this.vector.paths.length; i++) {
-        var random_color = '#'+(Math.random()*0xaaaaaa<<0).toString(16)
-        this.vector.colors.push(random_color)
-      }
-    }
-  },
-
-
-  isColorFill : function(color) {
-    var ret = false
-    if ('fills' in this.vector && 'colors' in this.vector) {
-      var colidx = jobhandler.vector.colors.indexOf(color)
-      if (colidx != -1) {
-        if (jobhandler.vector.fills.indexOf(colidx) != -1) {
-          ret = true
+    this.loopItems(function(path, i){
+      if (!('color' in path)) {
+        if (path === this.items[0]) {
+          path.color = "#000000"
+        } else {
+          var random_color = '#'+(Math.random()*0xaaaaaa<<0).toString(16)
+          path.color = random_color
         }
       }
-    }
-    return ret
+    }, "path")
   },
+
+
+
+
+
+
+
+
+
+
+
 
 
 

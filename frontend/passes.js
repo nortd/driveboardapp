@@ -31,10 +31,10 @@ function passes_add(feedrate, intensity, items_assigned) {
   }
 
   // assign image thumbs
-  jobhandler.loopItems(function(item, idx){
-    var img1 = jobhandler.getImageThumb(item, -100, 50)
+  jobhandler.loopItems(function(image, idx){
+    var img1 = jobhandler.getImageThumb(image, -100, 50)
     $(img1).appendTo('#passsel_'+num+'_'+idx+'_image a')
-    var img2 = jobhandler.getImageThumb(item, -100, 50)
+    var img2 = jobhandler.getImageThumb(image, -100, 50)
     $(img2).appendTo('#pass_'+num+'_'+idx+'_image .color_select_btn_'+num)
   }, "image")
 
@@ -97,20 +97,20 @@ function passes_pass_html(num, feedrate, intensity) {
   var select_html = ''
   var added_html = ''
 
-  jobhandler.loopItems(function(item, idx){
+  jobhandler.loopItems(function(image, idx){
     var color = '#ffffff'
     select_html += passes_select_html(num, idx, "image", color)
     added_html += passes_added_html(num, idx, "image", color)
   }, "image")
 
-  jobhandler.loopItems(function(item, idx){
-    select_html += passes_select_html(num, idx, "fill", item.color)
-    added_html += passes_added_html(num, idx, "fill", item.color)
+  jobhandler.loopItems(function(fill, idx){
+    select_html += passes_select_html(num, idx, "fill", fill.color)
+    added_html += passes_added_html(num, idx, "fill", fill.color)
   }, "fill")
 
-  jobhandler.loopItems(function(item, idx){
-    select_html += passes_select_html(num, idx, "path", item.color)
-    added_html += passes_added_html(num, idx, "path", item.color)
+  jobhandler.loopItems(function(path, idx){
+    select_html += passes_select_html(num, idx, "path", path.color)
+    added_html += passes_added_html(num, idx, "path", path.color)
   }, "path")
 
   // html template like it's 1999
@@ -196,23 +196,21 @@ function passes_add_widget() {
 }
 
 
-function passes_get_assignments() {
-  var assignments = []
+function passes_get_active() {
+  var passes = []
   $('#job_passes').children('.pass_widget').each(function(i) { // each pass
     var feedrate = Math.round(parseFloat($(this).find("input.feedrate").val()))
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
-    var assign = {"items":[], "feedrate":feedrate, "intensity":intensity}
+    var pass = {"items":[], "feedrate":feedrate, "intensity":intensity}
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
       var idx = $(this).find('.idxmem').text()
-      var kind = $(this).find('.kindmem').text()
-      assign.items.push([idx,kind])
-      // console.log('assign '+color+' -> '+(i+1))
+      pass.items.push(idx)
     })
-    if (assign.items.length) {
-      assignments.push(assign)
+    if (pass.items.length) {
+      passes.push(pass)
     }
   })
-  return assignments
+  return passes
 }
 
 
@@ -236,7 +234,7 @@ function passes_update_handler() {
   // this event handler is debounced to minimize updates
   clearTimeout(window.lastPassesUpdateTimer)
   window.lastPassesUpdateTimer = setTimeout(function() {
-    jobhandler.setPassesFromGUI()
+    jobhandler.passes = passes_get_active()
     // length
     var length = (jobhandler.getActivePassesLength()/1000.0).toFixed(1)
     if (length != 0) {

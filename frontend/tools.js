@@ -20,8 +20,10 @@ function tools_tselect_init() {
       jobview_deselect_all()
       path = hitResult.item
       path.parent.selected = !path.parent.selected
-      if (path.parent.parent === jobhandler.vector_group) {
+      if (path.parent.parent === jobhandler.path_group) {
         var kind = "path"
+      } else if (path.parent.parent === jobhandler.fill_group) {
+        var kind = "fill"
       } else if (path.parent.parent === jobhandler.image_group) {
         var kind = "image"
       }
@@ -49,9 +51,9 @@ function tools_addfill_init() {
       '</form>'+
     '</li>'
   // colors
-  jobhandler.loopItems(function(item, idx){
-    select_html += '<li id="addfill_'+idx+'" style="background-color:'+item.color+';"">'+
-    '<a href="#" class="addfill_color" style="color:'+item.color+'">'+
+  jobhandler.loopItems(function(path, idx){
+    select_html += '<li id="addfill_'+idx+'" style="background-color:'+path.color+';"">'+
+    '<a href="#" class="addfill_color" style="color:'+path.color+'">'+
     '<span class="label label-default kindmem">path</span>'
     '<span style="display:none" class="idxmem">'+idx+'</span></a></li>'
   }, "path")
