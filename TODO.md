@@ -35,12 +35,11 @@
 bugs
 ----
 - move when no machine does not recover, false feedback
-
+- stall between certain x-axis jogs
+  - send a pierce command in between
 
 beauty bugs
 -----------
-- stall between certain x-axis jogs
-  - send a pierce command in between
 - dba files: optimize should maybe split up into simplified and sorted
 
 optimizations
