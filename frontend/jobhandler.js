@@ -465,10 +465,10 @@ jobhandler = {
 
 
   bboxExpand : function(bbox, x, y) {
-    if (x < bbox[0]) {bbox[0] = x;}
-    else if (x > bbox[2]) {bbox[2] = x;}
-    if (y < bbox[1]) {bbox[1] = y;}
-    else if (y > bbox[3]) {bbox[3] = y;}
+    if (x < bbox[0]) {bbox[0] = x}
+    else if (x > bbox[2]) {bbox[2] = x}
+    if (y < bbox[1]) {bbox[1] = y}
+    else if (y > bbox[3]) {bbox[3] = y}
   },
 
 
@@ -487,53 +487,54 @@ jobhandler = {
     var d2 = 0
     var length_limit = app_config_main.max_segment_length
     var length_limit2 = length_limit*length_limit
-
+    // lerp helper function
     var lerp = function(x0, y0, x1, y1, t) {
       return [x0*(1-t)+x1*t, y0*(1-t)+y1*t]
     }
-
-    var paths = this.vector.paths
-    for (var k=0; k<paths.length; k++) {
-      var path = paths[k]
-      if (path.length > 1) {
-        var new_path = []
-        var copy_from = 0
-        var x = path[0][0]
-        var y = path[0][1]
-        // ignore seek lines for now
-        x_prev = x
-        y_prev = y
-        for (vertex=1; vertex<path.length; vertex++) {
-          var x = path[vertex][0]
-          var y = path[vertex][1]
-          d2 = (x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev)
-          // check length for each feed line
-          if (d2 > length_limit2) {
-            // copy previous verts
-            for (var n=copy_from; n<vertex; n++) {
-              new_path.push(path[n])
-            }
-            // add lerp verts
-            var t_step = 1/(Math.sqrt(d2)/length_limit)
-            for(var t=t_step; t<0.99; t+=t_step) {
-              new_path.push(lerp(x_prev, y_prev, x, y, t))
-            }
-            copy_from = vertex
-          }
+    // loop through defs
+    for (var i = 0; i < this.defs.length; i++) {
+      var def = this.defs[i]
+      if (def.kind == "path" || def.kind == "fill") {
+        var path = def.data
+        if (path.length > 1) {
+          var new_path = []
+          var copy_from = 0
+          var x = path[0][0]
+          var y = path[0][1]
+          // ignore seek lines for now
           x_prev = x
           y_prev = y
-        }
-        if (new_path.length > 0) {
-          // add any rest verts from path
-          for (var p=copy_from; p<path.length; p++) {
-            new_path.push(path[p])
+          for (vertex=1; vertex<path.length; vertex++) {
+            var x = path[vertex][0]
+            var y = path[vertex][1]
+            d2 = (x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev)
+            // check length for each feed line
+            if (d2 > length_limit2) {
+              // copy previous verts
+              for (var n=copy_from; n<vertex; n++) {
+                new_path.push(path[n])
+              }
+              // add lerp verts
+              var t_step = 1/(Math.sqrt(d2)/length_limit)
+              for(var t=t_step; t<0.99; t+=t_step) {
+                new_path.push(lerp(x_prev, y_prev, x, y, t))
+              }
+              copy_from = vertex
+            }
+            x_prev = x
+            y_prev = y
           }
-          copy_from = 0
-          paths[k] = new_path
+          if (new_path.length > 0) {
+            // add any rest verts from path
+            for (var p=copy_from; p<path.length; p++) {
+              new_path.push(path[p])
+            }
+            copy_from = 0
+            paths[k] = new_path
+          }
         }
       }
     }
-
   },
 
 
