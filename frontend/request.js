@@ -85,27 +85,23 @@ function request_post(args) {
 
 
 function request_boundary(bounds, seekrate) {
-  // Args:
-  //     bounds: [x1, y1, x2, y2]
-  //     seekrate:
   var job = {
-    "vector":{
-      "passes":[
-        {
-          "paths":[0],
-          "seekrate":seekrate,
-          "feedrate":seekrate,
-          "air_assist": "off"
-        }
-      ],
-      "paths":[[[
-          [bounds[0],bounds[1],0],
-          [bounds[2],bounds[1],0],
-          [bounds[2],bounds[3],0],
-          [bounds[0],bounds[3],0],
-          [bounds[0],bounds[1],0]
-        ]]]
-    }
+    "passes":[
+      {
+        "items":[0],
+        "seekrate":seekrate,
+        "feedrate":seekrate,
+        "air_assist":"off"
+      }
+    ],
+    "items":["def":0],
+    "defs":[{"kind":"path", "data":[[
+        [bounds[0],bounds[1],0],
+        [bounds[2],bounds[1],0],
+        [bounds[2],bounds[3],0],
+        [bounds[0],bounds[3],0],
+        [bounds[0],bounds[1],0]
+      ]]}],
   }
   request_post({
     url:'/run',
@@ -119,22 +115,17 @@ function request_boundary(bounds, seekrate) {
 
 function request_relative_move(x, y, z, seekrate, success_msg) {
   var job = {
-    "vector":{
-      "passes":[
-        {
-          "paths":[0],
-          "relative":true,
-          "seekrate":seekrate,
-          "air_assist":"off"
-        }
-      ],
-      "paths":[
-        [
-          [[x,y,z]]
-        ]
-      ],
-      "noreturn": true
-    }
+    "head":{"noreturn":true},
+    "passes":[
+      {
+        "items":[0],
+        "relative":true,
+        "seekrate":seekrate,
+        "air_assist":"off"
+      }
+    ],
+    "items":["def":0],
+    "defs":[{"kind":"path", "data":[[[x,y,z]]]}],
   }
   request_post({
     url:'/run',
@@ -148,21 +139,16 @@ function request_relative_move(x, y, z, seekrate, success_msg) {
 
 function request_absolute_move(x, y, z, seekrate, success_msg) {
   var job = {
-    "vector":{
-      "passes":[
-        {
-          "paths":[0],
-          "seekrate":seekrate,
-          "air_assist":"off"
-        }
-      ],
-      "paths":[
-        [
-          [[x,y,z]]
-        ]
-      ],
-      "noreturn": true
-    }
+    "head":{"noreturn":true},
+    "passes":[
+      {
+        "items":[0],
+        "seekrate":seekrate,
+        "air_assist":"off"
+      }
+    ],
+    "items":["def":0],
+    "defs":[{"kind":"path", "data":[[[x,y,z]]]}],
   }
   request_post({
     url:'/run',
@@ -183,17 +169,16 @@ function request_path_job(path, seekrate, feedrate, air_assist, success_msg) {
   //     feedrate:
   //     air_assist: one of "feed", "pass", "off"
   var job = {
-    "vector":{
-      "passes":[
-        {
-          "paths":[0],
-          "seekrate":seekrate,
-          "feedrate":feedrate,
-          "air_assist": air_assist
-        }
-      ],
-      "paths":[path]
-    }
+    "passes":[
+      {
+        "items":[0],
+        "seekrate":seekrate,
+        "feedrate":feedrate,
+        "air_assist":air_assist
+      }
+    ],
+    "items":["def":0],
+    "defs":[{"kind":"path", "data":path,
   }
   // json stringify while limiting numbers to 3 decimals
   var json_job = JSON.stringify(job,

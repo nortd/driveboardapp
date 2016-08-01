@@ -127,20 +127,6 @@ function controls_ready() {
   $("#run_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#run_btn").click(function(e){
     jobhandler.passes = passes_get_active()
-
-
-    // HACK in default pass
-    if ('images' in jobhandler.raster) {
-      jobhandler.raster.passes = [{
-        "images": [0],
-        "seekrate": 6000,
-        "feedrate": 6000,
-        "intensity": 100,
-        "air_assist": "pass",
-        "aux1_assist": "off"
-      }]
-    }
-
     // check for job
     if (jobhandler.isEmpty()) {
       $().uxmessage('notice', "Cannot run. No job loaded.")
@@ -151,12 +137,10 @@ function controls_ready() {
       $().uxmessage('notice', "No passes assigned to this job.")
       return false
     }
-
     // button feedback
     app_run_btn.start()
     $('#boundary_btn').prop('disabled', true)
     status_cache.ready = true  // prevent ready update
-
     // save job to queue, in-place
     var load_request = {
       'job':jobhandler.getJson(),

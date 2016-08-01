@@ -28,6 +28,7 @@
 }
 
 
+- passe.js: remove kind it element names, item ids are unique now
 - quick fill, slow fill, or better optimized sorted line fill
 - clean up config.py, rename raster_size
 

@@ -50,7 +50,7 @@ conf = {
     'max_segment_length': 5.0,
 
 
-    'raster_size': 0.4,                 # size (mm) of beam for rastering
+    'pxsize': 0.4,                 # size (mm) of beam for rastering
     'raster_offset': 40,
     'raster_feedrate': 3000,
     'raster_intensity': 20,

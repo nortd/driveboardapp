@@ -906,222 +906,185 @@ def job(jobdict):
     ###########################################################################
     """
 
-    if not jobdict.has_key('raster') and not jobdict.has_key('vector'):
+    if not 'defs' in jobdict or not 'items' in jobdict:
         print "ERROR: invalid job"
+        return
+
+    if not 'passes' in jobdict:
+        print "NOTICE: no passes defined"
         return
 
     # reset vavles
     air_off()
     aux1_off()
 
-    ### rasters
-    if jobdict.has_key('raster'):
-        if jobdict['raster'].has_key('passes') and jobdict['raster'].has_key('images'):
-            passes = jobdict['raster']['passes']
-            images = jobdict['raster']['images']
-            if 'rasterpxsize' in jobdict['raster']:
-                rasterpxsize = float(jobdict['raster']['rasterpxsize'])
-            else:
-                rasterpxsize = float(conf['raster_size'])
-            rasterpxsize = max(rasterpxsize, 0.01)  # prevent div by 0
-            for pass_ in passes:
-                intensity(0.0)
-                rasterpxsize_4 = rasterpxsize/4.0  # use 4x horiz resol.
-                pixelwidth(rasterpxsize_4)
-                # assists on, beginning of pass if set to 'pass'
-                if 'air_assist' in pass_:
-                    if pass_['air_assist'] == 'pass':
-                        air_on()
+    # loop passes
+    for pass_ in jobdict.passes:
+        if 'pxsize' in pass_:
+            pxsize = float(pass_['pxsize'])
+        else:
+            pxsize = float(conf['pxsize'])
+        pxsize = max(pxsize, 0.01)  # prevent div by 0
+        intensity(0.0)
+        pxsize_4 = pxsize/4.0  # use 4x horiz resol.
+        pixelwidth(pxsize_4)
+        # assists on, beginning of pass if set to 'pass'
+        if 'air_assist' in pass_:
+            if pass_['air_assist'] == 'pass':
+                air_on()
+        else:
+            air_on()    # also default this behavior
+        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
+            aux1_on()
+        # seekrate
+        if 'seekrate' in pass_:
+            seekrate = pass_['seekrate']
+        else:
+            seekrate = conf['seekrate']
+        # feedrate
+        if 'feedrate' in pass_:
+            feedrate_ = pass_['feedrate']
+        else:
+            feedrate_ = conf['feedrate']
+        # intensity
+        if 'intensity' in pass_:
+            intensity_ = pass_['intensity']
+        else:
+            intensity_ = 0.0
+        # set absolute/relative
+        if 'relative' not in pass_ or not pass_['relative']:
+            absolute()
+        else:
+            relative()
+        # loop pass' items
+        for itemidx in pass_.items:
+            item = jobdict['items'][itemidx]
+            def_ = jobdict['defs'][item['def']]
+            kind = def_.kind
+            if kind == "image":
+                pos = def_["pos"]
+                size = def_["size"]
+                data = def_["data"]  # in base64, format: jpg, png, gif
+                px_w = int(size[0]/pxsize_4)
+                px_h = int(size[1]/pxsize)
+                # create image obj, convert to grayscale, scale, loop through lines
+                print "--- start of image processing ---"
+                import Image
+                imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
+                imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                if imgobj.mode == 'RGBA':
+                    imgbg = Image.new('RGBA', imgobj.size, (255, 255, 255))
+                    imgbg.paste(imgobj, imgobj)
+                    imgobj = imgbg.convert("L")
                 else:
-                    air_on()    # also default this behavior
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
+                    imgobj = imgobj.convert("L")
+                print "---- end of image processing ----"
+                # imgobj.show()
+                posx = pos[0]
+                posy = pos[1]
+                # calc leadin/out
+                leadinpos = posx - conf['raster_leadin']
+                if leadinpos < 0:
+                    print "WARN: not enough leadin space"
+                    leadinpos = 0
+                leadoutpos = posx + size[0] + conf['raster_leadin']
+                if leadoutpos > conf['workspace'][0]:
+                    print "WARN: not enough leadout space"
+                    leadoutpos = conf['workspace'][0]
+                # assists on, beginning of feed if set to 'feed'
+                if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
+                    air_on()
+                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
                     aux1_on()
-                # seekrate
-                if 'seekrate' in pass_:
-                    seekrate = pass_['seekrate']
-                else:
-                    seekrate = conf['seekrate']
-                # feedrate
-                if 'feedrate' in pass_:
-                    feedrate_ = pass_['feedrate']
-                else:
-                    feedrate_ = conf['feedrate']
-                # intensity
-                if 'intensity' in pass_:
-                    intensity_ = pass_['intensity']
-                else:
-                    intensity_ = 0.0
-                # absolute positioning mode
-                absolute()
-                # loop through all images of this pass
-                for img_index in pass_['images']:
-                    if img_index < len(images):
-                        img = images[img_index]
-                        pos = img["pos"]
-                        size = img["size"]
-                        data = img["data"]  # in base64, format: jpg, png, gif
-                        px_w = int(size[0]/rasterpxsize_4)
-                        px_h = int(size[1]/rasterpxsize)
-                        # create image obj, convert to grayscale, scale, loop through lines
-                        print "--- start of image processing ---"
-                        import Image
-                        imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
-                        imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
-                        if imgobj.mode == 'RGBA':
-                            imgbg = Image.new('RGBA', imgobj.size, (255, 255, 255))
-                            imgbg.paste(imgobj, imgobj)
-                            imgobj = imgbg.convert("L")
+                ### go through image lines ####
+                pxarray = imgobj.getdata()
+                # if len(pxarray) % size[0] != 0:
+                #     print "ERROR: img length not divisable by width"
+                start = end = 0
+                line_y = posy + 0.5*pxsize
+                posleft = posx + 0.5*pxsize
+                posright = posx + size[0] - 0.5*pxsize
+                # print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
+                # print "px: |%s|  raster_size:%s" % (px_w, pxsize)
+                # print len(pxarray)
+                # print (px_w*px_h)
+                line_count = int(size[1]/pxsize)
+                for l in xrange(line_count):
+                    end += px_w
+                    # move to start of line
+                    feedrate(seekrate)
+                    move(leadinpos, line_y)
+                    # lead-in
+                    feedrate(feedrate_)
+                    move(posleft, line_y)
+                    # raster move
+                    intensity(intensity_)
+                    rastermove(posright, line_y)
+                    # lead-out
+                    intensity(0.0)
+                    move(leadoutpos, line_y)
+                    # stream raster data for previous rastermove
+                    rasterdata(pxarray, start, end)
+                    # prime for next line
+                    start = end
+                    line_y += pxsize
+                    move(leadoutpos, line_y)
+                # assists off, end of feed if set to 'feed'
+                if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
+                    air_off()
+                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
+                    aux1_off()
+
+            elif kind == "fill" or kind == "path":
+                path = def_.data
+                for polyline in path:
+                    if len(polyline) > 0:
+                        # first vertex -> seek
+                        feedrate(seekrate)
+                        intensity(0.0)
+                        is_2d = len(polyline[0]) == 2
+                        if is_2d:
+                            move(polyline[0][0], polyline[0][1])
                         else:
-                            imgobj = imgobj.convert("L")
-                        print "---- end of image processing ----"
-                        # imgobj.show()
-                        posx = pos[0]
-                        posy = pos[1]
-                        # calc leadin/out
-                        leadinpos = posx - conf['raster_leadin']
-                        if leadinpos < 0:
-                            print "WARN: not enough leadin space"
-                            leadinpos = 0
-                        leadoutpos = posx + size[0] + conf['raster_leadin']
-                        if leadoutpos > conf['workspace'][0]:
-                            print "WARN: not enough leadout space"
-                            leadoutpos = conf['workspace'][0]
-                        # assists on, beginning of feed if set to 'feed'
-                        if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
-                            air_on()
-                        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                            aux1_on()
-                        ### go through image lines ####
-                        pxarray = imgobj.getdata()
-                        # if len(pxarray) % size[0] != 0:
-                        #     print "ERROR: img length not divisable by width"
-                        start = end = 0
-                        line_y = posy + 0.5*rasterpxsize
-                        posleft = posx + 0.5*rasterpxsize
-                        posright = posx + size[0] - 0.5*rasterpxsize
-                        # print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
-                        # print "px: |%s|  raster_size:%s" % (px_w, rasterpxsize)
-                        # print len(pxarray)
-                        # print (px_w*px_h)
-                        line_count = int(size[1]/rasterpxsize)
-                        for l in xrange(line_count):
-                            end += px_w
-                            # move to start of line
-                            feedrate(seekrate)
-                            move(leadinpos, line_y)
-                            # lead-in
+                            move(polyline[0][0], polyline[0][1], polyline[0][2])
+                        # remaining verteces -> feed
+                        if len(polyline) > 1:
                             feedrate(feedrate_)
-                            move(posleft, line_y)
-                            # raster move
                             intensity(intensity_)
-                            rastermove(posright, line_y)
-                            # lead-out
-                            intensity(0.0)
-                            move(leadoutpos, line_y)
-                            # stream raster data for previous rastermove
-                            rasterdata(pxarray, start, end)
-                            # prime for next line
-                            start = end
-                            line_y += rasterpxsize
-                            move(leadoutpos, line_y)
-                        # assists off, end of feed if set to 'feed'
-                        if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
-                            air_off()
-                        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                            aux1_off()
+                            # turn on assists if set to 'feed'
+                            # also air_assist defaults to 'feed'
+                            if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
+                                air_on()
+                            if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
+                                aux1_on()
+                            # TODO dwell according to pierce time
+                            if is_2d:
+                                for i in xrange(1, len(polyline)):
+                                    move(polyline[i][0], polyline[i][1])
+                            else:
+                                for i in xrange(1, len(polyline)):
+                                    move(polyline[i][0], polyline[i][1], polyline[i][2])
+                            # turn off assists if set to 'feed'
+                            if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
+                                air_off()
+                            if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
+                                aux1_off()
 
-                # assists off, end of pass if set to 'pass'
-                if 'air_assist' in pass_:
-                    if pass_['air_assist'] == 'pass':
-                        air_off()
-                else:
-                    air_off()  # also default this behavior
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-                    aux1_off()
-
-    ### vectors
-    if jobdict.has_key('vector'):
-        if jobdict['vector'].has_key('passes') and jobdict['vector'].has_key('paths'):
-            passes = jobdict['vector']['passes']
-            paths = jobdict['vector']['paths']
-            for pass_ in passes:
-                # turn on assists if set to 'pass'
-                if 'air_assist' in pass_:
-                    if pass_['air_assist'] == 'pass':
-                        air_on()
-                else:
-                    air_on()    # also default this behavior
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-                    aux1_on()
-                # set absolute/relative
-                if 'relative' not in pass_ or not pass_['relative']:
-                    absolute()
-                else:
-                    relative()
-                # seekrate
-                if 'seekrate' in pass_:
-                    seekrate = pass_['seekrate']
-                else:
-                    seekrate = conf['seekrate']
-                # feedrate
-                if 'feedrate' in pass_:
-                    feedrate_ = pass_['feedrate']
-                else:
-                    feedrate_ = conf['feedrate']
-                # intensity
-                if 'intensity' in pass_:
-                    intensity_ = pass_['intensity']
-                else:
-                    intensity_ = 0.0
-                # loop through all paths of this pass
-                for path_index in pass_['paths']:
-                    if path_index < len(paths):
-                        path = paths[path_index]
-                        for polyline in path:
-                            if len(polyline) > 0:
-                                # first vertex -> seek
-                                feedrate(seekrate)
-                                intensity(0.0)
-                                is_2d = len(polyline[0]) == 2
-                                if is_2d:
-                                    move(polyline[0][0], polyline[0][1])
-                                else:
-                                    move(polyline[0][0], polyline[0][1], polyline[0][2])
-                                # remaining verteces -> feed
-                                if len(polyline) > 1:
-                                    feedrate(feedrate_)
-                                    intensity(intensity_)
-                                    # turn on assists if set to 'feed'
-                                    # also air_assist defaults to 'feed'
-                                    if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
-                                        air_on()
-                                    if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                                        aux1_on()
-                                    # TODO dwell according to pierce time
-                                    if is_2d:
-                                        for i in xrange(1, len(polyline)):
-                                            move(polyline[i][0], polyline[i][1])
-                                    else:
-                                        for i in xrange(1, len(polyline)):
-                                            move(polyline[i][0], polyline[i][1], polyline[i][2])
-                                    # turn off assists if set to 'feed'
-                                    if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
-                                        air_off()
-                                    if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                                        aux1_off()
-                # turn off assists if set to 'pass'
-                if 'air_assist' in pass_:
-                    if pass_['air_assist'] == 'pass':
-                        air_off()
-                else:
-                    air_off()  # also default this behavior
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-                    aux1_off()
+        # assists off, end of pass if set to 'pass'
+        if 'air_assist' in pass_:
+            if pass_['air_assist'] == 'pass':
+                air_off()
+        else:
+            air_off()  # also default this behavior
+        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
+            aux1_off()
 
     # return to origin
     feedrate(conf['seekrate'])
     intensity(0.0)
-    if jobdict['vector'].has_key('noreturn') and jobdict['vector']['noreturn']:
+    if 'head' in jobdict and
+       'noreturn' in jobdict['head'] and
+       jobdict['head']['noreturn']:
         pass
     else:
         move(0, 0, 0)

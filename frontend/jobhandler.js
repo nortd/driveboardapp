@@ -9,7 +9,7 @@
 //       },
 //      "passes": [
 //          {
-//              "items": [0],          # paths by index
+//              "items": [0],          # item by index
 //              "relative": True,      # optional, default: False
 //              "seekrate": 6000,      # optional, rate to first vertex
 //              "feedrate": 2000,      # optional, rate to other vertices
@@ -398,7 +398,7 @@ jobhandler = {
       var right = img.pos[0]+width
       var top = img.pos[1]
       var bottom = img.pos[1]+height
-      var line_count = Math.floor(height/app_config_main.raster_size)
+      var line_count = Math.floor(height/app_config_main.pxsize)
       var image_length = width * line_count
       var image_bbox = [left, top, right, bottom]
       this.stats.items[i] = {'bbox':image_bbox, 'len':image_length}
