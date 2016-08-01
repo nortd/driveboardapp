@@ -127,7 +127,7 @@ jobhandler = {
       }
     } else {
       for (var i = 0; i < this.items.length; i++) {
-        if (this.defs[this.items[i].def].kind == kind) {
+        if (kind.indexOf(this.defs[this.items[i].def].kind) != -1) {
           func(this.items[i], i)
         }
       }
@@ -380,143 +380,86 @@ jobhandler = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   // stats //////////////////////////////////////
 
   calculateStats : function() {
-    // calculate bounding boxes and path lengths
-    // for each path, image, and also for '_all_'
-    // bbox and length only account for feed lines
+    // calculate bounding boxes and feed lengths for each item
     // saves results in this.stats like so:
-    // {'_all_':{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral},
-    //  'paths':[{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral}, ...],
-    //  'images':[{'bbox':[xmin,ymin,xmax,ymax], 'length':numeral}, ...] }
+    // {'all':{'bbox':[xmin,ymin,xmax,ymax], 'len':numeral},
+    //  'items':[{'bbox':[xmin,ymin,xmax,ymax], 'len':numeral}, ...],}
     var length_all = 0
     var bbox_all = [Infinity, Infinity, -Infinity, -Infinity]
-    // paths
-    if ('paths' in this.vector) {
-      this.stats.paths = []
-      for (var k=0; k<this.vector.paths.length; k++) {
-        var path = this.vector.paths[k]
-        var path_length = 0
-        var path_bbox = [Infinity, Infinity, -Infinity, -Infinity]
-        for (var poly = 0; poly < path.length; poly++) {
-          var polyline = path[poly]
-          var x_prev = 0
-          var y_prev = 0
-          if (polyline.length > 1) {
-            var x = polyline[0][0]
-            var y = polyline[0][1]
+    // images
+    this.loopItems(function(img, i){
+      var img = this.raster.images[k]
+      var width = img.size[0]
+      var height = img.size[1]
+      var left = img.pos[0]
+      var right = img.pos[0]+width
+      var top = img.pos[1]
+      var bottom = img.pos[1]+height
+      var line_count = Math.floor(height/app_config_main.raster_size)
+      var image_length = width * line_count
+      var image_bbox = [left, top, right, bottom]
+      this.stats.items[i] = {'bbox':image_bbox, 'len':image_length}
+      length_all += image_length
+      this.bboxExpand2(bbox_all, image_bbox)
+    }, "image")
+    // paths and fills
+    this.loopItems(function(vectoritem, i){
+      var path_length = 0
+      var path_bbox = [Infinity, Infinity, -Infinity, -Infinity]
+      for (var poly = 0; poly < vectoritem.length; poly++) {
+        var polyline = vectoritem[poly]
+        var x_prev = 0
+        var y_prev = 0
+        if (polyline.length > 1) {
+          var x = polyline[0][0]
+          var y = polyline[0][1]
+          this.bboxExpand(path_bbox, x, y)
+          x_prev = x
+          y_prev = y
+          for (vertex=1; vertex<polyline.length; vertex++) {
+            var x = polyline[vertex][0]
+            var y = polyline[vertex][1]
+            path_length +=
+              Math.sqrt((x-x_prev)*(x-x_prev)+(y-y_prev)*(y-y_prev))
             this.bboxExpand(path_bbox, x, y)
             x_prev = x
             y_prev = y
-            for (vertex=1; vertex<polyline.length; vertex++) {
-              var x = polyline[vertex][0]
-              var y = polyline[vertex][1]
-              path_length +=
-                Math.sqrt((x-x_prev)*(x-x_prev)+(y-y_prev)*(y-y_prev))
-              this.bboxExpand(path_bbox, x, y)
-              x_prev = x
-              y_prev = y
-            }
           }
         }
-        this.stats.paths.push({'bbox':path_bbox, 'length':path_length})
-        length_all += path_length
-        this.bboxExpand(bbox_all, path_bbox[0], path_bbox[1])
-        this.bboxExpand(bbox_all, path_bbox[2], path_bbox[3])
       }
-    }
-    // images
-    if ('images' in this.raster) {
-      this.stats.images = []
-      for (var k=0; k<this.raster.images.length; k++) {
-        var img = this.raster.images[k]
-        var width = img.size[0]
-        var height = img.size[1]
-        var left = img.pos[0]
-        var right = img.pos[0]+width
-        var top = img.pos[1]
-        var bottom = img.pos[1]+height
-        var line_count = Math.floor(height/app_config_main.raster_size)
-        var image_length = width * line_count
-        var image_bbox = [left, top, right, bottom]
-        this.stats.images.push({'bbox':image_bbox, 'length':image_length})
-        length_all += image_length
-        this.bboxExpand2(bbox_all, image_bbox)
-      }
-    }
+      this.stats.items[i] = {'bbox':path_bbox, 'len':path_length}
+      length_all += path_length
+      this.bboxExpand(bbox_all, path_bbox[0], path_bbox[1])
+      this.bboxExpand(bbox_all, path_bbox[2], path_bbox[3])
+    }, "path fill")
     // store in object var
-    this.stats['_all_'] = {
-      'bbox':bbox_all,
-      'length':length_all
-    }
+    this.stats['all'] = {'bbox':bbox_all, 'len':length_all}
   },
 
 
   getActivePassesLength : function() {
     var length = 0
-    // vector
-    var vectorpasses = this.getVectorPasses()
-    for (var i = 0; i < vectorpasses.length; i++) {
-      var pass = vectorpasses[i]
-      for (var j = 0; j < pass.paths.length; j++) {
-        var path_idx = pass.paths[j]
-        if (path_idx >= 0 && path_idx < this.stats.paths.length) {
-          length += this.stats.paths[path_idx].length
-        }
+    this.loopPasses(function(pass, item_idxs){
+      for (var i = 0; i < item_idxs.length; i++) {
+        var item = item_idxs[i]
+        length += this.stats.items[item_idxs[i]].len
       }
-    }
-    // raster
-    var imagepasses = this.getImagePasses()
-    for (var i = 0; i < imagepasses.length; i++) {
-      var pass = imagepasses[i]
-      for (var j = 0; j < pass.images.length; j++) {
-        var image_idx = pass.images[j]
-        if (image_idx >= 0 && image_idx < this.stats.images.length) {
-          length += this.stats.images[image_idx].length
-        }
-      }
-    }
+    })
     return length
   },
 
 
   getActivePassesBbox : function() {
     var bbox = [Infinity, Infinity, -Infinity, -Infinity]
-    // vector
-    var vectorpasses = this.getVectorPasses()
-    for (var i = 0; i < vectorpasses.length; i++) {
-      var pass = vectorpasses[i]
-      for (var j = 0; j < pass.paths.length; j++) {
-        var path_idx = pass.paths[j]
-        if (path_idx >= 0 && path_idx < this.stats.paths.length) {
-          this.bboxExpand2(bbox, this.stats.paths[path_idx].bbox)
-        }
+    this.loopPasses(function(pass, item_idxs){
+      for (var i = 0; i < item_idxs.length; i++) {
+        var item = item_idxs[i]
+        this.bboxExpand2(bbox, this.stats.items[item_idxs[i]].bbox)
       }
-    }
-    // raster
-    var imagepasses = this.getImagePasses()
-    for (var i = 0; i < imagepasses.length; i++) {
-      var pass = imagepasses[i]
-      for (var j = 0; j < pass.images.length; j++) {
-        var image_idx = pass.images[j]
-        if (image_idx >= 0 && image_idx < this.stats.images.length) {
-          this.bboxExpand2(bbox, this.stats.images[image_idx].bbox)
-        }
-      }
-    }
+    })
     return bbox
   },
 
@@ -539,54 +482,54 @@ jobhandler = {
 
   segmentizeLongLines : function() {
     // TODO: make this also work 3D
-    var x_prev = 0;
-    var y_prev = 0;
-    var d2 = 0;
-    var length_limit = app_config_main.max_segment_length;
-    var length_limit2 = length_limit*length_limit;
+    var x_prev = 0
+    var y_prev = 0
+    var d2 = 0
+    var length_limit = app_config_main.max_segment_length
+    var length_limit2 = length_limit*length_limit
 
     var lerp = function(x0, y0, x1, y1, t) {
-      return [x0*(1-t)+x1*t, y0*(1-t)+y1*t];
+      return [x0*(1-t)+x1*t, y0*(1-t)+y1*t]
     }
 
-    var paths = this.vector.paths;
+    var paths = this.vector.paths
     for (var k=0; k<paths.length; k++) {
-      var path = paths[k];
+      var path = paths[k]
       if (path.length > 1) {
-        var new_path = [];
-        var copy_from = 0;
-        var x = path[0][0];
-        var y = path[0][1];
+        var new_path = []
+        var copy_from = 0
+        var x = path[0][0]
+        var y = path[0][1]
         // ignore seek lines for now
-        x_prev = x;
-        y_prev = y;
+        x_prev = x
+        y_prev = y
         for (vertex=1; vertex<path.length; vertex++) {
-          var x = path[vertex][0];
-          var y = path[vertex][1];
-          d2 = (x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev);
+          var x = path[vertex][0]
+          var y = path[vertex][1]
+          d2 = (x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev)
           // check length for each feed line
           if (d2 > length_limit2) {
             // copy previous verts
             for (var n=copy_from; n<vertex; n++) {
-              new_path.push(path[n]);
+              new_path.push(path[n])
             }
             // add lerp verts
-            var t_step = 1/(Math.sqrt(d2)/length_limit);
+            var t_step = 1/(Math.sqrt(d2)/length_limit)
             for(var t=t_step; t<0.99; t+=t_step) {
-              new_path.push(lerp(x_prev, y_prev, x, y, t));
+              new_path.push(lerp(x_prev, y_prev, x, y, t))
             }
-            copy_from = vertex;
+            copy_from = vertex
           }
-          x_prev = x;
-          y_prev = y;
+          x_prev = x
+          y_prev = y
         }
         if (new_path.length > 0) {
           // add any rest verts from path
           for (var p=copy_from; p<path.length; p++) {
-            new_path.push(path[p]);
+            new_path.push(path[p])
           }
-          copy_from = 0;
-          paths[k] = new_path;
+          copy_from = 0
+          paths[k] = new_path
         }
       }
     }
