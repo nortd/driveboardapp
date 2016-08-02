@@ -54,14 +54,14 @@ function tools_addfill_init() {
   jobhandler.loopItems(function(path, idx){
     select_html += '<li id="addfill_'+idx+'" style="background-color:'+path.color+';"">'+
     '<a href="#" class="addfill_color" style="color:'+path.color+'">'+
-    '<span class="label label-default kindmem">path</span>'
+    '<span class="label label-default kindmem">path</span>'+
     '<span style="display:none" class="idxmem">'+idx+'</span></a></li>'
   }, "path")
   $('#addfill_colors').html(select_html)
 
   // bind all color add buttons within dropdown
   $('.addfill_color').click(function(e) {
-    var idx = $(this).children('span.idxmem').text()
+    var idx = parseFloat($(this).children('span.idxmem').text())
     $('#addfill_colors').dropdown("toggle")
     app_fill_btn.start()
     fills_add_by_item(idx, function() {

@@ -2,11 +2,11 @@
 
 
 function fills_add_by_item(idx, callback) {
-  if (this.defs[this.items[idx].def].kind != "path") {
+  if (jobhandler.defs[jobhandler.items[idx].def].kind != "path") {
     callback()
     return
   }
-  var path = jobhandler.items[idx]
+  var path = jobhandler.defs[jobhandler.items[idx].def].data
   var bounds = jobhandler.stats.items[idx].bbox
   var leadin = app_config_main.fill_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
@@ -87,9 +87,11 @@ function fills_add_by_item(idx, callback) {
     }
     // add to jobhandler
     jobhandler.defs.push({"kind":"fill", "data":fillpolylines})
-    jobhandler.items.push({"def":jobhandler.items.length-1,
+    jobhandler.items.push({"def":jobhandler.defs.length-1,
                            "color":newcolor, "pxsize":fillpxsize})
+    jobhandler.calculateStats()  // TODO: only caclulate fill
     // update pass widgets
+    jobhandler.passes = passes_get_active()
     passes_clear()
     passes_set_assignments()
     jobhandler.render()

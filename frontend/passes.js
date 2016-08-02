@@ -19,32 +19,29 @@ function passes_add(feedrate, intensity, items_assigned) {
       $(this).blur();
   })
 
-  console.log(items_assigned)
   // assign colors
   for (var i = 0; i < items_assigned.length; i++) {
     var idx = items_assigned[i]
-    var kind =
-    $('#passsel_'+num+'_'+idx+'_'+kind).hide()
-    $('#pass_'+num+'_'+idx+'_'+kind).show(300)
+    $('#passsel_'+num+'_'+idx).hide()
+    $('#pass_'+num+'_'+idx).show(300)
     passes_update_handler()
   }
 
   // assign image thumbs
   jobhandler.loopItems(function(image, idx){
     var img1 = jobhandler.getImageThumb(image, -100, 50)
-    $(img1).appendTo('#passsel_'+num+'_'+idx+'_image a')
+    $(img1).appendTo('#passsel_'+num+'_'+idx+' a')
     var img2 = jobhandler.getImageThumb(image, -100, 50)
-    $(img2).appendTo('#pass_'+num+'_'+idx+'_image .color_select_btn_'+num)
+    $(img2).appendTo('#pass_'+num+'_'+idx+' .color_select_btn_'+num)
   }, "image")
 
   // bind color assign button
   $('#assign_btn_'+num).click(function(e) {
     if (jobview_item_selected !== undefined) {
       var idx = jobview_item_selected[0]
-      var kind = jobview_item_selected[1]
-      $('#passsel_'+num+'_'+idx+'_'+kind).hide()
-      $('#pass_'+num+'_'+idx+'_'+kind).hide()
-      $('#pass_'+num+'_'+idx+'_'+kind).show(300)
+      $('#passsel_'+num+'_'+idx).hide()
+      $('#pass_'+num+'_'+idx).hide()
+      $('#pass_'+num+'_'+idx).show(300)
       passes_update_handler()
       return false
     } else {
@@ -55,9 +52,8 @@ function passes_add(feedrate, intensity, items_assigned) {
   // bind all color add buttons within dropdown
   $('.color_add_btn_'+num).click(function(e) {
     var idx = $(this).children('span.idxmem').text()
-    var kind = $(this).children('span.kindmem').text()
-    $('#passsel_'+num+'_'+idx+'_'+kind).hide()
-    $('#pass_'+num+'_'+idx+'_'+kind).show(300)
+    $('#passsel_'+num+'_'+idx).hide()
+    $('#pass_'+num+'_'+idx).show(300)
     $('#passdp_'+num).dropdown("toggle")
     passes_update_handler()
     return false
@@ -66,9 +62,8 @@ function passes_add(feedrate, intensity, items_assigned) {
   // bind all color remove buttons
   $('.color_remove_btn_'+num).click(function(e) {
     var idx = $(this).parent().find('span.idxmem').text()
-    var kind = $(this).parent().find('span.kindmem').text()
-    $('#passsel_'+num+'_'+idx+'_'+kind).show(0)
-    $('#pass_'+num+'_'+idx+'_'+kind).hide(300)
+    $('#passsel_'+num+'_'+idx).show(0)
+    $('#pass_'+num+'_'+idx).hide(300)
     passes_update_handler()
     return false
   })
@@ -76,8 +71,7 @@ function passes_add(feedrate, intensity, items_assigned) {
   // bind all color select buttons
   $('.color_select_btn_'+num).click(function(e) {
     var idx = $(this).parent().find('span.idxmem').text()
-    var kind = $(this).children('span.kindmem').text()
-    jobhandler.selectItem(idx, kind)
+    jobhandler.selectItem(idx)
     return false
   })
 
@@ -144,7 +138,7 @@ function passes_pass_html(num, feedrate, intensity) {
 
 function passes_select_html(num, idx, kind, color) {
   var html =
-  '<li id="passsel_'+num+'_'+idx+'_'+kind+'" style="background-color:'+color+'">'+
+  '<li id="passsel_'+num+'_'+idx+'" style="background-color:'+color+'">'+
   '<a href="#" class="color_add_btn_'+num+'" style="color:'+color+'">'+
   '<span class="label label-default kindmem">'+kind+'</span>'+
   '<span class="idxmem" style="display:none">'+idx+'</span></a></li>'
@@ -153,7 +147,7 @@ function passes_select_html(num, idx, kind, color) {
 
 function passes_added_html(num, idx, kind, color) {
   var html =
-  '<div id="pass_'+num+'_'+idx+'_'+kind+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
+  '<div id="pass_'+num+'_'+idx+'" class="btn-group pull-left" style="margin-top:0.5em; display:none">'+
     '<span style="display:none" class="idxmem">'+idx+'</span>'+
     '<button class="btn btn-default btn-sm color_select_btn_'+num+'" '+
       'type="submit" style="width:175px; background-color:'+color+'">'+
@@ -202,7 +196,7 @@ function passes_get_active() {
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
     var pass = {"items":[], "feedrate":feedrate, "intensity":intensity}
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
-      var idx = $(this).find('.idxmem').text()
+      var idx = parseFloat($(this).find('.idxmem').text())
       pass.items.push(idx)
     })
     if (pass.items.length) {

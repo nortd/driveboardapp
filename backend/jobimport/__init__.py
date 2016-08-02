@@ -30,8 +30,8 @@ def convert(job, optimize=True, tolerance=conf['tolerance']):
         if optimize:
             if 'defs' in job:
                 for def_ in job['defs']:
-                    if def_.kind == "path":
-                        pathoptimizer.optimize(def_.data, tolerance)
+                    if def_['kind'] == "path":
+                        pathoptimizer.optimize(def_['data'], tolerance)
                 if not 'head' in job:
                     job['head'] = {}
                 job['head']['optimized'] = tolerance

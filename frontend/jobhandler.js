@@ -93,6 +93,7 @@ jobhandler = {
   items : [],
   defs : [],
   stats : {},
+  itemidx2group : [],
   name : "",
   path_group : undefined,
   fill_group : undefined,
@@ -103,6 +104,7 @@ jobhandler = {
     this.items = []
     this.defs = []
     this.stats = {}
+    this.itemidx2group = []
     name = ""
     jobview_clear()
     passes_clear()
@@ -117,7 +119,7 @@ jobhandler = {
   },
 
   hasPasses : function() {
-    return (!this.passes)
+    return !!this.passes.length
   },
 
   loopItems : function(func, kind) {
@@ -158,6 +160,15 @@ jobhandler = {
     }
     // defs and items
     if (job.defs.length && job.items.length) {
+      // head
+      if ('head' in job) {
+        this.head = job.head
+      }
+      //passes
+      if ('passes' in job && job.passes.length) {
+        this.passes = job.passes
+      }
+      // items, defs
       this.defs = job.defs
       this.items = job.items
       if (optimize) {
@@ -202,9 +213,10 @@ jobhandler = {
     for (var i = 0; i < this.defs.length; i++) {
       var def = this.defs[i]
       if (def.kind == "image") {
-        defs_out.push({'pos':def.pos,
-                        'size':def.size,
-                        'data':def.data.src})
+        defs_out.push({'kind':"image",
+                       'pos':def.pos,
+                       'size':def.size,
+                       'data':def.data.src})
       } else {
         defs_out.push(def)
       }
@@ -218,7 +230,7 @@ jobhandler = {
     return JSON.stringify(this.get() ,function(key, val) {
         if (isNaN(+key)) return val
         return val.toFixed ? Number(val.toFixed(3)) : val
-      })
+      }, '\t')
   },
 
   getKind : function(item) {
@@ -277,8 +289,10 @@ jobhandler = {
     this.fill_group = new paper.Group()
     this.path_group = new paper.Group()
     // images
-    this.loopItems(function(img, i){
+    this.loopItems(function(image, i){
+      var img = jobhandler.defs[image.def]
       var group = new paper.Group()
+      jobhandler.itemidx2group[i] = group
       jobhandler.image_group.addChild(group)
       var pos_x = img.pos[0]*jobview_mm2px
       var pos_y = img.pos[1]*jobview_mm2px
@@ -291,16 +305,18 @@ jobhandler = {
     }, "image")
     // fills
     this.loopItems(function(fill, i){
-      add_path(fill, jobhandler.fill_group)
+      add_vector(fill, i, jobhandler.fill_group)
     }, "fill")
     // paths
     this.loopItems(function(path, i){
-      add_path(path, jobhandler.path_group)
+      add_vector(path, i, jobhandler.path_group)
     }, "path")
     // fills, paths helper function
-    function add_path(path, parent_group) {
+    function add_vector(item, i, parent_group) {
+      var path = jobhandler.defs[item.def].data
       jobview_feedLayer.activate()
       var group = new paper.Group()
+      jobhandler.itemidx2group[i] = group
       parent_group.addChild(group)
       for (var j=0; j<path.length; j++) {
         var pathseg = path[j]
@@ -317,7 +333,7 @@ jobhandler = {
           jobview_feedLayer.activate()
           var p_feed = new paper.Path()
           group.addChild(p_feed)
-          p_feed.strokeColor = path.color || '#000000'
+          p_feed.strokeColor = item.color || '#000000'
           p_feed.add([x,y])
           for (vertex=1; vertex<pathseg.length; vertex++) {
             x = pathseg[vertex][0]*jobview_mm2px
@@ -348,26 +364,16 @@ jobhandler = {
   },
 
 
-  selectItem : function(idx, kind) {
-    if (kind == "path") {
-      var pgroup = this.path_group
-    } else if ( kind == "fill") {
-      var pgroup = this.fill_group
-    } else if (kind == "image") {
-      var pgroup = this.image_group
-    }
-    if (idx < pgroup.children.length) {
-      var group = pgroup.children[idx]
-      group.selected = true
-      jobview_item_selected = [idx, kind]
-      setTimeout(function() {
-        group.selected = false
-        jobview_item_selected = undefined
-        paper.view.draw()
-      }, 1500);
-    } else {
-      pgroup.children[idx].selected = false
-    }
+  selectItem : function(idx) {
+    var kind = this.defs[this.items[idx].def].kind
+    var group = this.itemidx2group[idx]
+    group.selected = true
+    jobview_item_selected = [idx, kind]
+    setTimeout(function() {
+      group.selected = false
+      jobview_item_selected = undefined
+      paper.view.draw()
+    }, 1500);
     paper.view.draw()
   },
 
@@ -400,7 +406,8 @@ jobhandler = {
     var length_all = 0
     var bbox_all = [Infinity, Infinity, -Infinity, -Infinity]
     // images
-    this.loopItems(function(img, i){
+    this.loopItems(function(image, i){
+      var img = jobhandler.defs[image.def]
       var width = img.size[0]
       var height = img.size[1]
       var left = img.pos[0]
@@ -416,10 +423,11 @@ jobhandler = {
     }, "image")
     // paths and fills
     this.loopItems(function(vectoritem, i){
+      var path = jobhandler.defs[vectoritem.def].data
       var path_length = 0
       var path_bbox = [Infinity, Infinity, -Infinity, -Infinity]
-      for (var poly = 0; poly < vectoritem.length; poly++) {
-        var polyline = vectoritem[poly]
+      for (var poly = 0; poly < path.length; poly++) {
+        var polyline = path[poly]
         var x_prev = 0
         var y_prev = 0
         if (polyline.length > 1) {
@@ -466,7 +474,7 @@ jobhandler = {
     this.loopPasses(function(pass, item_idxs){
       for (var i = 0; i < item_idxs.length; i++) {
         var item = item_idxs[i]
-        this.bboxExpand2(bbox, jobhandler.stats.items[item_idxs[i]].bbox)
+        jobhandler.bboxExpand2(bbox, jobhandler.stats.items[item_idxs[i]].bbox)
       }
     })
     return bbox
