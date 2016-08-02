@@ -5,7 +5,7 @@ The format of a path segment is:
 [[x1,y1],[x2,y2],...]
 
 The format of path is:
-[pathseg1, pathseg2, ...] 
+[pathseg1, pathseg2, ...]
 
 This module is typically used by calling the 'optimize' function.
 It takes a list of paths and optimizes in-place.
@@ -129,7 +129,7 @@ def simplify(pathseg, tolerance2):
     Users of this code must verify correctness for their application.
     http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm
     """
-    
+
     n = len(pathseg)
     if n == 0:
         return []
@@ -171,7 +171,7 @@ def simplify_all(path, tolerance2):
         path[u] = simplify(path[u], tolerance2)
         optiverts += len(path[u])
     if totalverts > 0:
-        # report polyline optimizations    
+        # report polyline optimizations
         difflength = totalverts - optiverts
         diffpct = (100*difflength/totalverts)
         if diffpct > 10:  # if diff more than 10%
@@ -209,13 +209,9 @@ def sort_by_seektime(path, start=[0.0, 0.0]):
 
 
 
-def optimize(paths, tolerance):
+def optimize(path, tolerance):
     tolerance2 = tolerance**2
     epsilon2 = (0.1*tolerance)**2
-    for path in paths:
-        # print "PATH before optimize: %s" % len(path)
-        connect_segments(path, epsilon2)
-        simplify_all(path, tolerance2)
-        sort_by_seektime(path)
-        # print "PATH after optimize: %s" % len(path)
-
+    connect_segments(path, epsilon2)
+    simplify_all(path, tolerance2)
+    sort_by_seektime(path)

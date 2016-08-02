@@ -94,14 +94,15 @@ function request_boundary(bounds, seekrate) {
         "air_assist":"off"
       }
     ],
-    "items":["def":0],
-    "defs":[{"kind":"path", "data":[[
+    "items":[{"def":0}],
+    "defs":[
+        {"kind":"path", "data":[[
         [bounds[0],bounds[1],0],
         [bounds[2],bounds[1],0],
         [bounds[2],bounds[3],0],
         [bounds[0],bounds[3],0],
-        [bounds[0],bounds[1],0]
-      ]]}],
+        [bounds[0],bounds[1],0] ]]}
+      ],
   }
   request_post({
     url:'/run',
@@ -124,8 +125,8 @@ function request_relative_move(x, y, z, seekrate, success_msg) {
         "air_assist":"off"
       }
     ],
-    "items":["def":0],
-    "defs":[{"kind":"path", "data":[[[x,y,z]]]}],
+    "items":[{"def":0}],
+    "defs":[{"kind":"path", "data":[[[x,y,z]]] }],
   }
   request_post({
     url:'/run',
@@ -147,8 +148,8 @@ function request_absolute_move(x, y, z, seekrate, success_msg) {
         "air_assist":"off"
       }
     ],
-    "items":["def":0],
-    "defs":[{"kind":"path", "data":[[[x,y,z]]]}],
+    "items":[{"def":0}],
+    "defs":[{"kind":"path", "data":[[[x,y,z]]] }]
   }
   request_post({
     url:'/run',
@@ -177,8 +178,8 @@ function request_path_job(path, seekrate, feedrate, air_assist, success_msg) {
         "air_assist":air_assist
       }
     ],
-    "items":["def":0],
-    "defs":[{"kind":"path", "data":path,
+    "items":[{"def":0}],
+    "defs":[{"kind":"path", "data":path}]
   }
   // json stringify while limiting numbers to 3 decimals
   var json_job = JSON.stringify(job,

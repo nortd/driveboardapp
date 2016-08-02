@@ -274,7 +274,7 @@ function controls_ready() {
         return false
       }
       app_fill_btn.start()
-      fills_add_by_item(jobview_item_selected[0], jobview_item_selected[1],
+      fills_add_by_item(jobview_item_selected[0],
         function() {
           app_fill_btn.stop()
       })

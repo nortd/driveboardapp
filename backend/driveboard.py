@@ -1082,8 +1082,8 @@ def job(jobdict):
     # return to origin
     feedrate(conf['seekrate'])
     intensity(0.0)
-    if 'head' in jobdict and
-       'noreturn' in jobdict['head'] and
+    if 'head' in jobdict and \
+       'noreturn' in jobdict['head'] and \
        jobdict['head']['noreturn']:
         pass
     else:

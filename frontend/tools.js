@@ -64,7 +64,7 @@ function tools_addfill_init() {
     var idx = $(this).children('span.idxmem').text()
     $('#addfill_colors').dropdown("toggle")
     app_fill_btn.start()
-    fills_add_by_item(idx, "path", function() {
+    fills_add_by_item(idx, function() {
       app_fill_btn.stop()
     })
     return false

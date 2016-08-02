@@ -1,18 +1,17 @@
 
 
 
-function fills_add_by_item(idx, kind, callback) {
-  if (kind != "path") {
+function fills_add_by_item(idx, callback) {
+  if (this.defs[this.items[idx].def].kind != "path") {
     callback()
     return
   }
-  var color = jobhandler.vector.colors[idx]
-  var path = jobhandler.vector.paths[idx]
-  var bounds = jobhandler.stats.paths[idx].bbox
+  var path = jobhandler.items[idx]
+  var bounds = jobhandler.stats.items[idx].bbox
   var leadin = app_config_main.fill_leadin
   var min_x = Math.max(bounds[0]-leadin, 0)
   var max_x = Math.min(bounds[2]+leadin, app_config_main.workspace[0])
-  var line_delta = parseFloat($('#fillpxsize').val())
+  var fillpxsize = parseFloat($('#fillpxsize').val())
   var fillpolylines = []  // polylines aka path
   var lines = []
   // setup loop function
@@ -65,19 +64,15 @@ function fills_add_by_item(idx, kind, callback) {
       // fillpolylines.push([[max_x, y_i]])  // polyline of one
       fillpolylines.push([[max_x_opti, y_i]])  // polyline of one
     }
-    y+=line_delta
+    y+=fillpxsize
     setTimeout(loop_lines, 0)
   }
 
   function finalize() {
-    // add to jobhandler
-    jobhandler.vector.paths.push(fillpolylines)
-    if (!('fills' in jobhandler.vector)) {
-      jobhandler.vector.fills = []
-    }
-    jobhandler.vector.fills.push(jobhandler.vector.paths.length-1)
     // generate a new color shifted from the old
-    var fillcolor = new paper.Color(color)
+    var newcolor
+    var fillcolor = new paper.Color(path.color)
+    var jobcolors = jobhandler.getAllColors()
     while (true) {
       if (fillcolor.brightness > 0.5) {
         fillcolor.brightness -= 0.3+0.1*Math.random()
@@ -85,12 +80,15 @@ function fills_add_by_item(idx, kind, callback) {
         fillcolor.brightness += 0.3+0.1*Math.random()
       }
       fillcolor.hue += 10+5*Math.random()
-      var col = fillcolor.toCSS(true)
-      if (jobhandler.vector.colors.indexOf(col) == -1) {
-        jobhandler.vector.colors.push(col)
+      newcolor = fillcolor.toCSS(true)
+      if (jobcolors.indexOf(newcolor) == -1) {
         break
       }
     }
+    // add to jobhandler
+    jobhandler.defs.push({"kind":"fill", "data":fillpolylines})
+    jobhandler.items.push({"def":jobhandler.items.length-1,
+                           "color":newcolor, "pxsize":fillpxsize})
     // update pass widgets
     passes_clear()
     passes_set_assignments()

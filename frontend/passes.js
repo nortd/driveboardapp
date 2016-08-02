@@ -6,7 +6,6 @@ function passes_clear() {
 
 function passes_add(feedrate, intensity, items_assigned) {
   // multiple = typeof multiple !== 'undefined' ? multiple : 1  // default to 1
-  // var image =  jobhandler.raster.images[images_assigned[0]].data
   var num_passes_already = $('#job_passes').children('.pass_widget').length
   var num = num_passes_already + 1
   var html = passes_pass_html(num, feedrate, intensity)

@@ -28,14 +28,13 @@ def convert(job, optimize=True, tolerance=conf['tolerance']):
         if type(job) in (str, unicode):
             job = json.loads(job)
         if optimize:
-            # only optimize if requested
-            if 'vector' in job and 'paths' in job['vector']:
-                # only optimize if vector data
-                if 'optimized' not in job['vector']['paths']:
-                    # only optimize if not already optimized
-                    pathoptimizer.optimize(
-                        job['vector']['paths'], tolerance)
-                    job['vector']['optimized'] = tolerance
+            if 'defs' in job:
+                for def_ in job['defs']:
+                    if def_.kind == "path":
+                        pathoptimizer.optimize(def_.data, tolerance)
+                if not 'head' in job:
+                    job['head'] = {}
+                job['head']['optimized'] = tolerance
     elif type_ == 'svg':
         job = read_svg(job, conf['workspace'],
                        tolerance, optimize=optimize)
@@ -57,130 +56,128 @@ def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
 
     # create an dba job from res
     # TODO: reader should generate an dba job to begin with
-    job = {}
-    if 'boundarys' in res:
-        job['vector'] = {}
-        vec = job['vector']
-        if 'dpi' in res:
-            vec['dpi'] = res['dpi']
-        # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
-        colors = []
-        paths = []
-        for k,v in res['boundarys'].iteritems():
-            colors.append(k)
-            paths.append(v)
-        if optimize:
-            pathoptimizer.optimize(paths, tolerance)
-        vec['paths'] = paths
-        vec['colors'] = colors
-        if optimize:
-            vec['optimized'] = tolerance
-
-
+    job = {'head':{}, 'passes':[], 'items':[], 'defs':[]}
     if 'rasters' in res:
-        job['raster'] = {}
-        job['raster']['images'] = []
         for raster in res['rasters']:
-            # format: [(pos, size, data)]
-            job['raster']['images'].append(raster)
+            job['defs'].append({"kind":"image",
+                                "data":raster['data'] ,
+                                "pos":raster['pos'] ,
+                                "size": raster['size']})
+            job['items'].append({"def":len(job['defs'])-1})
 
-    if 'lasertags' in res:
-        # format: [('12', '2550', '', '100', '%', ':#fff000', ':#ababab', ':#ccc999', '', '', '')]
-        # sort lasertags by pass number
-        def _cmp(a, b):
-            if a[0] < b[0]: return -1
-            elif a[0] > b[0]: return 1
-            else: return 0
-        res['lasertags'].sort(_cmp)
-        # add tags ass passes
-        for tag in res['lasertags']:
-            if len(tag) == 11:
-                # raster pass
-                if tag[5] == '_raster_' and 'raster' in job \
-                        and 'images' in job['raster'] and job['raster']['images']:
-                    if not 'passes' in job['raster']:
-                        job['raster']['passes'] = []
-                    job['raster']['passes'].append({
-                        "images": [0],
-                        "feedrate": tag[1],
-                        "intensity": tag[3]
-                    })
-                    break  # currently ony supporting one raster pass
-                    # TODO: we should support more than one in the future
-                # vector passes
-                elif 'vector' in job and 'paths' in job['vector']:
-                    idxs = []
-                    for colidx in range(5,10):
-                        color = tag[colidx]
-                        i = 0
-                        for col in job['vector']['colors']:
-                            if col == color:
-                                idxs.append(i)
-                            i += 1
-                    if "passes" not in job["vector"]:
-                        job["vector"]["passes"] = []
-                    job["vector"]["passes"].append({
-                        "paths": idxs,
-                        "feedrate": tag[1],
-                        "intensity": tag[3]
-                    })
+    if 'boundarys' in res:
+        if 'dpi' in res:
+            job['head']['dpi'] = res['dpi']
+        for color,path in res['boundarys'].iteritems():
+            if optimize:
+                pathoptimizer.optimize(path, tolerance)
+            job['defs'].append({"kind":"path",
+                                "data":path})
+            job['items'].append({"def":len(job['defs'])-1, "color":color})
+        if optimize:
+            job['head']['optimized'] = tolerance
+
+    # if 'lasertags' in res:
+    #     # format: [('12', '2550', '', '100', '%', ':#fff000', ':#ababab', ':#ccc999', '', '', '')]
+    #     # sort lasertags by pass number
+    #     def _cmp(a, b):
+    #         if a[0] < b[0]: return -1
+    #         elif a[0] > b[0]: return 1
+    #         else: return 0
+    #     res['lasertags'].sort(_cmp)
+    #     # add tags ass passes
+    #     for tag in res['lasertags']:
+    #         if len(tag) == 11:
+    #             # raster pass
+    #             if tag[5] == '_raster_' and 'raster' in job \
+    #                     and 'images' in job['raster'] and job['raster']['images']:
+    #                 if not 'passes' in job['raster']:
+    #                     job['raster']['passes'] = []
+    #                 job['raster']['passes'].append({
+    #                     "images": [0],
+    #                     "feedrate": tag[1],
+    #                     "intensity": tag[3]
+    #                 })
+    #                 break  # currently ony supporting one raster pass
+    #                 # TODO: we should support more than one in the future
+    #             # vector passes
+    #             elif 'vector' in job and 'paths' in job['vector']:
+    #                 idxs = []
+    #                 for colidx in range(5,10):
+    #                     color = tag[colidx]
+    #                     i = 0
+    #                     for col in job['vector']['colors']:
+    #                         if col == color:
+    #                             idxs.append(i)
+    #                         i += 1
+    #                 if "passes" not in job["vector"]:
+    #                     job["vector"]["passes"] = []
+    #                 job["vector"]["passes"].append({
+    #                     "paths": idxs,
+    #                     "feedrate": tag[1],
+    #                     "intensity": tag[3]
+    #                 })
     return job
 
 
 def read_dxf(dxf_string, tolerance, optimize=True):
     """Read an dxf file string and convert to dba job."""
-    dxfReader = DXFReader(tolerance)
-    res = dxfReader.parse(dxf_string)
-    # # flip y-axis
-    # for color,paths in res['boundarys'].items():
-    # 	for path in paths:
-    # 		for vertex in path:
-    # 			vertex[1] = 610-vertex[1]
-
-    # create an dba job from res
-    # TODO: reader should generate an dba job to begin with
-    job = {}
-    if 'boundarys' in res:
-        job['vector'] = {}
-        vec = job['vector']
-        # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
-        # colors = []
-        paths = []
-        for k,v in res['boundarys']:
-            # colors.append(k)
-            paths.append(v)
-        if optimize:
-            pathoptimizer.optimize(paths, tolerance)
-        vec['paths'] = paths
-        # vec['colors'] = colors
-        if optimize:
-            vec['optimized'] = tolerance
-    return job
+    # dxfReader = DXFReader(tolerance)
+    # res = dxfReader.parse(dxf_string)
+    # # # flip y-axis
+    # # for color,paths in res['boundarys'].items():
+    # # 	for path in paths:
+    # # 		for vertex in path:
+    # # 			vertex[1] = 610-vertex[1]
+    #
+    # # create an dba job from res
+    # # TODO: reader should generate an dba job to begin with
+    # job = {}
+    # if 'boundarys' in res:
+    #     job['vector'] = {}
+    #     vec = job['vector']
+    #     # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
+    #     # colors = []
+    #     paths = []
+    #     for k,v in res['boundarys']:
+    #         # colors.append(k)
+    #         paths.append(v)
+    #     if optimize:
+    #         pathoptimizer.optimize(paths, tolerance)
+    #     vec['paths'] = paths
+    #     # vec['colors'] = colors
+    #     if optimize:
+    #         vec['optimized'] = tolerance
+    # return job
+    print "DXF reader not implemented"
+    return {}
 
 
 def read_ngc(ngc_string, tolerance, optimize=False):
     """Read an gcode file string and convert to dba job."""
-    ngcReader = NGCReader(tolerance)
-    res = ngcReader.parse(ngc_string)
-    # create an dba job from res
-    # TODO: reader should generate an dba job to begin with
-    job = {}
-    if 'boundarys' in res:
-        job['vector'] = {}
-        vec = job['vector']
-        # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
-        # colors = []
-        paths = []
-        for k,v in res['boundarys']:
-            # colors.append(k)
-            paths.append(v)
-        if optimize:
-            pathoptimizer.optimize(paths, tolerance)
-        vec['paths'] = paths
-        # vec['colors'] = colors
-        if optimize:
-            vec['optimized'] = tolerance
-    return job
+    # ngcReader = NGCReader(tolerance)
+    # res = ngcReader.parse(ngc_string)
+    # # create an dba job from res
+    # # TODO: reader should generate an dba job to begin with
+    # job = {}
+    # if 'boundarys' in res:
+    #     job['vector'] = {}
+    #     vec = job['vector']
+    #     # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
+    #     # colors = []
+    #     paths = []
+    #     for k,v in res['boundarys']:
+    #         # colors.append(k)
+    #         paths.append(v)
+    #     if optimize:
+    #         pathoptimizer.optimize(paths, tolerance)
+    #     vec['paths'] = paths
+    #     # vec['colors'] = colors
+    #     if optimize:
+    #         vec['optimized'] = tolerance
+    # return job
+    print "GCODE reader not implemented."
+    return {}
 
 
 def get_type(job):

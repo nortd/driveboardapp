@@ -28,7 +28,7 @@
 //        {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
 //        {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
 //     ],
-//     "stats":{}
+//     "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all"{}}
 // }
 
 // {
@@ -157,7 +157,7 @@ jobhandler = {
       job = JSON.parse(job)
     }
     // defs and items
-    if (job.defs.length && this.items.length) {
+    if (job.defs.length && job.items.length) {
       this.defs = job.defs
       this.items = job.items
       if (optimize) {
@@ -210,7 +210,7 @@ jobhandler = {
       }
     }
     return {'head':this.head, 'passes':this.passes,
-            'items':this.items, 'defs':defs_out 'stats':this.stat}
+            'items':this.items, 'defs':defs_out, 'stats':this.stat}
   },
 
   getJson : function() {
@@ -223,6 +223,16 @@ jobhandler = {
 
   getKind : function(item) {
     return this.defs[item.def].kind
+  },
+
+  getAllColors : function() {
+    colors = []
+    this.loopItems(function(item, i){
+      if ("color" in item) {
+        colors.push(item.color)
+      }
+    })
+    return colors
   },
 
   getImageThumb : function(imgitem, width, height) {
@@ -268,9 +278,8 @@ jobhandler = {
     this.path_group = new paper.Group()
     // images
     this.loopItems(function(img, i){
-      var img = this.raster.images[k]
       var group = new paper.Group()
-      this.image_group.addChild(group)
+      jobhandler.image_group.addChild(group)
       var pos_x = img.pos[0]*jobview_mm2px
       var pos_y = img.pos[1]*jobview_mm2px
       var img_w = img.size[0]*jobview_mm2px
@@ -282,11 +291,11 @@ jobhandler = {
     }, "image")
     // fills
     this.loopItems(function(fill, i){
-      add_path(fill, this.fill_group)
+      add_path(fill, jobhandler.fill_group)
     }, "fill")
     // paths
     this.loopItems(function(path, i){
-      add_path(fill, this.path_group)
+      add_path(path, jobhandler.path_group)
     }, "path")
     // fills, paths helper function
     function add_path(path, parent_group) {
@@ -368,7 +377,7 @@ jobhandler = {
   normalizeColors : function() {
     this.loopItems(function(path, i){
       if (!('color' in path)) {
-        if (path === this.items[0]) {
+        if (path === jobhandler.items[0]) {
           path.color = "#000000"
         } else {
           var random_color = '#'+(Math.random()*0xaaaaaa<<0).toString(16)
@@ -387,11 +396,11 @@ jobhandler = {
     // saves results in this.stats like so:
     // {'all':{'bbox':[xmin,ymin,xmax,ymax], 'len':numeral},
     //  'items':[{'bbox':[xmin,ymin,xmax,ymax], 'len':numeral}, ...],}
+    this.stats.items = []
     var length_all = 0
     var bbox_all = [Infinity, Infinity, -Infinity, -Infinity]
     // images
     this.loopItems(function(img, i){
-      var img = this.raster.images[k]
       var width = img.size[0]
       var height = img.size[1]
       var left = img.pos[0]
@@ -401,9 +410,9 @@ jobhandler = {
       var line_count = Math.floor(height/app_config_main.pxsize)
       var image_length = width * line_count
       var image_bbox = [left, top, right, bottom]
-      this.stats.items[i] = {'bbox':image_bbox, 'len':image_length}
+      jobhandler.stats.items[i] = {'bbox':image_bbox, 'len':image_length}
       length_all += image_length
-      this.bboxExpand2(bbox_all, image_bbox)
+      jobhandler.bboxExpand2(bbox_all, image_bbox)
     }, "image")
     // paths and fills
     this.loopItems(function(vectoritem, i){
@@ -416,7 +425,7 @@ jobhandler = {
         if (polyline.length > 1) {
           var x = polyline[0][0]
           var y = polyline[0][1]
-          this.bboxExpand(path_bbox, x, y)
+          jobhandler.bboxExpand(path_bbox, x, y)
           x_prev = x
           y_prev = y
           for (vertex=1; vertex<polyline.length; vertex++) {
@@ -424,16 +433,16 @@ jobhandler = {
             var y = polyline[vertex][1]
             path_length +=
               Math.sqrt((x-x_prev)*(x-x_prev)+(y-y_prev)*(y-y_prev))
-            this.bboxExpand(path_bbox, x, y)
+            jobhandler.bboxExpand(path_bbox, x, y)
             x_prev = x
             y_prev = y
           }
         }
       }
-      this.stats.items[i] = {'bbox':path_bbox, 'len':path_length}
+      jobhandler.stats.items[i] = {'bbox':path_bbox, 'len':path_length}
       length_all += path_length
-      this.bboxExpand(bbox_all, path_bbox[0], path_bbox[1])
-      this.bboxExpand(bbox_all, path_bbox[2], path_bbox[3])
+      jobhandler.bboxExpand(bbox_all, path_bbox[0], path_bbox[1])
+      jobhandler.bboxExpand(bbox_all, path_bbox[2], path_bbox[3])
     }, "path fill")
     // store in object var
     this.stats['all'] = {'bbox':bbox_all, 'len':length_all}
@@ -445,7 +454,7 @@ jobhandler = {
     this.loopPasses(function(pass, item_idxs){
       for (var i = 0; i < item_idxs.length; i++) {
         var item = item_idxs[i]
-        length += this.stats.items[item_idxs[i]].len
+        length += jobhandler.stats.items[item_idxs[i]].len
       }
     })
     return length
@@ -457,7 +466,7 @@ jobhandler = {
     this.loopPasses(function(pass, item_idxs){
       for (var i = 0; i < item_idxs.length; i++) {
         var item = item_idxs[i]
-        this.bboxExpand2(bbox, this.stats.items[item_idxs[i]].bbox)
+        this.bboxExpand2(bbox, jobhandler.stats.items[item_idxs[i]].bbox)
       }
     })
     return bbox
