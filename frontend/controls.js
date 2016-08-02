@@ -170,7 +170,7 @@ function controls_ready() {
             app_run_btn.stop()
           },
           complete: function (data) {
-            console.log("complete run")
+            // console.log("complete run")
           }
         })
       },
@@ -181,7 +181,7 @@ function controls_ready() {
       },
       complete: function (data) {
         status_cache.ready = undefined  // allow ready update
-        console.log("complete load")
+        // console.log("complete load")
       }
     })
     return false

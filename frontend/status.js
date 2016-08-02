@@ -109,9 +109,9 @@ function status_set_main_button(status) {
 
 function status_set_refresh() {
   if (status_websocket && status_websocket.readyState == 1) {  // connected
-    var every = 1
+    var every = 2
     if (app_visibility) {  // app focused
-      if (!status_cache.ready) {  // focused and ready -> idle
+      if (status_cache.ready) {  // focused and ready -> idle
         every = 4
       }  // else: every = 1
     } else {  // app blured
@@ -176,6 +176,7 @@ var status_handlers = {
       $('#motion_btn').addClass('disabled')
       $('#jog_btn').addClass('disabled')
     }
+    status_cache.ready = status.ready  // deed this before set_refresh
     status_set_refresh()
   },
   //// when hardware connected

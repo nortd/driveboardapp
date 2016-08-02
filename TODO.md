@@ -1,6 +1,5 @@
 
-- quick fill, slow fill, or better optimized sorted line fill
-- clean up config.py, rename raster_size
+- clean up config.py
 
 bugs
 ----

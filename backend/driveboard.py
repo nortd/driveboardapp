@@ -262,7 +262,7 @@ class SerialLoopClass(threading.Thread):
 
     def reset_status(self):
         self._status = {
-            'ready': False,                  # is hardware idle (and not stop mode)
+            'ready': False,                 # is hardware idle (and not stop mode)
             'serial': False,                # is serial connected
             'appver':conf['version'],
             'firmver': None,
@@ -291,6 +291,9 @@ class SerialLoopClass(threading.Thread):
             'pixelwidth': 0.0
         }
         self._s = copy.deepcopy(self._status)
+
+    def get_compressed_status(self):
+        pass
 
 
     def send_command(self, command):

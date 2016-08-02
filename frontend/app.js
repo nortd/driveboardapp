@@ -164,23 +164,23 @@ function app_status_connect() {
     var data = JSON.parse(e.data)
     // console.log(data)
 
-    // show in config modal
-    var html = ''
-    var keys_sorted = Object.keys(data).sort()
-    for (var i=0; i<keys_sorted.length; i++) {
-      var val = data[keys_sorted[i]]
-      if (typeof(val) === 'object' && val !== null) {
-        html += keys_sorted[i]+"<br>"
-        // iterate over sub-asso-array
-        var subkeys_sorted = Object.keys(val).sort()
-        for (var j = 0; j < subkeys_sorted.length; j++) {
-          html += "--"+subkeys_sorted[j] + ": " + val[subkeys_sorted[j]] + "<br>"
-        }
-      } else  {
-        html += keys_sorted[i] + " : " + data[keys_sorted[i]] + "<br>"
-      }
-    }
-    $('#status_content').html(html)
+    // // show in config modal
+    // var html = ''
+    // var keys_sorted = Object.keys(data).sort()
+    // for (var i=0; i<keys_sorted.length; i++) {
+    //   var val = data[keys_sorted[i]]
+    //   if (typeof(val) === 'object' && val !== null) {
+    //     html += keys_sorted[i]+"<br>"
+    //     // iterate over sub-asso-array
+    //     var subkeys_sorted = Object.keys(val).sort()
+    //     for (var j = 0; j < subkeys_sorted.length; j++) {
+    //       html += "--"+subkeys_sorted[j] + ": " + val[subkeys_sorted[j]] + "<br>"
+    //     }
+    //   } else  {
+    //     html += keys_sorted[i] + " : " + data[keys_sorted[i]] + "<br>"
+    //   }
+    // }
+    // $('#status_content').html(html)
 
     // call handlers, only when status changes
     status_handle_message(data)
