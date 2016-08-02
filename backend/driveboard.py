@@ -919,7 +919,7 @@ def job(jobdict):
     aux1_off()
 
     # loop passes
-    for pass_ in jobdict.passes:
+    for pass_ in jobdict['passes']:
         if 'pxsize' in pass_:
             pxsize = float(pass_['pxsize'])
         else:
@@ -957,10 +957,10 @@ def job(jobdict):
         else:
             relative()
         # loop pass' items
-        for itemidx in pass_.items:
+        for itemidx in pass_['items']:
             item = jobdict['items'][itemidx]
             def_ = jobdict['defs'][item['def']]
-            kind = def_.kind
+            kind = def_['kind']
             if kind == "image":
                 pos = def_["pos"]
                 size = def_["size"]
@@ -1036,7 +1036,7 @@ def job(jobdict):
                     aux1_off()
 
             elif kind == "fill" or kind == "path":
-                path = def_.data
+                path = def_['data']
                 for polyline in path:
                     if len(polyline) > 0:
                         # first vertex -> seek
