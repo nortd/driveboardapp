@@ -1,17 +1,14 @@
 {
-  "vector":
-  {
-    "passes":
-    [
-      {
-        "paths":[0],
-        "feedrate":"400",
-        "intensity":"12"
-      }
-    ],
-    "paths":
-    [
-      [[[0,0],[0,0]],[[100,100],[105,100]]]
-    ]
-  }
+  "passes":
+  [
+    {
+      "items":[0],
+      "feedrate":400,
+      "intensity":12
+    }
+  ],
+  "items":[{"def":0}],
+  "defs":[
+    {"kind":"path", "data":[[[100,100],[105,100]]]}
+  ]
 }
