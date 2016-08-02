@@ -20,14 +20,7 @@ function tools_tselect_init() {
       jobview_deselect_all()
       path = hitResult.item
       path.parent.selected = !path.parent.selected
-      if (path.parent.parent === jobhandler.path_group) {
-        var kind = "path"
-      } else if (path.parent.parent === jobhandler.fill_group) {
-        var kind = "fill"
-      } else if (path.parent.parent === jobhandler.image_group) {
-        var kind = "image"
-      }
-      jobview_item_selected = [path.parent.index, kind]
+      jobview_item_selected = path.parent.itemidx
     } else {
       jobview_deselect_all()
       jobview_item_selected = undefined

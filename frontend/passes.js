@@ -38,7 +38,7 @@ function passes_add(feedrate, intensity, items_assigned) {
   // bind color assign button
   $('#assign_btn_'+num).click(function(e) {
     if (jobview_item_selected !== undefined) {
-      var idx = jobview_item_selected[0]
+      var idx = jobview_item_selected
       $('#passsel_'+num+'_'+idx).hide()
       $('#pass_'+num+'_'+idx).hide()
       $('#pass_'+num+'_'+idx).show(300)

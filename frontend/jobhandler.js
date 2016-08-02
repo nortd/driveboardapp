@@ -1,7 +1,7 @@
 
 // module to handle job data
 // read, write, draw, stats, cleanup/filter
-
+//
 // {
 //      "head": {
 //          "noreturn": True,          # do not return to origin, default: False
@@ -30,61 +30,6 @@
 //     ],
 //     "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all"{}}
 // }
-
-// {
-//       "vector":                          # optional
-//       {
-//           "passes":
-//           [
-//               {
-//                   "paths": [0],          # paths by index
-//                   "relative": True,      # optional, default: False
-//                   "seekrate": 6000,      # optional, rate to first vertex
-//                   "feedrate": 2000,      # optional, rate to other vertices
-//                   "intensity": 100,      # optional, default: 0 (in percent)
-//                   "pierce_time": 0,      # optional, default: 0
-//                   "air_assist": "pass",  # optional (feed, pass, off), default: pass
-//                   "aux1_assist": "off",  # optional (feed, pass, off), default: off
-//               }
-//           ],
-//           "paths":
-//           [                              # list of paths
-//               [                          # list of polylines
-//                   [                      # list of verteces
-//                       [0,-10, 0],        # list of coordinates
-//                   ],
-//               ],
-//           ],
-//           "colors": ["#FF0000"],         # color is matched to path by index
-//           "noreturn": True,              # do not return to origin, default: False
-//           "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
-//           "fills": [0],                  # paths by index
-//       }
-//       "raster":                          # optional
-//       {
-//           "passes":
-//           [
-//               {
-//                   "images": [0],
-//                   "seekrate": 6000,      # optional
-//                   "feedrate": 3000,
-//                   "intensity": 100,
-//                   "air_assist": "pass",  # optional (feed, pass, off), default: pass
-//                   "aux1_assist": "off",  # optional (feed, pass, off), default: off
-//               },
-//           ],
-//           "images":
-//           [
-//               {
-//                   "pos": (100,50),          # pos in mm
-//                   "size": (300,200),        # size in mm
-//                   "data": <data in base64>  # internally this is a js Image
-//               }
-//           ],
-//           "rasterpxsize": [0.4]             # size is matched to fills by index
-//       }
-//   }
-
 
 
 jobhandler = {
@@ -292,6 +237,7 @@ jobhandler = {
     this.loopItems(function(image, i){
       var img = jobhandler.defs[image.def]
       var group = new paper.Group()
+      group.itemidx = i
       jobhandler.itemidx2group[i] = group
       jobhandler.image_group.addChild(group)
       var pos_x = img.pos[0]*jobview_mm2px
@@ -316,6 +262,7 @@ jobhandler = {
       var path = jobhandler.defs[item.def].data
       jobview_feedLayer.activate()
       var group = new paper.Group()
+      group.itemidx = i
       jobhandler.itemidx2group[i] = group
       parent_group.addChild(group)
       for (var j=0; j<path.length; j++) {
@@ -365,10 +312,9 @@ jobhandler = {
 
 
   selectItem : function(idx) {
-    var kind = this.defs[this.items[idx].def].kind
     var group = this.itemidx2group[idx]
     group.selected = true
-    jobview_item_selected = [idx, kind]
+    jobview_item_selected = idx
     setTimeout(function() {
       group.selected = false
       jobview_item_selected = undefined

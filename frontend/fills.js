@@ -6,6 +6,7 @@ function fills_add_by_item(idx, callback) {
     callback()
     return
   }
+  var color = jobhandler.items[idx].color
   var path = jobhandler.defs[jobhandler.items[idx].def].data
   var bounds = jobhandler.stats.items[idx].bbox
   var leadin = app_config_main.fill_leadin
@@ -71,7 +72,7 @@ function fills_add_by_item(idx, callback) {
   function finalize() {
     // generate a new color shifted from the old
     var newcolor
-    var fillcolor = new paper.Color(path.color)
+    var fillcolor = new paper.Color(color)
     var jobcolors = jobhandler.getAllColors()
     while (true) {
       if (fillcolor.brightness > 0.5) {

@@ -269,12 +269,13 @@ function controls_ready() {
   $("#addfill_btn").tooltip({placement:'right', delay: {show:1000, hide:100}})
   $("#addfill_btn").click(function(e){
     if (jobview_item_selected !== undefined) {
-      if (jobview_item_selected[1] != "path") {
+      var kind = jobhandler.defs[jobhandler.items[jobview_item_selected].kind
+      if (kind != "path") {
         $().uxmessage('notice', "Make sure a path is selected.")
         return false
       }
       app_fill_btn.start()
-      fills_add_by_item(jobview_item_selected[0],
+      fills_add_by_item(jobview_item_selected,
         function() {
           app_fill_btn.stop()
       })
