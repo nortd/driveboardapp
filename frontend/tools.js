@@ -127,10 +127,15 @@ function tools_tmove_init() {
   // create tool
   tools_tmove = new paper.Tool()
   tools_tmove.onMouseDown = function(event) {
+    // check for machine
+    if (!status_cache.serial) {
+      $().uxmessage('error', "No machine.")
+      return
+    }
     var x_mm = Math.ceil(event.point.x/jobview_mm2px-status_cache.offset[0])
     var y_mm = Math.ceil(event.point.y/jobview_mm2px-status_cache.offset[1])
     request_absolute_move(x_mm, y_mm, 0, app_config_main.seekrate, "Moving to "+x_mm+","+y_mm)
-    $('#select_btn').trigger('click')
+    // $('#select_btn').trigger('click')
     status_cache.ready = undefined  // force status update
     // setTimeout(function(){
     //   jobview_moveLayer.visible = false

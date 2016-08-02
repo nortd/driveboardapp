@@ -137,6 +137,11 @@ function controls_ready() {
       $().uxmessage('notice', "No passes assigned to this job.")
       return false
     }
+    // check for machine
+    if (!status_cache.serial) {
+      $().uxmessage('error', "No machine.")
+      return false
+    }
     // button feedback
     app_run_btn.start()
     $('#boundary_btn').prop('disabled', true)
@@ -263,6 +268,7 @@ function controls_ready() {
     $(".tool_extra_btn").hide()
     tools_tselect.activate()
     $("#addfill_wgt").show()
+    jobview_moveLayer.visible = false
     return true
   })
 
@@ -293,6 +299,7 @@ function controls_ready() {
       $(".tool_extra_btn").hide()
       tools_toffset.activate()
       $("#offset_reset_btn").show()
+      jobview_moveLayer.visible = false
     } else {
       setTimeout(function(){
         $('#select_btn').trigger('click')
@@ -336,6 +343,7 @@ function controls_ready() {
       $(".tool_extra_btn").hide()
       $("#jog_hotkey_hint").show()
       tools_tjog.activate()
+      jobview_moveLayer.visible = false
       jobview_jogLayer.visible = true
     } else {
       setTimeout(function(){

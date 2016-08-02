@@ -4,7 +4,6 @@
 
 bugs
 ----
-- move when no machine run button does not recover, false feedback
 - stall between certain x-axis jogs
   - send a pierce command in between
 

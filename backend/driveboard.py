@@ -850,58 +850,32 @@ def job(jobdict):
     The job dict looks like this:
     ###########################################################################
     {
-        "vector":                          # optional
-        {
-            "passes":
-            [
-                {
-                    "paths": [0],          # paths by index
-                    "relative": True,      # optional, default: False
-                    "seekrate": 6000,      # optional, rate to first vertex
-                    "feedrate": 2000,      # optional, rate to other vertices
-                    "intensity": 100,      # optional, default: 0 (in percent)
-                    "pierce_time": 0,      # optional, default: 0
-                    "air_assist": "pass",  # optional (feed, pass, off), default: pass
-                    "aux1_assist": "off",  # optional (feed, pass, off), default: off
-                }
-            ],
-            "paths":
-            [                              # list of paths
-                [                          # list of polylines
-                    [                      # list of vertices
-                        [0,-10, 0],        # list of coords
-                    ],
-                ],
-            ],
-            "colors": ["#FF0000"],         # color is matched to path by index
-            "noreturn": True,              # do not return to origin, default: False
-            "optimized": 0.08,             # optional, tolerance to which it was optimized, default: 0 (not optimized)
-            "fills": [0],                  # paths by index
-        }
-        "raster":                          # optional
-        {
-            "passes":
-            [
-                {
-                    "images": [0],
-                    "seekrate": 6000,      # optional
-                    "feedrate": 3000,
-                    "intensity": 100,
-                    "air_assist": "pass",  # optional (feed, pass, off), default: pass
-                    "aux1_assist": "off",  # optional (feed, pass, off), default: off
-                },
-            ],
-            "images":
-            [
-                [pos, size, <data>],           # pos: [x,y], size: [w,h], data in base64
-                {
-                    "pos": (100,50),
-                    "size": (320,240),
-                    "data": <data in base64>
-                }
-            ],
-            "rasterpxsize": [0.4]              # size is matched to fills by index
-        }
+      "head": {
+          "noreturn": True,          # do not return to origin, default: False
+          "optimized": 0.08,         # optional, tolerance to which it was optimized, default: 0 (not optimized)
+       },
+      "passes": [
+          {
+              "items": [0],          # item by index
+              "relative": True,      # optional, default: False
+              "seekrate": 6000,      # optional, rate to first vertex
+              "feedrate": 2000,      # optional, rate to other vertices
+              "intensity": 100,      # optional, default: 0 (in percent)
+              "pierce_time": 0,      # optional, default: 0
+              "pxsize": [0.4],       # optional
+              "air_assist": "pass",  # optional (feed, pass, off), default: pass
+              "aux1_assist": "off",  # optional (feed, pass, off), default: off
+          }
+      ],
+     "items": [
+        {"def":0, "translate":[0,0,0], "color":"#BADA55"}
+     ],
+     "defs": [
+        {"kind":"path", "data":[[[0,10,0]]]},
+        {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
+        {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
+     ],
+     "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all":{}}
     }
     ###########################################################################
     """

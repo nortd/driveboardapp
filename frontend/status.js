@@ -167,7 +167,6 @@ var status_handlers = {
       $('#offset_btn').removeClass('disabled')
       $('#motion_btn').removeClass('disabled')
       $('#jog_btn').removeClass('disabled')
-      jobview_moveLayer.visible = false
     } else {
       app_run_btn.start()
       $('#boundary_btn').prop('disabled', true)

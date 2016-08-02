@@ -70,7 +70,7 @@ function request_post(args) {
       }
     },
     error: function (data) {
-      $().uxmessage('error', args.url)
+      // $().uxmessage('error', args.url)
       if ('error' in args) {
         args.error(data)
       }

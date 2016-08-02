@@ -28,7 +28,7 @@
 //        {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
 //        {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
 //     ],
-//     "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all"{}}
+//     "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all":{}}
 // }
 
 
