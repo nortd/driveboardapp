@@ -16,7 +16,6 @@ optimizations
 - tune lasertags
 - consider flipping y-axis
 - compact statserver message
-- take offset feature out of API
 
 
 features
