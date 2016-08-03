@@ -316,14 +316,15 @@ class SerialLoopClass(threading.Thread):
 
     def send_data(self, data, start, end):
         count = 2
-        self.tx_buffer.append(CMD_RASTER_DATA_START)
+        with self.lock:
+            self.tx_buffer.append(CMD_RASTER_DATA_START)
         for val in itertools.islice(data, start, end):
-            self.tx_buffer.append(chr(int(0.5*(255-val))+128))
+            with self.lock:
+                self.tx_buffer.append(chr(int(0.5*(255-val))+128))
             count += 1
-            if count % 50 == 0:
-                time.sleep(0.01)  # ease off, to give other threads priority
-        self.tx_buffer.append(CMD_RASTER_DATA_END)
-        self.job_size += count
+        with self.lock:
+            self.tx_buffer.append(CMD_RASTER_DATA_END)
+            self.job_size += count
 
 
     def run(self):
@@ -839,9 +840,9 @@ def rastermove(x, y, z=0.0):
         SerialLoop.send_command(CMD_RASTER)
 
 def rasterdata(data, start, end):
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_data(data, start, end)
+    # global SerialLoop
+    # with SerialLoop.lock:  # NOTE: more granular locking in send_data
+    SerialLoop.send_data(data, start, end)
 
 
 
