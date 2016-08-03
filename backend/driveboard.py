@@ -320,7 +320,6 @@ class SerialLoopClass(threading.Thread):
         for val in itertools.islice(data, start, end):
             self.tx_buffer.append(chr(int(0.5*(255-val))+128))
             count += 1
-            if count % 100 == 0:
         self.tx_buffer.append(CMD_RASTER_DATA_END)
         self.job_size += count
 
