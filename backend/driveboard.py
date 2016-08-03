@@ -840,8 +840,8 @@ def rastermove(x, y, z=0.0):
         SerialLoop.send_command(CMD_RASTER)
 
 def rasterdata(data, start, end):
-    # global SerialLoop
-    # with SerialLoop.lock:  # NOTE: more granular locking in send_data
+    # NOTE: no SerialLoop.lock
+    # more granular locking in send_data
     SerialLoop.send_data(data, start, end)
 
 
@@ -948,18 +948,13 @@ def job(jobdict):
                 print "--- start of image processing ---"
                 import Image
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
-                time.sleep(0.01)  # ease off, to give other threads priority
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
-                time.sleep(0.01)  # ease off, to give other threads priority
                 if imgobj.mode == 'RGBA':
                     imgbg = Image.new('RGBA', imgobj.size, (255, 255, 255))
-                    time.sleep(0.01)  # ease off, to give other threads priority
                     imgbg.paste(imgobj, imgobj)
-                    time.sleep(0.01)  # ease off, to give other threads priority
                     imgobj = imgbg.convert("L")
                 else:
                     imgobj = imgobj.convert("L")
-                time.sleep(0.01)  # ease off, to give other threads priority
                 print "---- end of image processing ----"
                 # imgobj.show()
                 posx = pos[0]
@@ -991,7 +986,6 @@ def job(jobdict):
                 # print len(pxarray)
                 # print (px_w*px_h)
                 line_count = int(size[1]/pxsize)
-                time.sleep(0.01)  # ease off, to give other threads priority
                 for l in xrange(line_count):
                     end += px_w
                     # move to start of line
@@ -1013,7 +1007,6 @@ def job(jobdict):
                     line_y += pxsize
                     feedrate(100)
                     move(leadoutpos, line_y)
-                    time.sleep(0.01)  # ease off, to give other threads priority
                 # assists off, end of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_off()
@@ -1054,7 +1047,6 @@ def job(jobdict):
                                 air_off()
                             if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
                                 aux1_off()
-                        time.sleep(0.01)  # ease off, to give other threads priority
 
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:
