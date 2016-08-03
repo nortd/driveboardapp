@@ -1,11 +1,12 @@
 
 
-driveboard.py
--------------
+Low-Level API - driveboard.py
+=============================
 
 This module does all the serial communication. It knows the [hardware protocol](protocol.md) and provides a low-level API for talking to the hardware. It can perfectly well be used from the python CLI or in custom python scripts.
 
-#### Example usage
+Example usage
+-------------
 ```
 import driveboard, sys, time
 driveboard.connect()
@@ -17,7 +18,8 @@ driveboard.close()
 ```
 
 
-#### drivboard.py API
+drivboard.py API
+----------------
 ```
 find_controller()
 connect()
