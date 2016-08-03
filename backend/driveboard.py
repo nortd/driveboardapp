@@ -321,7 +321,6 @@ class SerialLoopClass(threading.Thread):
             self.tx_buffer.append(chr(int(0.5*(255-val))+128))
             count += 1
             if count % 100 == 0:
-                time.sleep(0.01)  # ease off, to give other threads priority
         self.tx_buffer.append(CMD_RASTER_DATA_END)
         self.job_size += count
 
@@ -1004,8 +1003,7 @@ def job(jobdict):
                     # prime for next line
                     start = end
                     line_y += pxsize
-                    # move(leadoutpos, line_y)
-                    time.sleep(0.01)  # ease off, to give other threads priority
+                    move(leadoutpos, line_y)
                 # assists off, end of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_off()
@@ -1046,7 +1044,6 @@ def job(jobdict):
                                 air_off()
                             if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
                                 aux1_off()
-                        time.sleep(0.01)  # ease off, to give other threads priority
 
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:
