@@ -36,10 +36,12 @@ cd driveboardapp
 scripts/install_packages.sh
 scripts/upgrade_to_driveboardapp.sh
 python backend/flash.py
+reboot
 ```
 If for some reason you want to downgrade and use LasaurApp again run:
 ```
 scripts/downgrade_to_lasaurapp.sh
+reboot
 ```
 
 
