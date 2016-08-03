@@ -292,9 +292,6 @@ class SerialLoopClass(threading.Thread):
         }
         self._s = copy.deepcopy(self._status)
 
-    def get_compressed_status(self):
-        pass
-
 
     def send_command(self, command):
         self.tx_buffer.append(command)
@@ -1005,7 +1002,7 @@ def job(jobdict):
                     # prime for next line
                     start = end
                     line_y += pxsize
-                    move(leadoutpos, line_y)
+                    # move(leadoutpos, line_y)
                 # assists off, end of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_off()
@@ -1066,6 +1063,10 @@ def job(jobdict):
     else:
         move(0, 0, 0)
 
+
+def jobfile(filepath):
+    jobdict = json.load(open(filepath))
+    job(jobdict)
 
 
 def pause():
@@ -1163,20 +1164,6 @@ def sel_offset_custom():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_SEL_OFFSET_CUSTOM)
-
-
-def testjob(jobname="Lasersaur", feedrate=2000, intensity=10):
-    j = json.load(open(os.path.join(conf['rootdir'], 'backend', 'testjobs', jobname+'.dba')))
-    if "vector" in j:
-        j['vector']['passes'] = [{
-            "paths":[0],
-            "feedrate":feedrate,
-            "intensity":intensity }]
-
-    job(j)
-
-def torturejob():
-    testjob('k4', 4000)
 
 
 

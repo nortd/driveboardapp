@@ -3,6 +3,7 @@
 
 bugs
 ----
+- deprioritize job processing thread over serial thread
 - stall between certain x-axis jogs
   - send a pierce command in between
 

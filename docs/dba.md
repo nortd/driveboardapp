@@ -2,7 +2,7 @@
 DriveboardApp File Format
 =========================
 
-The native file format has the extension .dba and is technically a json text file. It can save paths, fills, and images along with passes definition.
+The native file format has the extension .dba and is technically a json text file. It can save paths, fills, and images along with pass definition.
 
 Simple Example
 ==============
