@@ -28,13 +28,8 @@ argparser.add_argument('-b', '--browser', dest='browser', action='store_true',
 args = argparser.parse_args()
 
 
-
 print "DriveboardApp " + conf['version']
 conf['usb_reset_hack'] = args.usbhack
-
-if args.debug:
-    if hasattr(sys, "_MEIPASS"):
-        print "Data root is: " + sys._MEIPASS
 
 # run
 web.start(threaded=args.threaded, browser=args.browser, debug=args.debug)

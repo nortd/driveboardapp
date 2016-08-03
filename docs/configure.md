@@ -4,8 +4,8 @@ DriveboardApp Configuration
 
 The main configuration file is [config.py](../backend/config.py). It contains the *conf* dictionary which gets used in both the *backend* and *frontend*.
 
-How to change entries?
-----------------------
+How to change
+-------------
 Instead of changing the *conf* fields directly in *config.py* create a *userconfig.py* file in the same directory. Then set the fields you want to change in this file. For example if you want to change the serial port, workspace size and web credentials write the following into *userconfig.py*:
 
 ```
@@ -17,7 +17,7 @@ conf = {
     }
 }
 ```
-This way you always retain the default settings and your new setting won't be overwritten when updating the software with `git pull`.
+This way you always retain the default settings and your new settings won't be overwritten when updating the software with `git pull`.
 
 
 Firmware Configuration
