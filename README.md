@@ -18,6 +18,6 @@ This software is written in Javascript (frontend), Python (backend) and C (firmw
 - firmware
   - [serial protocol](docs/protocol.md)
 - jobs
-  - [dba file format)](docs/dba.md)
+  - [dba file format](docs/dba.md)
 
 **DISCLAIMER:** Please be aware that operating CNC machines can be dangerous and requires full awareness of the risks involved. NORTD Labs does not warrant for any code or documentation and does not assume any risks whatsoever with regard to using this software.

@@ -7,6 +7,7 @@ This module does all the serial communication. It knows the [hardware protocol](
 
 Example Usage
 -------------
+
 This example show how to run a [job file](dba.md).
 
 ```
