@@ -13,7 +13,8 @@ This software is written in Javascript (frontend), Python (backend) and C (firmw
 
 - frontend
 - [backend](docs/backend.md)
-  - [API](docs/api.md)
+  - [Low-Level API](docs/api_low.md)
+  - [High-Level API](docs/api_high.md)
 - firmware
   - [serial protocol](docs/protocol.md)
 - jobs
