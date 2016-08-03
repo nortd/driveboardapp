@@ -19,6 +19,7 @@ This software is written in Javascript (frontend), Python (backend) and C (firmw
   - [serial protocol](docs/protocol.md)
 - jobs
   - [dba file format](docs/dba.md)
+- [configuration](docs/configure.md)
 
 
 Installation
