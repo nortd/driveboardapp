@@ -17,21 +17,14 @@ argparser.add_argument('port', metavar='serial_port', nargs='?', default=False,
                        help='serial port to the Driveboard')
 argparser.add_argument('-v', '--version', action='version', version='%(prog)s ' + conf['version'],
                        default=False, help='print version of this app')
-# argparser.add_argument('-l', '--list', dest='list_serial_devices', action='store_true',
-#                     default=False, help='list all serial devices currently connected')
 argparser.add_argument('-t', '--threaded', dest='threaded', action='store_true',
-                       default=False, help='run web server in thread')
+                       default=True, help='run web server in thread')
 argparser.add_argument('-d', '--debug', dest='debug', action='store_true',
                        default=False, help='print more verbose for debugging')
 argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
 argparser.add_argument('-b', '--browser', dest='browser', action='store_true',
                        default=False, help='launch interface in browser')
-# for backwards compatibility
-argparser.add_argument('-p', '--public', dest='host_on_all_interfaces', action='store_true',
-                       default=False, help='dummy, for backwards compatibility')
-argparser.add_argument('--beaglebone', dest='beaglebone', action='store_true',
-                       default=False, help='dummy, for backwards compatibility')
 args = argparser.parse_args()
 
 
