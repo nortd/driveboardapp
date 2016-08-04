@@ -32,29 +32,19 @@ conf = {
     'tolerance': 0.01,
     'workspace': [1220,610,0],
     'grid_mm': 100,
-    # 'intensity_minmax': [0,255],
     'seekrate': 6000,
     'feedrate': 2000,
     'intensity': 0,
     'kerf': 0.3,
-    'max_raster_size': [3000,3000],
+    'pxsize': 0.4,                 # size (mm) of beam for rastering
     'max_jobs_in_list': 20,
-    'users': {
-        'laser': 'laser',
-    },
-
     'usb_reset_hack': False,
     'fill_leadin': 10,
     'raster_leadin': 20,
-
     'max_segment_length': 5.0,
-
-
-    'pxsize': 0.4,                 # size (mm) of beam for rastering
-    'raster_offset': 40,
-    'raster_feedrate': 3000,
-    'raster_intensity': 20,
-    'raster_linechars': 70,
+    'users': {
+        'laser': 'laser',
+    },
 }
 
 

@@ -11,11 +11,12 @@ Example Usage
 This example show how to run a [job file](dba.md).
 
 ```
-import driveboard, sys, time
+import driveboard, time
 driveboard.connect()
 driveboard.jobfile("../library/lasersaur.dba")
 while not driveboard.status()['ready']:
     time.sleep(1)
+    print str(driveboard.status()['progress']*100) + '%'
     sys.stdout.write('.')
 driveboard.close()
 ```
