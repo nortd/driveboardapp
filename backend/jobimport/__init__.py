@@ -3,7 +3,7 @@ import json
 
 from config import conf
 from svg_reader import SVGReader
-from dxf_reader import DXFReader
+from dxf_parser import DXFParser
 from ngc_reader import NGCReader
 import pathoptimizer
 
@@ -49,7 +49,7 @@ def convert(job, optimize=True, tolerance=conf['tolerance']):
 
 
 def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
-    """Read an svg file string and convert to dba job."""
+    """Read a svg file string and convert to dba job."""
     svgReader = SVGReader(tolerance, workspace)
     res = svgReader.parse(svg_string, forced_dpi)
     # {'boundarys':b, 'dpi':d, 'lasertags':l, 'rasters':r}
@@ -119,42 +119,20 @@ def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
     #                 })
     return job
 
-
 def read_dxf(dxf_string, tolerance, optimize=True):
-    """Read an dxf file string and convert to dba job."""
-    # dxfReader = DXFReader(tolerance)
-    # res = dxfReader.parse(dxf_string)
-    # # # flip y-axis
-    # # for color,paths in res['boundarys'].items():
-    # # 	for path in paths:
-    # # 		for vertex in path:
-    # # 			vertex[1] = 610-vertex[1]
-    #
-    # # create an dba job from res
-    # # TODO: reader should generate an dba job to begin with
-    # job = {}
-    # if 'boundarys' in res:
-    #     job['vector'] = {}
-    #     vec = job['vector']
-    #     # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
-    #     # colors = []
-    #     paths = []
-    #     for k,v in res['boundarys']:
-    #         # colors.append(k)
-    #         paths.append(v)
-    #     if optimize:
-    #         pathoptimizer.optimize(paths, tolerance)
-    #     vec['paths'] = paths
-    #     # vec['colors'] = colors
-    #     if optimize:
-    #         vec['optimized'] = tolerance
-    # return job
-    print "DXF reader not implemented"
-    return {}
-
+    """Read a dxf file string and optimize returned value."""
+    dxfParser = DXFParser(tolerance)
+    # second argument is the forced unit, TBI in Driverboard
+    job = dxfParser.parse(dxf_string, None)
+    if 'vector' in job:
+        if optimize:
+            vec = job['vector']
+            pathoptimizer.dxf_optimize(vec['paths'], tolerance)
+            vec['optimized'] = tolerance
+    return job
 
 def read_ngc(ngc_string, tolerance, optimize=False):
-    """Read an gcode file string and convert to dba job."""
+    """Read a gcode file string and convert to dba job."""
     # ngcReader = NGCReader(tolerance)
     # res = ngcReader.parse(ngc_string)
     # # create an dba job from res
