@@ -36,6 +36,7 @@ git clone https://github.com/nortd/driveboardapp.git
 cd driveboardapp
 scripts/install_packages.sh
 scripts/upgrade_to_driveboardapp.sh
+pkill python
 python backend/flash.py
 reboot
 ```
