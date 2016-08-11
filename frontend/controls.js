@@ -190,6 +190,22 @@ function controls_ready() {
   $("#boundary_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
   $("#boundary_btn").click(function(e){
     jobhandler.passes = passes_get_active()
+    // check for job
+    if (jobhandler.isEmpty()) {
+      $().uxmessage('notice', "Cannot run. No job loaded.")
+      return false
+    }
+    // check for passes
+    if (!jobhandler.hasPasses()) {
+      $().uxmessage('notice', "No passes assigned to this job.")
+      return false
+    }
+    // check for machine
+    if (!status_cache.serial) {
+      $().uxmessage('error', "No machine.")
+      return false
+    }
+    // send bounds request
     var bounds = jobhandler.getActivePassesBbox()
     request_boundary(bounds, app_config_main.seekrate)
     return false
