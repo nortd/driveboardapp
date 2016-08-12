@@ -3,20 +3,23 @@
 MinimalDriveboard
 =================
 
-Here you will find instructions on how to build a minimal Driveboard with an Arduino Uno. Compared to a regular Driveboard this requires more wiring and also lacks some features. In any case this may be a good starting point to build your CNC machine from the ground up. the following shows a 2-axis setup as it is used by the [Lasersaur](http://www.lasersaur.com). A 3-axis setup is also possible but left as an exercise for the reader.
+Here you will find instructions on how to build a minimal Driveboard with an Arduino Uno. Compared to a regular Driveboard this requires more wiring and also lacks some features. In any case this may be a good starting point to build your CNC machine from the ground up. The following shows a 2-axis setup as it is used by the [Lasersaur](http://www.lasersaur.com). A 3-axis setup is also possible but left as an exercise to the reader.
 
 
 
 ### Required Parts:
 - Arduino Uno
-- 2 Setpper Drivers
-- 2 Stepper Motors
-- 4 Limit Switches
-- 1 Door Switch
-- 1 E-Valve
-- 1 Big AC Switch
-- 24V PSU
-- 5V PSU
+- 2 Setpper Drivers (Gecko G201X)
+- 2 Stepper Motors (ST4118M1206-A, ST5918X3008-A)
+- 4 Limit Switches (MK04-1B90C-500W)
+- 1 Door Switch (MK04-1A66B-500W)
+- 1 E-Valve (MS 20310 24V=)
+- 6 resistors (10 kOhm)
+- 1 resistor (360 Ohm)
+- 1 diode (1N4004)
+- 1 Solid State Relay (AQY212GH)
+- 24V PSU, 3.2A
 
 
-### Work in Progress ....
+### Schematic
+![MinimalDriveboard](res/MinimalDriveboard.png)
