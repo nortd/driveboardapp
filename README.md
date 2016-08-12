@@ -24,9 +24,7 @@ This software is written in Javascript (frontend), Python (backend) and C (firmw
 
 Installation
 ------------
-- Download and run `python driveboardapp/backend/app.py -b`
-
-For details on how to run DriveboardApp on a Lasersaur or in a Developer setup see: [installation](docs/install.md)
+- [installation](docs/install.md)
 
 
 
