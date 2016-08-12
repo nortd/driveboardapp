@@ -22,4 +22,4 @@ Here you will find instructions on how to build a minimal Driveboard with an Ard
 
 
 ### Schematic
-![MinimalDriveboard](res/MinimalDriveboard.png)
+![MinimalDriveboard](img/MinimalDriveboard.png)
