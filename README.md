@@ -29,7 +29,7 @@ Installation
 Hardware
 --------
 - [Driveboard](https://github.com/nortd/lasersaur/wiki/driveboard) via [Lasersaur project](http://www.lasersaur.com)
-- [MinimalDriveboard](minimaldriveboard.md)
+- [MinimalDriveboard](docs/minimaldriveboard.md)
 
 
 **DISCLAIMER:** Please be aware that operating CNC machines can be dangerous and requires full awareness of the risks involved. NORTD Labs does not warrant for any code or documentation and does not assume any risks whatsoever with regard to using this software.
