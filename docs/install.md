@@ -45,4 +45,4 @@ DriveboardApp is quite flexible software and can be run on any Windows, OSX, or 
 
 At this point your default browser should open at [http://localhost:4444](http://localhost:4444). DriveboardApp runs in any current Firefox or Chrome (Safari and IE may work too). Congrats!
 
-If you get a serial port error you may have to configure it by [setting up a configuration](configure.md) file and point to the port where the Vanillaboard is connected to. On Linux you may also have to set proper r/w permissions for the serial port.
+If you get a serial port error you may have to configure it by [setting up a configuration](configure.md) file and point to the port where the Hardware is connected to. On Linux you may also have to set proper r/w permissions for the serial port.
