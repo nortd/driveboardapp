@@ -3,7 +3,7 @@
 MinimalDriveboard
 =================
 
-Here you will find instructions on how to build a minimal Driveboard with an Arduino Uno. Compared to a regular [Driveboard](https://github.com/nortd/lasersaur/wiki/driveboard) this requires more wiring and also lacks some features (e.g: hard-logic safty system). It takes some rigor to do this well. In any case this may be a good starting point to build your CNC machine from the ground up. The following shows a 2-axis setup as it is used by the [Lasersaur](http://www.lasersaur.com). A 3-axis setup is also possible but left as an exercise to the reader.
+Here you will find instructions on how to build a minimal Driveboard with an Arduino Uno. Compared to a regular [Driveboard](https://github.com/nortd/lasersaur/wiki/driveboard) this requires more wiring and also lacks some features (e.g. e-stop, hard-logic safety system). It takes some rigor to do this well. In any case this may be a good starting point to build your CNC machine from the ground up. The following shows a 2-axis setup as it is used by the [Lasersaur](http://www.lasersaur.com). A 3-axis setup is also possible but left as an exercise to the reader.
 
 
 
