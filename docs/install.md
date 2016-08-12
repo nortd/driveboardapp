@@ -30,11 +30,10 @@ reboot
 ```
 
 
-Vanillaboard Setup
+MinimalDriveboard Setup
 ------------------------
-Vanillaboard we shall call an Arduino Uno wired up so it can drive a CNC machine.
 
-DriveboardApp is quite flexible software and can be run on any Windows, OSX, or Linux computer. A [Vanillaboard](vanillaboard.md) can be connected via USB directly. In this case the DriveboardApp *backend* runs on the computer and the browser connects locally.
+DriveboardApp is quite flexible software and can be run on any Windows, OSX, or Linux computer. A [MinimalDriveboard](minimaldriveboard.md) can be connected via USB directly. In this case the DriveboardApp *backend* runs on the computer and the browser connects locally.
 
 - Open the command line.
 - Make sure you have Python 2.7, run `python --version`
