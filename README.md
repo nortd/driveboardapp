@@ -26,25 +26,8 @@ Installation
 ------------
 - Download and run `python driveboardapp/backend/app.py -b`
 
+For details on how to run DriveboardApp on a Lasersaur or in a Developer setup see: [installation](docs/install.md)
 
-Lasersaur Installation
-----------------------
-- make sure the Lasersaur can access the Internet
-- ssh into the Lasersaur with `ssh lasersaur.local` and do the follwoing:
-```
-git clone https://github.com/nortd/driveboardapp.git
-cd driveboardapp
-scripts/install_packages.sh
-scripts/upgrade_to_driveboardapp.sh
-pkill python
-python backend/flash.py
-reboot
-```
-If for some reason you want to downgrade and use LasaurApp again run:
-```
-scripts/downgrade_to_lasaurapp.sh
-reboot
-```
 
 
 **DISCLAIMER:** Please be aware that operating CNC machines can be dangerous and requires full awareness of the risks involved. NORTD Labs does not warrant for any code or documentation and does not assume any risks whatsoever with regard to using this software.
