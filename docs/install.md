@@ -10,7 +10,7 @@ python driveboardapp/backend/app.py -b
 If necessary, create a [configuration](configure.md) file for the app.
 
 
-Driveboard/Lasersaur Installation
+Driveboard/Lasersaur Setup
 ---------------------------------
 - make sure the Driveboard/Lasersaur can access the Internet
 - ssh into the Driveboard/Lasersaur with `ssh lasersaur.local` and do the follwoing:
