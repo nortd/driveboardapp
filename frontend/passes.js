@@ -119,7 +119,7 @@ function passes_pass_html(num, feedrate, intensity, pxsize) {
       '<div class="input-group" style="margin-right:4px">'+
         '<div class="input-group-addon">pxsize</div>'+
         '<input type="text" class="form-control input-sm pxsize"'+
-          'style="width:38px;" value="'+pxsize+'" title="size of physical raster pixel in mm">'+
+          'style="width:44px;" value="'+pxsize+'" title="size of physical raster pixel in mm">'+
       '</div>'+
     '</div></div>'+
     '<form class="form-inline">'+
