@@ -4,11 +4,11 @@ function passes_clear() {
   $('#job_passes').html("")
 }
 
-function passes_add(feedrate, intensity, items_assigned) {
+function passes_add(feedrate, intensity, pxsize, items_assigned) {
   // multiple = typeof multiple !== 'undefined' ? multiple : 1  // default to 1
   var num_passes_already = $('#job_passes').children('.pass_widget').length
   var num = num_passes_already + 1
-  var html = passes_pass_html(num, feedrate, intensity)
+  var html = passes_pass_html(num, feedrate, intensity, pxsize)
   if ($('#pass_add_widget').length) {
     var pass_elem = $(html).insertBefore('#pass_add_widget')
   } else {
@@ -85,7 +85,7 @@ function passes_add(feedrate, intensity, items_assigned) {
 
 
 
-function passes_pass_html(num, feedrate, intensity) {
+function passes_pass_html(num, feedrate, intensity, pxsize) {
   // add all color selectors
   var select_html = ''
   var added_html = ''
@@ -110,6 +110,18 @@ function passes_pass_html(num, feedrate, intensity) {
   var html =
   '<div id="pass_'+num+'" class="row pass_widget" style="margin:0; margin-bottom:20px">'+
     '<label style="color:#666666">Pass '+num+'</label>'+
+
+    '<a id="pass_conf_btn_'+num+'" style="margin-left:8px; position:relative; top:1px" role="button"'+
+      'data-toggle="collapse" href="#pass_conf_'+num+'" aria-expanded="false" aria-controls="pass_conf_'+num+'"'+
+      '<span class="glyphicon glyphicon-cog" style="color:#888888"></span>'+
+    '</a>'+
+    '<div class="collapse" id="pass_conf_'+num+'"><div class="well" style="margin-bottom:10px">'+
+      '<div class="input-group" style="margin-right:4px">'+
+        '<div class="input-group-addon">pxsize</div>'+
+        '<input type="text" class="form-control input-sm pxsize"'+
+          'style="width:38px;" value="'+pxsize+'" title="size of physical raster pixel in mm">'+
+      '</div>'+
+    '</div></div>'+
     '<form class="form-inline">'+
       '<div class="form-group">'+
         '<div class="input-group" style="margin-right:4px">'+
@@ -177,7 +189,7 @@ function passes_add_widget() {
 
   // bind pass_add_btn
   $('#pass_add_btn').click(function(e) {
-    passes_add(1500, 100, [])
+    passes_add(1500, 100, app_config_main.pxsize, [])
     return false
   })
 
@@ -194,7 +206,8 @@ function passes_get_active() {
   $('#job_passes').children('.pass_widget').each(function(i) { // each pass
     var feedrate = Math.round(parseFloat($(this).find("input.feedrate").val()))
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
-    var pass = {"items":[], "feedrate":feedrate, "intensity":intensity}
+    var pxsize = parseFloat($(this).find("input.pxsize").val())
+    var pass = {"items":[], "feedrate":feedrate, "intensity":intensity, "pxsize":pxsize}
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
       var idx = parseFloat($(this).find('.idxmem').text())
       pass.items.push(idx)
@@ -211,12 +224,12 @@ function passes_set_assignments() {
   // set passes in gui from current job
   if (jobhandler.hasPasses()) {
     jobhandler.loopPasses(function(pass, items){
-      passes_add(pass.feedrate, pass.intensity, items)
+      passes_add(pass.feedrate, pass.intensity, pass.pxsize, items)
     })
   } else {
-    passes_add(1500, 100, [])
-    passes_add(1500, 100, [])
-    passes_add(1500, 100, [])
+    passes_add(1500, 100, app_config_main.pxsize, [])
+    passes_add(1500, 100, app_config_main.pxsize, [])
+    passes_add(1500, 100, app_config_main.pxsize, [])
   }
   passes_add_widget()
 }
