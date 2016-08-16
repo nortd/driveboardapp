@@ -1,35 +1,3 @@
-dxfgrabber branch notes
-=======================
-
-This branch replaces the lasersaur dxf reader with a parser driving
-dxfgrabber.   All new work added by jet is under the existing
-lasersaur licensing.  This work is done on jet's personal time,
-not supported by any commercial entities, and donations are always welcome.
-
-You'll need to install the latest dxfgrabber from console:
-
-root@laserdev:~/LasaurApp# pip install dxfgrabber
-
-Changes:
-
-- dxf line colors from entity or entity layer
-- dxf units converted to mm
-- flip dxf files on the Y axis by default
-
-In Testing:
-- flip dxf files on the X axis by default
-
-TODO list:
-- fix circle/arc generation?  Make test file with holes from 1mm to
-  25mm for tests.
-- TEXT YES TEXT I'M WORKING ON THAT DILUTE! DILUTE! OK!
-- more dxf entities
-- remapping/reducing dxf color sets down to a set of 0..7
-  (which will probably change when we start rasterizing)
-
---- start of DriverboardApp official README.md ---
-
-
 DriveboardApp
 =============
 
