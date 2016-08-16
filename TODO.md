@@ -11,7 +11,7 @@ beauty bugs
 
 optimizations
 -------------
-- consider flipping y-axis
+- consider changing laser drive board for more frequency control
 
 
 features

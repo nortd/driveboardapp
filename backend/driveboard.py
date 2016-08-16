@@ -903,8 +903,8 @@ def job(jobdict):
             pxsize = float(conf['pxsize'])
         pxsize = max(pxsize, 0.01)  # prevent div by 0
         intensity(0.0)
-        pxsize_4 = pxsize/4.0  # use 4x horiz resol.
-        pixelwidth(pxsize_4)
+        pxsize_2 = pxsize/2.0  # use 2x horiz resol.
+        pixelwidth(pxsize_2)
         # assists on, beginning of pass if set to 'pass'
         if 'air_assist' in pass_:
             if pass_['air_assist'] == 'pass':
@@ -942,7 +942,7 @@ def job(jobdict):
                 pos = def_["pos"]
                 size = def_["size"]
                 data = def_["data"]  # in base64, format: jpg, png, gif
-                px_w = int(size[0]/pxsize_4)
+                px_w = int(size[0]/pxsize_2)
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
                 print "--- start of image processing ---"
