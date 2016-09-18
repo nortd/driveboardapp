@@ -27,8 +27,15 @@ void sense_init();
 #define SENSE_X2_LIMIT !((LIMIT_PIN >> X2_LIMIT_BIT) & 1)
 #define SENSE_Y1_LIMIT !((LIMIT_PIN >> Y1_LIMIT_BIT) & 1)
 #define SENSE_Y2_LIMIT !((LIMIT_PIN >> Y2_LIMIT_BIT) & 1)
+
+#ifdef ENABLE_3AXES
 #define SENSE_Z1_LIMIT !((LIMIT_PIN >> Z1_LIMIT_BIT) & 1)
 #define SENSE_Z2_LIMIT !((LIMIT_PIN >> Z2_LIMIT_BIT) & 1)
+#else
+#define SENSE_Z1_LIMIT 0
+#define SENSE_Z2_LIMIT 0
+#endif
+
 #define SENSE_CHILLER_OFF !((SENSE_PIN >> CHILLER_BIT) & 1)
 #define SENSE_DOOR_OPEN !((SENSE_PIN >> DOOR_BIT) & 1)
 
@@ -42,3 +49,4 @@ void control_aux1_assist(bool enable);
 void control_aux2_assist(bool enable);
 
 #endif
+

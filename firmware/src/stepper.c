@@ -562,7 +562,9 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
   uint8_t limit_bits;
   uint8_t x_overshoot_count = 6;
   uint8_t y_overshoot_count = 6;
+#ifdef ENABLE_3AXES
   uint8_t z_overshoot_count = 6;
+#endif
 
   if (x_axis) { out_bits |= (1<<X_STEP_BIT); }
   if (y_axis) { out_bits |= (1<<Y_STEP_BIT); }
