@@ -97,17 +97,8 @@ conf['stordir'] = directory
 
 
 ### auto-check hardware
-#
-conf['hardware'] = 'standard'
-### check if running on BBB
-# also works on old Beaglebone if named 'lasersaur'
-# os.uname() on BBB:
-# ('Linux', 'lasersaur', '3.8.13-bone20',
-#  '#1 SMP Wed May 29 06:14:59 UTC 2013', 'armv7l')
-uname = os.uname()
-if (sys.platform == "linux2"
-        and (uname[1] == 'lasersaur' or uname[2] == '3.8.13-bone20')):
-    conf['hardware'] = 'beaglebone'
+# default to beaglebone
+conf['hardware'] = 'beaglebone'
 ### check if running on RaspberryPi
 try:
     import RPi.GPIO
