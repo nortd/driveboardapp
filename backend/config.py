@@ -18,7 +18,7 @@ import glob
 
 conf = {
     'appname': 'driveboardapp',
-    'version': '16.07-alpha',
+    'version': '16.10-alpha',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
