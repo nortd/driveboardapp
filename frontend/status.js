@@ -113,7 +113,7 @@ function status_set_refresh() {
     if (app_visibility) {  // app focused
       if (status_cache.ready) {  // focused and ready -> idle
         every = 4
-      }  // else: every = 1
+      }  // else: every = 2
     } else {  // app blured
       every = 10
     }

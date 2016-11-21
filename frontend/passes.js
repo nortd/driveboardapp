@@ -207,7 +207,10 @@ function passes_get_active() {
     var feedrate = Math.round(parseFloat($(this).find("input.feedrate").val()))
     var intensity = Math.round(parseFloat($(this).find("input.intensity").val()))
     var pxsize = parseFloat($(this).find("input.pxsize").val())
-    var pass = {"items":[], "feedrate":feedrate, "intensity":intensity, "pxsize":pxsize}
+    var pass = {"items":[]}
+    if (typeof(feedrate) === 'number' && !isNaN(feedrate)) { pass.feedrate = feedrate }
+    if (typeof(intensity) === 'number' && !isNaN(intensity)) { pass.intensity = intensity }
+    if (typeof(pxsize) === 'number' && !isNaN(pxsize)) { pass.pxsize = pxsize }
     $(this).children('div.pass_colors').children('div').filter(':visible').each(function(k) {
       var idx = parseFloat($(this).find('.idxmem').text())
       pass.items.push(idx)
