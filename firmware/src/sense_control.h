@@ -50,7 +50,9 @@ void control_laser_intensity(uint8_t intensity);  //0-255 is 0-100%
 
 void control_air_assist(bool enable);
 
-#ifndef DRIVEBOARD_USB
+#ifdef DRIVEBOARD_USB
+  void control_laser_highlow(bool enable);
+#else
   void control_aux1_assist(bool enable);
   void control_aux2_assist(bool enable);
 #endif

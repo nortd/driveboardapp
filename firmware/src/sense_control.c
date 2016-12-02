@@ -60,7 +60,10 @@ void control_init() {
   //// air and aux assist control
   ASSIST_DDR |= (1 << AIR_ASSIST_BIT);   // set as output pin
   control_air_assist(false);
-  #ifndef DRIVEBOARD_USB
+  #ifdef DRIVEBOARD_USB
+    ASSIST_DDR |= (1 << LASER_HIGHLOW_BIT);   // set as output pin
+    control_laser_highlow(true);
+  #else
     ASSIST_DDR |= (1 << AUX1_ASSIST_BIT);  // set as output pin
     control_aux1_assist(false);
     ASSIST_DDR |= (1 << AUX2_ASSIST_BIT);  // set as output pin
@@ -83,7 +86,15 @@ inline void control_air_assist(bool enable) {
   }
 }
 
-#ifndef DRIVEBOARD_USB
+#ifdef DRIVEBOARD_USB
+  inline void control_laser_highlow(bool enable) {
+    if (enable) {
+      ASSIST_PORT |= (1 << LASER_HIGHLOW_BIT);
+    } else {
+      ASSIST_PORT &= ~(1 << LASER_HIGHLOW_BIT);
+    }
+  }
+#else
   inline void control_aux1_assist(bool enable) {
     if (enable) {
       ASSIST_PORT |= (1 << AUX1_ASSIST_BIT);
