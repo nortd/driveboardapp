@@ -434,6 +434,7 @@ ISR(TIMER1_COMPA_vect) {
       planner_discard_current_block();
       break;
 
+#ifndef DRIVEBOARD_USB
     case TYPE_AUX1_ASSIST_ENABLE:
       control_aux1_assist(true);
       current_block = NULL;
@@ -457,6 +458,7 @@ ISR(TIMER1_COMPA_vect) {
       current_block = NULL;
       planner_discard_current_block();
       break;
+#endif
   }
 
   busy = false;
@@ -585,7 +587,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       // Invert limit_bits if this is a reverse homing_cycle
       limit_bits ^= LIMIT_MASK;
     }
-    
+
     #ifdef DRIVEBOARD_USB
       bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT))
       bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT))

@@ -49,8 +49,10 @@ void control_init();
 void control_laser_intensity(uint8_t intensity);  //0-255 is 0-100%
 
 void control_air_assist(bool enable);
-void control_aux1_assist(bool enable);
 
-void control_aux2_assist(bool enable);
+#ifndef DRIVEBOARD_USB
+  void control_aux1_assist(bool enable);
+  void control_aux2_assist(bool enable);
+#endif
 
 #endif

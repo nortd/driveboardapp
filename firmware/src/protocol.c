@@ -248,6 +248,7 @@ inline void on_cmd(uint8_t command) {
     case CMD_AIR_DISABLE:
       planner_control_air_assist_disable();
       break;
+#ifndef DRIVEBOARD_USB
     case CMD_AUX1_ENABLE:
       planner_control_aux1_assist_enable();
       break;
@@ -260,6 +261,7 @@ inline void on_cmd(uint8_t command) {
     case CMD_AUX2_DISABLE:
       planner_control_aux2_assist_disable();
       break;
+#endif
     default:
       stepper_request_stop(STOPERROR_INVALID_COMMAND);
   }

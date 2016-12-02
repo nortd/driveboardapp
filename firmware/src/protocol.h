@@ -49,11 +49,12 @@
 
 #define CMD_AIR_ENABLE 'L'
 #define CMD_AIR_DISABLE 'M'
-#define CMD_AUX1_ENABLE 'N'
-#define CMD_AUX1_DISABLE 'O'
-#define CMD_AUX2_ENABLE 'P'
-#define CMD_AUX2_DISABLE 'Q'
-
+#ifndef DRIVEBOARD_USB
+  #define CMD_AUX1_ENABLE 'N'
+  #define CMD_AUX1_DISABLE 'O'
+  #define CMD_AUX2_ENABLE 'P'
+  #define CMD_AUX2_DISABLE 'Q'
+#endif
 
 #define PARAM_TARGET_X 'x'
 #define PARAM_TARGET_Y 'y'
