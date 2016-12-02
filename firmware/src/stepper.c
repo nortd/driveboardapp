@@ -585,7 +585,18 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       // Invert limit_bits if this is a reverse homing_cycle
       limit_bits ^= LIMIT_MASK;
     }
-    if (x_axis && !(limit_bits & (1<<X1_LIMIT_BIT))) {
+    
+    #ifdef DRIVEBOARD_USB
+      bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT))
+      bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT))
+      bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT))
+    #else
+      bool sense_x1_limit = !(limit_bits & (1<<X1_LIMIT_BIT))
+      bool sense_y1_limit = !(limit_bits & (1<<Y1_LIMIT_BIT))
+      bool sense_z1_limit = !(limit_bits & (1<<Z1_LIMIT_BIT))
+    #endif
+
+    if (x_axis && sense_x1_limit) {
       if(x_overshoot_count == 0) {
         x_axis = false;
         out_bits ^= (1<<X_STEP_BIT);
@@ -593,7 +604,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
         x_overshoot_count--;
       }
     }
-    if (y_axis && !(limit_bits & (1<<Y1_LIMIT_BIT))) {
+    if (y_axis && sense_y1_limit) {
       if(y_overshoot_count == 0) {
         y_axis = false;
         out_bits ^= (1<<Y_STEP_BIT);
@@ -602,7 +613,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       }
     }
     #ifdef ENABLE_3AXES
-    if (z_axis && !(limit_bits & (1<<Z1_LIMIT_BIT))) {
+    if (z_axis && sense_z1_limit) {
       if(z_overshoot_count == 0) {
         z_axis = false;
         out_bits ^= (1<<Z_STEP_BIT);

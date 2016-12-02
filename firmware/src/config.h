@@ -28,6 +28,7 @@
 // #define DEBUG_IGNORE_SENSORS  // set for debugging
 // #define NOT_GEARED
 // #define ENABLE_3AXES
+#define DRIVEBOARD_USB
 
 
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
@@ -51,14 +52,24 @@
 #define SENSE_PORT              PORTD
 #define SENSE_PIN               PIND
 #define CHILLER_BIT             3           // Arduino: 3
-#define DOOR_BIT                2           // Arduino: 2
+#ifdef DRIVEBOARD_USB
+  #define DOOR1_BIT             2           // Arduino: 2
+  #define DOOR2_BIT             7           // Arduino: 7
+#else
+  #define DOOR_BIT              2           // Arduino: 2
+#endif
 
 #define ASSIST_DDR              DDRD
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
-#define AUX1_ASSIST_BIT         7           // Arduino: 7
-#define AUX2_ASSIST_BIT         5           // Arduino: 5
-// laser pwm                    6           // Ardunio: 6
+#ifdef DRIVEBOARD_USB
+  #define LASER_PWM_BIT         5           // Arduino: 5
+  #define LASER_HIGHLOW_BIT     6           // Arduino: 6
+#else
+  #define AUX2_ASSIST_BIT       5           // Arduino: 5
+  #define LASER_PWM_BIT         6           // Arduino: 6
+  #define AUX1_ASSIST_BIT       7           // Arduino: 7
+#endif
 
 #define LIMIT_DDR               DDRC
 #define LIMIT_PORT              PORTC
@@ -81,8 +92,11 @@
 #define Z_DIRECTION_BIT         5           // Arduino: 13
 
 
-
-#define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR_BIT))
+#ifdef DRIVEBOARD_USB
+  #define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR1_BIT)|(1<<DOOR2_BIT))
+#else
+  #define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR_BIT))
+#endif
 #define LIMIT_MASK ((1<<X1_LIMIT_BIT)|(1<<X2_LIMIT_BIT)|(1<<Y1_LIMIT_BIT)|(1<<Y2_LIMIT_BIT)|(1<<Z1_LIMIT_BIT)|(1<<Z2_LIMIT_BIT))
 #define STEPPING_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT))
 #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT))
