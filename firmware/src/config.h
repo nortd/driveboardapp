@@ -23,10 +23,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1608             // int or float
+#define VERSION 1612             // int or float
 #define BAUD_RATE 57600
-// #define DEBUG_IGNORE_SENSORS  // set for debugging
-// #define NOT_GEARED
 // #define ENABLE_3AXES
 #define ENABLE_LASER_INTERLOCKS
 #define DRIVEBOARD_USB
