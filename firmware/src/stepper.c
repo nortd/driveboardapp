@@ -542,7 +542,15 @@ inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
 
 
 inline void adjust_intensity( uint8_t intensity ) {
-  control_laser_intensity(intensity);
+  #ifdef ENABLE_LASER_INTERLOCKS
+    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+      control_laser_intensity(0);
+    } else {
+      control_laser_intensity(intensity);
+    }
+  #else
+    control_laser_intensity(intensity);
+  #endif
 
   // depending on intensity adapt PWM freq
   // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
