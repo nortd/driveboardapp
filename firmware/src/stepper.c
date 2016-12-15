@@ -224,32 +224,39 @@ ISR(TIMER1_COMPA_vect) {
     return;
   }
 
-  // stop program when any limit is hit
-  if (SENSE_X1_LIMIT) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_X1);
-    busy = false;
-    return;
-  } else if (SENSE_X2_LIMIT) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_X2);
-    busy = false;
-    return;
-  } else if (SENSE_Y1_LIMIT) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_Y1);
-    busy = false;
-    return;
-  }else if (SENSE_Y2_LIMIT) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_Y2);
-    busy = false;
-    return;
-  } else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
-    busy = false;
-    return;
-  } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
-    stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
-    busy = false;
-    return;
-  }
+  #ifdef ENABLE_LASER_INTERLOCKS
+    // honor interlocks
+    // (for unlikely edge case the protocol loop stops)
+    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+      control_laser_intensity(0);
+    }
+    // stop program when any limit is hit
+    if (SENSE_X1_LIMIT) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_X1);
+      busy = false;
+      return;
+    } else if (SENSE_X2_LIMIT) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_X2);
+      busy = false;
+      return;
+    } else if (SENSE_Y1_LIMIT) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_Y1);
+      busy = false;
+      return;
+    }else if (SENSE_Y2_LIMIT) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_Y2);
+      busy = false;
+      return;
+    } else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
+      busy = false;
+      return;
+    } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
+      stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
+      busy = false;
+      return;
+    }
+  #endif
 
   // pulse steppers
   STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
