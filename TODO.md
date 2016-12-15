@@ -1,5 +1,13 @@
 
 
+DriveboardUSB TODO
+------------------
+- new freq control
+- 2/3 axis modes
+- laser to low on door open
+- laser to low on chiller fail
+
+
 bugs
 ----
 - stall between certain x-axis jogs

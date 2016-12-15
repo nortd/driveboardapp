@@ -73,7 +73,15 @@ void control_init() {
 
 
 inline void control_laser_intensity(uint8_t intensity) {
-  OCR0A = intensity;
+  #ifdef ENABLE_LASER_INTERLOCKS
+    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+      OCR0A = 0;
+    } else {
+      OCR0A = intensity;
+    }
+  #else
+    OCR0A = intensity;
+  #endif
 }
 
 

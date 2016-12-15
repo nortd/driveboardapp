@@ -9,35 +9,12 @@ Atmega328 Memory
   - 'data' is the constants (in flash and in sram)
   - 'bss' is uninitialized data (sram only)
 
-The avr-size tool shows the percentage of flash ("Program") and sram ("Data") use. Assuming the program does not dynamically allocate memory (malloc) the only uncertainty left is the stack. Depending on the depth of function calls, functions' parameters, and functions' local variables the stack may use up the sram. The stack will then corrupt static data. 
+The avr-size tool shows the percentage of flash ("Program") and sram ("Data") use. Assuming the program does not dynamically allocate memory (malloc) the only uncertainty left is the stack. Depending on the depth of function calls, functions' parameters, and functions' local variables the stack may use up the sram. The stack will then corrupt static data.
 
 What to do about the stack growing too big:
 
 - inline small functions (only works when not using size optimization -Os)
 
-
-
-
-Raster
-======
-
-The elementary building block for doing rasters is the raster line. It's the
-same as a normal line but when cruising at constant speed the intensity is
-modulated according to a raster buffer.
-
-To get constant speed for the entire raster line an acceleration and
-deceleration line needs to come before and after it.
-
-Assume raster line along x-axis.
-
-G0 X<start> Y<start+kerf>
-G0 X<start+offset>
-G8 X<start+offset+width>
-G8 D<raster data>
-G8 D<raster data>
-G8 D<raster data>
-G0 X<start+offset+width+offset>
-...
 
 
 

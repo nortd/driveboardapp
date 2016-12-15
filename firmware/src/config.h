@@ -28,6 +28,7 @@
 // #define DEBUG_IGNORE_SENSORS  // set for debugging
 // #define NOT_GEARED
 // #define ENABLE_3AXES
+#define ENABLE_LASER_INTERLOCKS
 #define DRIVEBOARD_USB
 
 
