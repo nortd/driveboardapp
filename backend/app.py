@@ -10,7 +10,6 @@ from config import conf
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
-
 ### Setup Argument Parser
 argparser = argparse.ArgumentParser(description='Run DriveboardApp.', prog='driveboardapp')
 argparser.add_argument('-v', '--version', action='version', version='%(prog)s ' + conf['version'],
@@ -28,6 +27,7 @@ args = argparser.parse_args()
 
 print "DriveboardApp " + conf['version']
 conf['usb_reset_hack'] = args.usbhack
+
 
 # run
 web.start(threaded=args.threaded, browser=args.browser, debug=args.debug)

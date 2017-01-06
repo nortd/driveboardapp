@@ -612,23 +612,13 @@ def start(threaded=True, browser=False, debug=False):
         bottle.debug(True)
     print "Persistent storage root is: " + conf['stordir']
     print "-----------------------------------------------------------------------------"
-    print "Bottle server starting up ..."
-    # print "Serial is set to %d bps" % BITSPERSECOND
-    print "Point your browser to: "
-    print "http://%s:%d/      (local)" % ('127.0.0.1', conf['network_port'])
-    print "Use Ctrl-C to quit."
+    print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    print
     driveboard.connect(server=True)  # also start websocket stat server
     if not driveboard.connected():
         print "---------------"
-        print "HOW TO configure the SERIAL PORT:"
-        print "in DriveboardApp/backend/ create a configuration file"
-        print "userconfig.py, and add something like:"
-        print "conf = {"
-        print "    'serial_port': 'COM3',"
-        print "}"
-        print "Any settings in this conf dictionary will overwrite config.py"
+        print "Maybe you need to add a configuration file? See:"
+        print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
         print "---------------"
     # open web-browser
     if browser:
