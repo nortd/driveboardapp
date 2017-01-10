@@ -9,14 +9,14 @@ Ports
 
 The board has 1x USB type-B, 2x barrel 2.1mm, 14x RJ45, 3x 12-pin headers.
 
-### USB (1x)
+### USB
 
 Port for connecting to the computer running DriveboardApp.
 
 - USB, type-B
 
 
-### Power (2x)
+### Power
 
 The board is typically powered through two barrel connectors with 5V and 24V. The 5V are used for sensors and control and the 24V are used for driving the steppers and air valve. Alternatively the board can be jumpered to use the 5V from the Laser PSU. In any case the Arduino USB power is optically isolated from any external wiring.
 
@@ -33,7 +33,7 @@ The board is designed to work with 2 or 3 stepper drivers (2 or 3 axes). The rec
 - DRIVER_Z, 12-pin header
 
 
-### Interlocks (9x)
+### Interlocks
 
 These are the imputs for the limit, door, and chiller switches. Switches are expected to be normally closed (NC). When triggered they should disconnect the loop. The point of the RJ45 jacks is to use ethernet patch cables for external wiring: Flexible Cat5 or Cat6 shielded (FTP, STP, or SFTP) patch cables with 26 AWG. Polarity does not matter.
 

@@ -249,15 +249,15 @@ ISR(TIMER1_COMPA_vect) {
       return;
     }
     #ifdef ENABLE_3AXES
-    else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
-      busy = false;
-      return;
-    } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
-      busy = false;
-      return;
-    }
+      else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
+        busy = false;
+        return;
+      } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
+        busy = false;
+        return;
+      }
     #endif
   #endif
 
