@@ -26,7 +26,7 @@
 #define VERSION 1612             // int or float
 #define BAUD_RATE 57600
 // #define ENABLE_3AXES
-#define ENABLE_LASER_INTERLOCKS
+// #define ENABLE_LASER_INTERLOCKS
 #define DRIVEBOARD_USB
 
 

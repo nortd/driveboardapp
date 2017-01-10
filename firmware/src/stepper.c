@@ -247,7 +247,9 @@ ISR(TIMER1_COMPA_vect) {
       stepper_request_stop(STOPERROR_LIMIT_HIT_Y2);
       busy = false;
       return;
-    } else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
+    }
+    #ifdef ENABLE_3AXES
+    else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
       stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
       busy = false;
       return;
@@ -256,6 +258,7 @@ ISR(TIMER1_COMPA_vect) {
       busy = false;
       return;
     }
+    #endif
   #endif
 
   // pulse steppers
@@ -602,13 +605,13 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
     }
 
     #ifdef DRIVEBOARD_USB
-      bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT))
-      bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT))
-      bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT))
+      bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT));
+      bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT));
+      bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT));
     #else
-      bool sense_x1_limit = !(limit_bits & (1<<X1_LIMIT_BIT))
-      bool sense_y1_limit = !(limit_bits & (1<<Y1_LIMIT_BIT))
-      bool sense_z1_limit = !(limit_bits & (1<<Z1_LIMIT_BIT))
+      bool sense_x1_limit = !(limit_bits & (1<<X1_LIMIT_BIT));
+      bool sense_y1_limit = !(limit_bits & (1<<Y1_LIMIT_BIT));
+      bool sense_z1_limit = !(limit_bits & (1<<Z1_LIMIT_BIT));
     #endif
 
     if (x_axis && sense_x1_limit) {
