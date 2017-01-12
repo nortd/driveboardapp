@@ -613,7 +613,7 @@ def start(threaded=True, browser=False, debug=False):
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    driveboard.connect(server=False)  # also start websocket stat server
+    driveboard.connect()
     if not driveboard.connected():
         print "---------------"
         print "Maybe you need to add a configuration file? See:"

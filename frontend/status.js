@@ -1,5 +1,4 @@
 
-var status_websocket = undefined
 var status_cache = {}
 var status_every_default = 500
 var status_every = status_every_default
@@ -175,21 +174,6 @@ function status_set_refresh() {
   }
   // console.log(status_every)
 }
-// function status_set_refresh() {
-//   if (status_websocket && status_websocket.readyState == 1) {  // connected
-//     var every = 2
-//     if (app_visibility) {  // app focused
-//       if (status_cache.ready) {  // focused and ready -> idle
-//         every = 4
-//       }  // else: every = 2
-//     } else {  // app blured
-//       every = 10
-//     }
-//     // send request to statserver
-//     status_websocket.send('{"status_every":'+every+'}')
-//     // console.log("every: " + every)
-//   }
-// }
 
 
 ///////////////////////////////////////////////////////////////////////////////

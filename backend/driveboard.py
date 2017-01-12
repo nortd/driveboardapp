@@ -11,7 +11,7 @@ import itertools
 import serial
 import serial.tools.list_ports
 from config import conf
-import statserver
+# import statserver
 
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -396,11 +396,11 @@ class SerialLoopClass(threading.Thread):
                     self._s['ready'] = False
                     self._s['underruns'] = self._status['underruns']
                     self._s['stackclear'] = self._status['stackclear']
-                    # send through status server
-                    if statserver.is_running() and statserver.msg_every_now():
-                        statusjson = json.dumps(self._status)
-                        statserver.send(statusjson)
-                        statserver.on_connected_message(statusjson)
+                    # # send through status server
+                    # if statserver.is_running() and statserver.msg_every_now():
+                    #     statusjson = json.dumps(self._status)
+                    #     statserver.send(statusjson)
+                    #     statserver.on_connected_message(statusjson)
             elif 31 < ord(char) < 65:  ### stop error markers
                 # chr is in [!-@], process flag
                 if char == ERROR_LIMIT_HIT_X1:
@@ -640,10 +640,11 @@ def find_controller(baudrate=conf['baudrate']):
 
 
 
-def connect(port=conf['serial_port'], baudrate=conf['baudrate'], server=False):
-    # start up status server
-    if server:
-        statserver.start()
+def connect(port=conf['serial_port'], baudrate=conf['baudrate']):
+# def connect(port=conf['serial_port'], baudrate=conf['baudrate'], server=False):
+    # # start up status server
+    # if server:
+    #     statserver.start()
 
     global SerialLoop
     if not SerialLoop:
@@ -691,22 +692,22 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate'], server=False):
         except serial.SerialException:
             SerialLoop = None
             print "ERROR: Cannot connect serial on port: %s" % (port)
-            if server:
-                # keep sending statserver messages
-                def run_fallback_stat_msgs():
-                    while True:
-                        if statserver.is_running():
-                            statusjson = json.dumps({'ready': False, 'serial': False})
-                            statserver.send(statusjson)
-                            statserver.on_connected_message(statusjson)
-                            time.sleep(4.0)
-                        else:
-                            print "driveboard:statusthread: stopped."
-                            break
-                global fallback_msg_thread
-                fallback_msg_thread = threading.Thread(target=run_fallback_stat_msgs)
-                fallback_msg_thread.deamon = True  # kill thread when main thread exits
-                fallback_msg_thread.start()
+            # if server:
+            #     # keep sending statserver messages
+            #     def run_fallback_stat_msgs():
+            #         while True:
+            #             if statserver.is_running():
+            #                 statusjson = json.dumps({'ready': False, 'serial': False})
+            #                 statserver.send(statusjson)
+            #                 statserver.on_connected_message(statusjson)
+            #                 time.sleep(4.0)
+            #             else:
+            #                 print "driveboard:statusthread: stopped."
+            #                 break
+            #     global fallback_msg_thread
+            #     fallback_msg_thread = threading.Thread(target=run_fallback_stat_msgs)
+            #     fallback_msg_thread.deamon = True  # kill thread when main thread exits
+            #     fallback_msg_thread.start()
     else:
         print "ERROR: disconnect first"
 
@@ -717,10 +718,10 @@ def connected():
 
 
 def close():
-    # stop status server
-    statserver.stop()
-    if fallback_msg_thread and fallback_msg_thread.is_alive():
-        fallback_msg_thread.join()
+    # # stop status server
+    # statserver.stop()
+    # if fallback_msg_thread and fallback_msg_thread.is_alive():
+    #     fallback_msg_thread.join()
 
     global SerialLoop
     if SerialLoop:
