@@ -130,15 +130,19 @@ function config_received() {
   queue_ready()
   // call 'ready' of library
   library_ready()
+  // call 'ready' of status
+  status_ready()
 
-  // connect to status channel via websocket
-  // connect and also continuously check connection and reconnect if closed
-  app_status_connect()
-  setInterval(function () {
-      if (!status_websocket || status_websocket.readyState == 3) {
-        app_status_connect()
-      }
-    }, 8000)
+
+
+  // // connect to status channel via websocket
+  // // connect and also continuously check connection and reconnect if closed
+  // app_status_connect()
+  // setInterval(function () {
+  //     if (!status_websocket || status_websocket.readyState == 3) {
+  //       app_status_connect()
+  //     }
+  //   }, 8000)
 }
 
 

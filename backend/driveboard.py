@@ -775,11 +775,14 @@ def reset():
 
 def status():
     """Get status."""
-    global SerialLoop
-    with SerialLoop.lock:
-        stats = copy.deepcopy(SerialLoop._status)
-        stats['serial'] = connected()  # make sure serial flag is up-to-date
-    return stats
+    if connected():
+        global SerialLoop
+        with SerialLoop.lock:
+            stats = copy.deepcopy(SerialLoop._status)
+            stats['serial'] = connected()  # make sure serial flag is up-to-date
+        return stats
+    else:
+        return {'serial':False, 'ready':False}
 
 
 def homing():
