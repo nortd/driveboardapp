@@ -572,7 +572,7 @@ class Server(threading.Thread):
                 self.server.handle_request()
             except KeyboardInterrupt:
                 break
-        print "\nShutting down..."
+        print "\nServer shutting down..."
         driveboard.close()
 
     def stop(self):
@@ -583,7 +583,7 @@ class Server(threading.Thread):
 S = Server()
 
 
-def start(threaded=True, browser=False, debug=False):
+def start(browser=False, debug=False):
     """ Start a bottle web server.
         Derived from WSGIRefServer.run()
         to have control over the main loop.
@@ -609,6 +609,7 @@ def start(threaded=True, browser=False, debug=False):
     S.server.quiet = not debug
     if debug:
         bottle.debug(True)
+    # print "Internal storage root is: " + conf['rootdir']
     print "Persistent storage root is: " + conf['stordir']
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
@@ -627,12 +628,8 @@ def start(threaded=True, browser=False, debug=False):
             print "Cannot open Webbrowser, please do so manually."
     sys.stdout.flush()  # make sure everything gets flushed
     # start server
-    if threaded:
-        print "INFO: Starting web server thread."
-        S.start()
-    else:
-        print "INFO: Entering main loop."
-        S.run()
+    print "INFO: Starting web server thread."
+    S.start()
 
 
 
