@@ -17,7 +17,7 @@ def init():
     root.title("DriveboardApp Server")
     # root.iconbitmap(os.path.join(conf['rootdir'], 'frontend', 'img', 'favicon.ico'))
     # root.iconbitmap(os.path.join('backend', 'img', 'favicon.ico'))
-    img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.png'))
+    img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.gif'))
     root.tk.call('wm', 'iconphoto', root._w, img)
 
 
