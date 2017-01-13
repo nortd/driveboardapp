@@ -1,4 +1,5 @@
 
+import os
 import sys
 import itertools
 import webbrowser
@@ -6,12 +7,16 @@ import webbrowser
 import Queue
 import Tkinter as tk
 
+from config import conf
+
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 def init():
     root = tk.Tk()
     root.title("DriveboardApp Server")
+    img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.png'))
+    root.tk.call('wm', 'iconphoto', root._w, img)
 
 
     # text widget
