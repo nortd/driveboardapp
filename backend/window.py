@@ -15,8 +15,10 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 def init():
     root = tk.Tk()
     root.title("DriveboardApp Server")
-    # img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.png'))
-    # root.tk.call('wm', 'iconphoto', root._w, img)
+    # root.iconbitmap(os.path.join(conf['rootdir'], 'frontend', 'img', 'favicon.ico'))
+    # root.iconbitmap(os.path.join('backend', 'img', 'favicon.ico'))
+    img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.png'))
+    root.tk.call('wm', 'iconphoto', root._w, img)
 
 
     # text widget
