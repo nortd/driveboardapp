@@ -18,8 +18,10 @@ argparser.add_argument('-v', '--version', action='version', version='%(prog)s ' 
                        default=False, help='print version of this app')
 argparser.add_argument('-d', '--debug', dest='debug', action='store_true',
                        default=False, help='print more verbose for debugging')
-argparser.add_argument('-b', '--browser', dest='browser', action='store_true',
-                       default=False, help='launch interface in browser')
+# argparser.add_argument('-b', '--browser', dest='browser', action='store_true',
+#                        default=False, help='launch interface in browser')
+argparser.add_argument('-n', '--nobrowser', dest='nobrowser', action='store_true',
+                       default=False, help='do not launch interface in browser')
 argparser.add_argument('-c', '--cli', dest='cli', action='store_true',
                        default=False, help='run without GUI window')
 argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
@@ -34,7 +36,7 @@ conf['usb_reset_hack'] = args.usbhack
 
 
 # start server in thread
-web.start(browser=args.browser, debug=args.debug)
+web.start(browser=(not args.nobrowser), debug=args.debug)
 
 # main thread loop
 while 1:

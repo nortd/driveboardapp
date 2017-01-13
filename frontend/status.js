@@ -166,7 +166,7 @@ function status_set_main_button(status) {
 function status_set_refresh() {
   status_every = status_every_default  // focused and busy
   if (app_visibility) {  // app focused
-    if (status_cache.ready) {  // focused and ready -> idle
+    if (!status_cache.serial || status_cache.ready) {  // focused and ready -> idle
       status_every = 4000
     }
   } else {  // app blured
