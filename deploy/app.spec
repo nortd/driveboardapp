@@ -37,28 +37,23 @@ elif sys.platform == "linux" or sys.platform == "linux2":
     add_resource_files( glob('../firmware/tools_linux/*') )
 
 
-# data_files = [
-#     ('../backend/*.gif', '.'),
-#     ('../frontend/*.html', '.'),
-#     ('../frontend/*.js', '.'),
-#     ('../frontend/css/*', '.'),
-#     ('../frontend/fonts/*', '.'),
-#     ('../frontend/img/*', '.'),
-#     ('../frontend/js/*', '.'),
-#     ('../firmware/*.hex', '.'),
-#     ('../library/*', '.')
-# ]
-
 data_files = [
-    ('../backend/*.gif', '.'),
-    ('../frontend/*.html', '.')
+    ('../backend/*.gif', 'backend'),
+    ('../frontend/*.html', 'frontend'),
+    ('../frontend/*.js', 'frontend'),
+    ('../frontend/css/*', 'frontend'),
+    ('../frontend/fonts/*', 'frontend'),
+    ('../frontend/img/*', 'frontend'),
+    ('../frontend/js/*', 'frontend'),
+    ('../firmware/*.hex', 'firmware'),
+    ('../library/*', 'library')
 ]
 
 ### build TOC
 a = Analysis(['../backend/app.py'],
              pathex=[os.path.abspath('__file__')],
              binaries=None,
-             datas=resource_files,
+             datas=data_files,
              hiddenimports=['pkg_reseources', 'encodings'],
              hookspath=None,
              runtime_hooks=[],
