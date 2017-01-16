@@ -50,7 +50,7 @@ data_files = [
 ]
 
 ### build TOC
-a = Analysis(['../backend/web.py'],
+a = Analysis(['../backend/app.py'],
              pathex=[os.path.abspath('__file__')],
              binaries=None,
              datas=data_files,
