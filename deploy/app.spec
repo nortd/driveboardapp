@@ -41,10 +41,10 @@ data_files = [
     ('../backend/*.gif', 'backend'),
     ('../frontend/*.html', 'frontend'),
     ('../frontend/*.js', 'frontend'),
-    ('../frontend/css/*', 'frontend'),
-    ('../frontend/fonts/*', 'frontend'),
-    ('../frontend/img/*', 'frontend'),
-    ('../frontend/js/*', 'frontend'),
+    ('../frontend/css/*', 'frontend/css'),
+    ('../frontend/fonts/*', 'frontend/fonts'),
+    ('../frontend/img/*', 'frontend/img'),
+    ('../frontend/js/*', 'frontend/js'),
     ('../firmware/*.hex', 'firmware'),
     ('../library/*', 'library')
 ]
