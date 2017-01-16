@@ -51,7 +51,7 @@ elif sys.platform == "linux" or sys.platform == "linux2":
 
 data_files = [
     ('../backend/*.gif', '.'),
-    ('../frontend/*.html', '.'),
+    ('../frontend/*.html', '.')
 ]
 
 ### build TOC
