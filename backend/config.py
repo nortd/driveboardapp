@@ -16,9 +16,9 @@ import os
 import sys
 import glob
 
-from encodings import hex_codec  # explicit for pyinstaller
-from encodings import ascii  # explicit for pyinstaller
-from encodings import utf_8  # explicit for pyinstaller
+# from encodings import hex_codec  # explicit for pyinstaller
+# from encodings import ascii  # explicit for pyinstaller
+# from encodings import utf_8  # explicit for pyinstaller
 
 
 conf = {
