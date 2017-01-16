@@ -2,27 +2,8 @@
 # -*- mode: python -*-
 
 import os, sys
-# from glob import glob
 
 block_cipher = None
-
-# resource_files = []
-# def add_resource_files(file_list):
-#     global resource_files
-#     for resfile in file_list:
-#         resource_files.append( (os.path.relpath(resfile,'../'), resfile, 'DATA') )
-#
-# ### files to pack into the executable
-# add_resource_files( glob('../backend/*.gif') )
-# add_resource_files( glob('../frontend/*.html') )
-# add_resource_files( glob('../frontend/*.js') )
-# add_resource_files( glob('../frontend/css/*') )
-# add_resource_files( glob('../frontend/fonts/*') )
-# add_resource_files( glob('../frontend/img/*') )
-# add_resource_files( glob('../frontend/js/*') )
-# add_resource_files( glob('../firmware/*.hex') )
-# add_resource_files( glob('../library/*') )
-
 
 data_files = [
     ('../backend/*.gif', 'backend'),
