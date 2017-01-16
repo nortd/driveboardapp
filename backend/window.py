@@ -17,7 +17,7 @@ def init():
     root.title("DriveboardApp Server")
     img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.gif'))
     root.tk.call('wm', 'iconphoto', root._w, img)
-    root.iconify()
+    # root.iconify()
 
 
     # text widget
@@ -93,3 +93,8 @@ def init():
 
 
     return root
+
+
+if __name__ == "__main__":
+    root = init()
+    root.mainloop()
