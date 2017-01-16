@@ -37,16 +37,21 @@ elif sys.platform == "linux" or sys.platform == "linux2":
     add_resource_files( glob('../firmware/tools_linux/*') )
 
 
+# data_files = [
+#     ('../backend/*.gif', '.'),
+#     ('../frontend/*.html', '.'),
+#     ('../frontend/*.js', '.'),
+#     ('../frontend/css/*', '.'),
+#     ('../frontend/fonts/*', '.'),
+#     ('../frontend/img/*', '.'),
+#     ('../frontend/js/*', '.'),
+#     ('../firmware/*.hex', '.'),
+#     ('../library/*', '.')
+# ]
+
 data_files = [
     ('../backend/*.gif', '.'),
     ('../frontend/*.html', '.'),
-    ('../frontend/*.js', '.'),
-    ('../frontend/css/*', '.'),
-    ('../frontend/fonts/*', '.'),
-    ('../frontend/img/*', '.'),
-    ('../frontend/js/*', '.'),
-    ('../firmware/*.hex', '.'),
-    ('../library/*', '.'),
 ]
 
 ### build TOC
