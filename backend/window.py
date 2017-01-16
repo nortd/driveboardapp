@@ -15,8 +15,8 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 def init():
     root = tk.Tk()
     root.title("DriveboardApp Server")
-    img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.gif'))
-    root.tk.call('wm', 'iconphoto', root._w, img)
+    # img = tk.PhotoImage(file=os.path.join(conf['rootdir'], 'backend', 'icon.gif'))
+    # root.tk.call('wm', 'iconphoto', root._w, img)
     # root.iconify()
 
 
@@ -53,9 +53,9 @@ def init():
 
     stdout_old = sys.stdout
     stderr_old = sys.stderr
-    output = OutputHandler()
-    sys.stdout = output
-    sys.stderr = output
+    # output = OutputHandler()
+    # sys.stdout = output
+    # sys.stderr = output
 
 
     # output consumer, a recursive tkinter callback
