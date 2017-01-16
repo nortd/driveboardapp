@@ -1,4 +1,4 @@
-
+# -*- coding: UTF-8 -*-
 import os
 import cProfile as profile
 import timeit

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # lasersaur.py - control a networked Lasersaur from python
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.

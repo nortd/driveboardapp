@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # Super Awesome DriveboardFirmware python flash script.
 #
 # Copyright (c) 2011 Nortd Labs

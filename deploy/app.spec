@@ -54,5 +54,5 @@ exe = EXE(pyz,
           upx=True,
           console=False )
 
-# app = BUNDLE(exe,
-#              name=target_location + '.app')
+if sys.platform == "darwin":
+    app = BUNDLE(exe, name=target_location + '.app')
