@@ -4,6 +4,8 @@
 import os, sys
 from glob import glob
 
+block_cipher = None
+
 resource_files = []
 def add_resource_files(file_list):
     global resource_files
@@ -38,21 +40,41 @@ elif sys.platform == "linux" or sys.platform == "linux2":
 ### build TOC
 a = Analysis(['../backend/app.py'],
              pathex=[os.path.abspath('__file__')],
-             hiddenimports=[],
-             hookspath=None)
+             binaries=None,
+             datas=resource_files,
+             hiddenimports=['pkg_reseources', 'encodings'],
+             hookspath=None,
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
 
 
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure,
+          a.zipped_data,
+          cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas + resource_files,
+          exclude_binaries=True,
           name=target_location,
+        #   a.datas + resource_files,
           debug=False,
-          strip=None,
+          strip=False,
           upx=True,
           console=False )
 
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               name=target_location )
+
 if sys.platform == "darwin":
-    app = BUNDLE(exe, name=target_location + '.app')
+    app = BUNDLE(coll,
+                 name=target_location + '.app',
+                 icon=None,
+                 bundle_identifier=None)

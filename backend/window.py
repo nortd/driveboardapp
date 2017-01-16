@@ -53,9 +53,9 @@ def init():
 
     stdout_old = sys.stdout
     stderr_old = sys.stderr
-    # output = OutputHandler()
-    # sys.stdout = output
-    # sys.stderr = output
+    output = OutputHandler()
+    sys.stdout = output
+    sys.stderr = output
 
 
     # output consumer, a recursive tkinter callback
