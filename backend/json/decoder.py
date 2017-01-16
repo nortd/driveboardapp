@@ -3,6 +3,7 @@
 import re
 import sys
 import struct
+from encodings import hex_codec  # explicit for pyinstaller
 
 from json.scanner import make_scanner
 try:

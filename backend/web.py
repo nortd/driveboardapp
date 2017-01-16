@@ -609,7 +609,7 @@ def start(browser=False, debug=False):
     S.server.quiet = not debug
     if debug:
         bottle.debug(True)
-    # print "Internal storage root is: " + conf['rootdir']
+    print "Internal storage root is: " + conf['rootdir']
     print "Persistent storage root is: " + conf['stordir']
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
