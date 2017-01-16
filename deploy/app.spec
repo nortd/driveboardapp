@@ -50,7 +50,7 @@ data_files = [
 ]
 
 ### build TOC
-a = Analysis(['../backend/app.py'],
+a = Analysis(['../backend/web.py'],
              pathex=[os.path.abspath('__file__')],
              binaries=None,
              datas=data_files,
@@ -75,7 +75,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False )
+          console=True )
 
 coll = COLLECT(exe,
                a.binaries,
