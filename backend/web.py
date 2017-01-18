@@ -12,7 +12,8 @@ import webbrowser
 import wsgiref.simple_server
 import bottle
 import traceback
-from config import conf
+from config import conf, userconfigurable, write_config_fields, conf_defaults
+
 import driveboard
 import jobimport
 
@@ -21,6 +22,7 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 DEBUG = False
 bottle.BaseRequest.MEMFILE_MAX = 1024*1024*100 # max 100Mb files
+time_status_last = 0
 
 
 def checkuser(user, pw):
@@ -98,15 +100,50 @@ def download(filename, dlname):
 ### LOW-LEVEL
 
 @bottle.route('/config')
+@bottle.route('/config/<key>/<value:path>')
 @bottle.auth_basic(checkuser)
-def config():
-    confcopy = copy.deepcopy(conf)
-    del confcopy['users']
-    return json.dumps(confcopy)
+def config(key=None, value=None):
+    if not key or not value:
+        confcopy = copy.deepcopy(conf)
+        del confcopy['users']
+        return json.dumps(confcopy)
+    else:
+        if key in userconfigurable:
+            if value == "_default_":
+                value = conf_defaults[key]
+            else:
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    pass
+            conf[key] = value
+            write_config_fields({key:value})
+            return "Written to config file."
+        else:
+            return "Not a user-configurable key."
+
+
+@bottle.route('/confserial')
+@bottle.route('/confserial/<port>')
+@bottle.auth_basic(checkuser)
+def confserial(port=None):
+    """Write serial port to configuration file."""
+    if port:
+        conf['serial_port'] = port
+        write_config_fields({'serial_port':port})
+        return "Serial port written to config file."
+    else:
+        return conf['serial_port']
+
+
 
 @bottle.route('/status')
 @bottle.auth_basic(checkuser)
 def status():
+    global time_status_last
+    if not driveboard.connected() and (time.time()-time_status_last) > 6.0:
+        driveboard.connect_withfind()
+    time_status_last = time.time()
     return json.dumps(driveboard.status())
 
 
@@ -614,12 +651,7 @@ def start(browser=False, debug=False):
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    driveboard.connect()
-    if not driveboard.connected():
-        print "---------------"
-        print "Maybe you need to add a configuration file? See:"
-        print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
-        print "---------------"
+    driveboard.connect_withfind()
     # open web-browser
     if browser:
         try:

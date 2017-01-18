@@ -10,7 +10,7 @@ import threading
 import itertools
 import serial
 import serial.tools.list_ports
-from config import conf
+from config import conf, write_config_fields
 
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -389,7 +389,7 @@ class SerialLoopClass(threading.Thread):
                         self._status['progress'] = 1.0
                     else:
                         self._status['progress'] = \
-                          round(SerialLoop.tx_pos/float(SerialLoop.job_size),3)
+                          round(self.tx_pos/float(self.job_size),3)
                     self._s['stops'].clear()
                     self._s['info'].clear()
                     self._s['ready'] = False
@@ -608,7 +608,7 @@ def find_controller(baudrate=conf['baudrate']):
     if os.name == 'posix':
         iterator = sorted(serial.tools.list_ports.grep('tty'))
         for port, desc, hwid in iterator:
-            print "Looking for controller on port: " + port
+            # print "Looking for controller on port: " + port
             try:
                 s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
                 lasaur_hello = s.read(8)
@@ -683,6 +683,27 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate']):
             print "ERROR: Cannot connect serial on port: %s" % (port)
     else:
         print "ERROR: disconnect first"
+
+
+def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate']):
+    connect(port=port, baudrate=baudrate)
+    if not connected():
+        # try finding driveboard
+        print "WARN: Cannot connect to configured serial port."
+        print "INFO: Trying to find port."
+        serialfindresult = find_controller()
+        if serialfindresult:
+            print "INFO: Hardware found at %s." % serialfindresult
+            connect(port=serialfindresult, baudrate=baudrate)
+        if connected():
+            print "INFO: Connected at %s." % serialfindresult
+            conf['serial_port'] = serialfindresult
+            write_config_fields({'serial_port':serialfindresult})
+        else:
+            print "-----------------------------------------------------------------------------"
+            print "How to configure:"
+            print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
+            print "-----------------------------------------------------------------------------"
 
 
 def connected():

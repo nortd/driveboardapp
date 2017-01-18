@@ -23,7 +23,7 @@ argparser.add_argument('-d', '--debug', dest='debug', action='store_true',
 argparser.add_argument('-n', '--nobrowser', dest='nobrowser', action='store_true',
                        default=False, help='do not launch interface in browser')
 argparser.add_argument('-c', '--cli', dest='cli', action='store_true',
-                       default=False, help='run without GUI window')
+                       default=False, help='run without server GUI window')
 argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
 args = argparser.parse_args()
@@ -31,7 +31,7 @@ args = argparser.parse_args()
 if not args.cli:
     root = window.init()
 
-print "DriveboardApp " + conf['version']
+print "DriveboardApp v" + conf['version']
 conf['usb_reset_hack'] = args.usbhack
 
 
