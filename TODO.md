@@ -1,9 +1,8 @@
 
 
 - ui loading indicator until config is received
-- serial setting/reconnect
-- move config file to permanent storage path
 - prepped frimwares for DriveboardUSB
+- test arduino tool chains cross-platform
 
 
 DriveboardUSB TODO

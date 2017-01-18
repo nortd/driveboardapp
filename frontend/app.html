@@ -146,6 +146,26 @@
         <div id="job_passes" style="width:100%;padding:6px"></div>
       </div>
 
+      <!-- connecting modal-->
+      <div id="connect_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content" style="width:562px">
+            <div class="modal-header">
+
+              <h4 class="modal-title" id="about_header"><span class="glyphicon glyphicon-refresh spinning"></span> Connecting ...</h4>
+            </div>
+            <div id="about_content" class="modal-body" style="width:60px;margin:30px;margin-left:auto;margin-right:auto">
+              <img src="/img/lasersaur-dino.png" style="width:60px">
+            </div>
+              <p style="margin:30px">
+                The frontend is trying to connect the server backend. This typically takes a couple of seconds.
+                If this takes longer it is probably because the server is not running any more. You may have to
+                manually start it again.
+              </p>
+          </div>
+        </div>
+      </div>
+
       <!-- about modal-->
       <div id="about_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -324,7 +344,7 @@
           <!-- add fill button -->
           <div id="addfill_wgt" class="dropdown input-group dropup tool_extra_btn">
             <button id="addfill_btn" class="btn btn-default dropdown-toggle ladda-button"
-              data-style="expand-right" data-spinner-color="#000000" type="button" 
+              data-style="expand-right" data-spinner-color="#000000" type="button"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="add fill to paths">
               <span class="glyphicon glyphicon-plus"></span> Fill
             </button>

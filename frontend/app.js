@@ -93,6 +93,13 @@ $(document).ready(function(){
     // console.log("onblur")
   }
 
+  // connecting modal
+  $('#connect_modal').modal({
+    show: true,
+    keyboard: false,
+    backdrop: 'static'
+  })
+
   // get appconfig from server
   request_get({
     url:'/config',

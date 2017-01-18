@@ -149,8 +149,10 @@ function status_check_new(data1, data2) {
 
 function status_set_main_button(status) {
   if (!status.server) {  // disconnected
+    $('#connect_modal').modal('show')
     $("#status_btn").removeClass("btn-warning btn-success").addClass("btn-danger")
   } else {  // connected
+    $('#connect_modal').modal('hide')
     if (!$.isEmptyObject(status.stops) || !status.serial) {  // connected but stops, serial down
       $("#status_btn").removeClass("btn-warning btn-success").addClass("btn-danger")
     } else {
