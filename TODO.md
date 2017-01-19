@@ -1,6 +1,5 @@
 
 
-- ui loading indicator until config is received
 - prepped frimwares for DriveboardUSB
 - test arduino tool chains cross-platform
 

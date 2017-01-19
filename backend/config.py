@@ -58,7 +58,6 @@ userconfigurable = {
     'network_host': "IP (NIC) to run server on. Leave '' for all.",
     'network_port': "Port to run server on.",
     'serial_port': "Serial port for Driveboard hardware.",
-    'firmware': "Firmware file to flash by default.",
     'workspace': "[x,y,z] dimensions of machine's work area in mm.",
     'grid_mm': "Visual grid of UI in mm.",
     'seekrate': "Default seek rate in mm/min",
@@ -128,9 +127,9 @@ if sys.platform == "linux2":
 ###
 
 
-
-
-if conf['hardware'] == 'beaglebone':
+if conf['hardware'] == 'standard':
+    conf['firmware'] = 'DriveboardUSBFirmware.hex'
+elif conf['hardware'] == 'beaglebone':
     conf['serial_port'] = '/dev/ttyO1'
     # if running as root
     if os.geteuid() == 0:
