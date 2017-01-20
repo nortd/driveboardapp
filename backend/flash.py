@@ -4,7 +4,7 @@
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
 
-import os, sys, time, subprocess
+import os, sys, time, subprocess, stat
 from config import conf
 
 
@@ -34,6 +34,9 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
         if sys.platform == "darwin":  # OSX
             AVRDUDEAPP    = os.path.join(resources_dir, "firmware/tools_osx/avrdude")
             AVRDUDECONFIG = os.path.join(resources_dir, "firmware/tools_osx/avrdude.conf")
+            # chmod +x
+            st = os.stat(AVRDUDEAPP)
+            os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)
 
         elif sys.platform == "win32": # Windows
             AVRDUDEAPP    = os.path.join(resources_dir, "firmware", "tools_win", "avrdude")
