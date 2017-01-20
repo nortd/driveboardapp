@@ -2,9 +2,9 @@ import os
 import sys
 
 if sys.platform == "darwin":
-    icon_opt = "-i icon.icns"
+    icon_opt = "--icon icon.icns"
 elif sys.platform == "win32":
-    icon_opt = "-i icon.ico"
+    icon_opt = "--icon icon.ico"
 else:
     icon_opt = ""
 
