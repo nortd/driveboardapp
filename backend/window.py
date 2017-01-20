@@ -45,14 +45,16 @@ def init():
     # output queue, required because of tkinter thread issues
     q = Queue.Queue()
 
+    stdout_old = sys.stdout
+    stderr_old = sys.stderr
+
     class OutputHandler(object):
         def write(self, msg):
+            stdout_old.write()
             q.put(msg)
         def flush(self):
             pass
 
-    stdout_old = sys.stdout
-    stderr_old = sys.stderr
     output = OutputHandler()
     sys.stdout = output
     sys.stderr = output
