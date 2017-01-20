@@ -100,5 +100,5 @@ else:  # OSX
 
     app = BUNDLE(coll,
                  name=target_location + '.app',
-                 icon=None,
+                 icon="icon.icns",
                  bundle_identifier=None)
