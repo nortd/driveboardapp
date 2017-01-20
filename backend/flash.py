@@ -8,13 +8,7 @@ import os, sys, time, subprocess
 from config import conf
 
 
-thislocation = os.path.dirname(os.path.realpath(__file__))
-resources_dir = os.path.abspath(os.path.join(thislocation, '..'))
-firmware_file = "DriveboardFirmware.hex"
-serial_port = "/dev/ttyACM0"
-
-
-def flash_upload(serial_port=serial_port, resources_dir=resources_dir, firmware_file=firmware_file):
+def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'], firmware_file=conf['firmware']):
     firmware_file = firmware_file.replace("/", "").replace("\\", "")  # make sure no evil injection
     FIRMWARE = os.path.join(resources_dir, "firmware", firmware_file)
 
@@ -204,6 +198,6 @@ def usb_reset_hack():
 
 
 if __name__ == '__main__':
-    ret = flash_upload(serial_port=conf['serial_port'], firmware_file=conf['firmware'])
+    ret = flash_upload()
     if ret != 0:
         print "ERROR: flash failed"

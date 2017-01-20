@@ -13,6 +13,7 @@ bugs
 ----
 - stall between certain x-axis jogs
   - send a pierce command in between
+- unplugging usb is not always ahndled gracfully
 
 beauty bugs
 -----------
