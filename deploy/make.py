@@ -1,17 +1,11 @@
 import os
 import sys
 
-if sys.platform == "darwin":
-    icon_opt = "--icon='icon.icns'"
-elif sys.platform == "win32":
-    icon_opt = "--icon='icon.ico'"
-else:
-    icon_opt = ""
 
 if not sys.platform == "darwin":  # Linux Windows
-    cmd = "python PyInstaller/pyinstaller.py --onefile --windowed %s --clean --noconfirm app.spec" % icon_opt
+    cmd = "python PyInstaller/pyinstaller.py --onefile --windowed --clean --noconfirm app.spec"
 else:  # OSX
-    cmd = "python PyInstaller/pyinstaller.py --onedir --windowed %s --clean --noconfirm app.spec" % icon_opt
+    cmd = "python PyInstaller/pyinstaller.py --onedir --windowed --clean --noconfirm app.spec"
 
 print cmd
 os.system(cmd)

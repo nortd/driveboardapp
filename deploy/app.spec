@@ -60,7 +60,8 @@ if not sys.platform == "darwin":  # Linux Windows
               debug=False,
               strip=False,
               upx=False,
-              console=False )
+              console=False,
+              icon="icon.ico" )
 
 else:  # OSX
     a = Analysis(['../backend/app.py'],
