@@ -604,36 +604,71 @@ class SerialLoopClass(threading.Thread):
 ###########################################################################
 
 
+# def find_controller(baudrate=conf['baudrate'], verbose=True):
+#     if os.name == 'posix':
+#         iterator = sorted(serial.tools.list_ports.grep('tty'))
+#         for port, desc, hwid in iterator:
+#             # print "Looking for controller on port: " + port
+#             try:
+#                 s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+#                 lasaur_hello = s.read(8)
+#                 if lasaur_hello.find(INFO_HELLO) > -1:
+#                     return port
+#                 s.close()
+#             except serial.SerialException:
+#                 pass
+#     else:
+#         # windows hack because pyserial does not enumerate USB-style com ports
+#         if verbose:
+#             print "Trying to find controller ..."
+#         for i in range(24):
+#             try:
+#                 s = serial.Serial(port=i, baudrate=baudrate, timeout=2.0)
+#                 lasaur_hello = s.read(8)
+#                 if lasaur_hello.find(INFO_HELLO) > -1:
+#                     return s.portstr
+#                 s.close()
+#             except serial.SerialException:
+#                 pass
+#     if verbose:
+#         print "ERROR: No controller found."
+#     return None
 def find_controller(baudrate=conf['baudrate'], verbose=True):
-    if os.name == 'posix':
-        iterator = sorted(serial.tools.list_ports.grep('tty'))
-        for port, desc, hwid in iterator:
-            # print "Looking for controller on port: " + port
-            try:
-                s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
-                lasaur_hello = s.read(8)
-                if lasaur_hello.find(INFO_HELLO) > -1:
-                    return port
+    iterator = sorted(serial.tools.list_ports.comports())
+    # look for Arduinos
+    arduinos = []
+    for port, desc, hwid in iterator:
+        if "uino" in desc:
+            arduinos.append(port)
+    # check these arduinos for driveboard firmware, take first
+    for port in arduinos:
+        try:
+            s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+            lasaur_hello = s.read(8)
+            if lasaur_hello.find(INFO_HELLO) > -1:
                 s.close()
-            except serial.SerialException:
-                pass
-    else:
-        # windows hack because pyserial does not enumerate USB-style com ports
-        if verbose:
-            print "Trying to find controller ..."
-        for i in range(24):
-            try:
-                s = serial.Serial(port=i, baudrate=baudrate, timeout=2.0)
-                lasaur_hello = s.read(8)
-                if lasaur_hello.find(INFO_HELLO) > -1:
-                    return s.portstr
+                return port
+            s.close()
+        except serial.SerialException:
+            pass
+    # check all comports for driveboard firmware
+    for port, desc, hwid in iterator:
+        try:
+            s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+            lasaur_hello = s.read(8)
+            if lasaur_hello.find(INFO_HELLO) > -1:
                 s.close()
-            except serial.SerialException:
-                pass
+                return port
+            s.close()
+        except serial.SerialException:
+            pass
+    # handle the case Arduino without firmware
+    if arduinos:
+        return arduinos[0]
+    # none found
     if verbose:
         print "ERROR: No controller found."
     return None
-
 
 
 def connect(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
