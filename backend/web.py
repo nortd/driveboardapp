@@ -142,7 +142,8 @@ def confserial(port=None):
 def status():
     global time_status_last
     if not driveboard.connected() and (time.time()-time_status_last) > 6.0:
-        driveboard.connect_withfind(verbose=False)
+        # driveboard.connect_withfind(verbose=False)
+        driveboard.connect(verbose=False)
     time_status_last = time.time()
     return json.dumps(driveboard.status())
 
@@ -651,7 +652,8 @@ def start(browser=False, debug=False):
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    driveboard.connect_withfind()
+    # driveboard.connect_withfind()
+    driveboard.connect()
     # open web-browser
     if browser:
         try:
