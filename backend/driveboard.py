@@ -604,7 +604,7 @@ class SerialLoopClass(threading.Thread):
 ###########################################################################
 
 
-def find_controller(baudrate=conf['baudrate']):
+def find_controller(baudrate=conf['baudrate'], verbose=True):
     if os.name == 'posix':
         iterator = sorted(serial.tools.list_ports.grep('tty'))
         for port, desc, hwid in iterator:
@@ -619,7 +619,8 @@ def find_controller(baudrate=conf['baudrate']):
                 pass
     else:
         # windows hack because pyserial does not enumerate USB-style com ports
-        print "Trying to find controller ..."
+        if verbose:
+            print "Trying to find controller ..."
         for i in range(24):
             try:
                 s = serial.Serial(port=i, baudrate=baudrate, timeout=2.0)
@@ -629,12 +630,13 @@ def find_controller(baudrate=conf['baudrate']):
                 s.close()
             except serial.SerialException:
                 pass
-    print "ERROR: No controller found."
+    if verbose:
+        print "ERROR: No controller found."
     return None
 
 
 
-def connect(port=conf['serial_port'], baudrate=conf['baudrate']):
+def connect(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
     global SerialLoop
     if not SerialLoop:
         SerialLoop = SerialLoopClass()
@@ -670,40 +672,48 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate']):
             start = time.time()
             while True:
                 if time.time() - start > 2:
-                    print "ERROR: Cannot get 'hello' from controller"
+                    if verbose:
+                        print "ERROR: Cannot get 'hello' from controller"
                     raise serial.SerialException
                 char = SerialLoop.device.read(1)
                 if char == INFO_HELLO:
-                    print "Controller says Hello!"
+                    if verbose:
+                        print "Controller says Hello!"
                     break
 
             SerialLoop.start()  # this calls run() in a thread
         except serial.SerialException:
             SerialLoop = None
-            print "ERROR: Cannot connect serial on port: %s" % (port)
+            if verbose:
+                print "ERROR: Cannot connect serial on port: %s" % (port)
     else:
-        print "ERROR: disconnect first"
+        if verbose:
+            print "ERROR: disconnect first"
 
 
-def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate']):
-    connect(port=port, baudrate=baudrate)
+def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
+    connect(port=port, baudrate=baudrate, verbose=verbose)
     if not connected():
         # try finding driveboard
-        print "WARN: Cannot connect to configured serial port."
-        print "INFO: Trying to find port."
-        serialfindresult = find_controller()
+        if verbose:
+            print "WARN: Cannot connect to configured serial port."
+            print "INFO: Trying to find port."
+        serialfindresult = find_controller(verbose=verbose)
         if serialfindresult:
-            print "INFO: Hardware found at %s." % serialfindresult
-            connect(port=serialfindresult, baudrate=baudrate)
+            if verbose:
+                print "INFO: Hardware found at %s." % serialfindresult
+            connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
         if connected():
-            print "INFO: Connected at %s." % serialfindresult
+            if verbose:
+                print "INFO: Connected at %s." % serialfindresult
             conf['serial_port'] = serialfindresult
             write_config_fields({'serial_port':serialfindresult})
         else:
-            print "-----------------------------------------------------------------------------"
-            print "How to configure:"
-            print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
-            print "-----------------------------------------------------------------------------"
+            if verbose:
+                print "-----------------------------------------------------------------------------"
+                print "How to configure:"
+                print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
+                print "-----------------------------------------------------------------------------"
 
 
 def connected():

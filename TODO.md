@@ -25,7 +25,6 @@ optimizations
 
 features
 --------
-- websocket fallback to http
 - lasertags
 - pixel size assignment for image rasters
 - gcode editor
