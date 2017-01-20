@@ -652,8 +652,8 @@ def start(browser=False, debug=False):
     print "-----------------------------------------------------------------------------"
     print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    # driveboard.connect_withfind()
-    driveboard.connect()
+    driveboard.connect_withfind()
+    # driveboard.connect()
     # open web-browser
     if browser:
         try:
