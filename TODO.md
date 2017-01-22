@@ -1,7 +1,6 @@
 
 
-- prepped frimwares for DriveboardUSB
-- test arduino tool chains cross-platform
+- when serial port ato changes, fails to do so in flash module
 
 
 DriveboardUSB TODO
