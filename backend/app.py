@@ -3,9 +3,7 @@ import sys
 import os
 import time
 import argparse
-import Tkinter
 
-import window
 import web
 from config import conf
 
@@ -28,12 +26,17 @@ argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
 args = argparser.parse_args()
 
+try:
+    import Tkinter
+except ImportError:
+    args.cli = True
+
 if not args.cli:
+    import window
     root = window.init()
 
 print "DriveboardApp v" + conf['version']
 conf['usb_reset_hack'] = args.usbhack
-
 
 # start server in thread
 web.start(browser=(not args.nobrowser), debug=args.debug)
