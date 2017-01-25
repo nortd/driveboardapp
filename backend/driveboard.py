@@ -498,7 +498,7 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_FEEDRATE:
                     self._s['feedrate'] = num
                 elif char == INFO_INTENSITY:
-                    self._s['intensity'] = num
+                    self._s['intensity'] = 100*num/255
                 elif char == INFO_DURATION:
                     self._s['duration'] = num
                 elif char == INFO_PIXEL_WIDTH:
@@ -838,6 +838,7 @@ def feedrate(val):
 def intensity(val):
     global SerialLoop
     with SerialLoop.lock:
+        val = max(min(255*val/100, 255), 0)
         SerialLoop.send_param(PARAM_INTENSITY, val)
 
 def duration(val):

@@ -53,17 +53,15 @@ void control_init() {
     DDRD |= _BV(PORTD5); // set PD5 as an output
     // use pwm mode 5, phase-corrected, non-inverted
     // count from 0 to OCR0A and OCR0A to 0, output LOW while counter above OCR0B
+    // TCCR0A = _BV(WGM00) | _BV(WGM01);
+    // TCCR0B = _BV(WGM02);
     TCCR0B = _BV(WGM02);
     TCCR0A = _BV(WGM00);
-    // TCCR0A |= _BV(COM0A1);  // output to PD6 (OC0A), non-inverted
-    TCCR0A |= _BV(COM0B1);  // output to PD5 (OC0B), non-inverted
-    // counter and prescaler
-    TCNT0 = 0;  // initialize counter to 0
-    TCCR0B |= _BV(CS01);  // prescaler: 8
+    TCCR0A |= _BV(COM0B1);  // output to PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
     // initial frequency
-    control_laser_frequency(3910);
-    // control_laser_frequency(489);
-    // control_laser_frequency(123);
+    control_laser_frequency(3910);  // 255us
+    // control_laser_frequency(489);  // 2044us
+    // control_laser_frequency(123);  // 8130
     // laser high/low mode
     ASSIST_DDR |= (1 << LASER_HIGHLOW_BIT);   // set as output pin
     control_laser_highlow(true);
@@ -107,15 +105,17 @@ inline void control_laser_frequency(long freq) {
   else if((cycles >>= 2) < 256) { clockSelectBits = _BV(CS02); }                // prescale by /256
   else if((cycles >>= 2) < 256) { clockSelectBits = _BV(CS02) | _BV(CS00); }    // prescale by /1024
   else { cycles = 256 - 1, clockSelectBits = _BV(CS02) | _BV(CS00); }           // request was out of bounds, set as maximum
-  OCR0A = pwmTop = cycles;                                                      // OCR0A is TOP in p & f correct pwm mode
+  pwmTop = cycles;                                                              // OCR0A is TOP in p & f correct pwm mode
+  // freq change takes effect on next intensity change
 }
 
 inline void control_laser_intensity(uint8_t intensity) {
   #ifdef DRIVEBOARD_USB
     // map intensity 0-255 to 0-TOP
-    // uint16_t temp = intensity*pwmTop;
-    // OCR0B = temp >> 8;  // div by 256
-    OCR0B = pwmTop >> 2;
+    uint16_t temp = intensity*pwmTop;
+    OCR0B = temp/255;  // div by 256
+    OCR0A = pwmTop;
+    TCCR0B |= clockSelectBits;
   #else
     OCR0A = intensity;
   #endif
