@@ -63,7 +63,7 @@ These are the imputs for the limit, door, and chiller switches. Switches are exp
 
 ### Laser Control
 
-The control wire connects to the control port of the laser PSU. The typical pins are `| 5V | TH | TL | WP | IN |` and all but TH need to connected as follows.
+The control wire connects to the control port of the laser PSU. The typical pins are `| 5V | TH | TL | WP | GND | IN |` and all but TH need to connected as follows.
 
  - LASER, RJ45
 

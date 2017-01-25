@@ -545,6 +545,7 @@ inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
 
 
 inline void adjust_intensity( uint8_t intensity ) {
+  // adjust intensity
   #ifdef ENABLE_LASER_INTERLOCKS
     if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
       control_laser_intensity(0);
@@ -555,18 +556,30 @@ inline void adjust_intensity( uint8_t intensity ) {
     control_laser_intensity(intensity);
   #endif
 
-  // depending on intensity adapt PWM freq
-  // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
-  if (intensity > 40) {
-    // set PWM freq to 3.9kHz
-    TCCR0B = _BV(CS01);
-  } else if (intensity > 10) {
-    // set PWM freq to 489Hz
-    TCCR0B = _BV(CS01) | _BV(CS00);
-  } else {
-    // set PWM freq to 122Hz
-    TCCR0B = _BV(CS02);
-  }
+  // adjust frequency
+  #ifdef DRIVEBOARD_USB
+    // PPI = PWMfreq/(feedrate/25.4/60)
+    if (intensity > 40) {
+      control_laser_frequency(3910);
+    } else if (intensity > 10) {
+      control_laser_frequency(489);
+    } else {
+      control_laser_frequency(123);
+    }
+  #else
+    // depending on intensity adapt PWM freq
+    // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
+    if (intensity > 40) {
+      // set PWM freq to 3.9kHz
+      TCCR0B = _BV(CS01);
+    } else if (intensity > 10) {
+      // set PWM freq to 489Hz
+      TCCR0B = _BV(CS01) | _BV(CS00);
+    } else {
+      // set PWM freq to 122Hz
+      TCCR0B = _BV(CS02);
+    }
+  #endif
 }
 
 

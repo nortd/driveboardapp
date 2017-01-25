@@ -46,6 +46,7 @@ void sense_init();
 
 void control_init();
 
+void control_laser_frequency(long freq); // freq in Hz
 void control_laser_intensity(uint8_t intensity);  //0-255 is 0-100%
 
 void control_air_assist(bool enable);

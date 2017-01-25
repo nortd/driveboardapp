@@ -1,6 +1,8 @@
 
 
+- python-imaging dependancy
 - when serial port ato changes, fails to do so in flash module
+
 
 
 DriveboardUSB TODO
