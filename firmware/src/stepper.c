@@ -559,13 +559,13 @@ inline void adjust_intensity( uint8_t intensity ) {
   // adjust frequency
   #ifdef DRIVEBOARD_USB
     // PPI = PWMfreq/(feedrate/25.4/60)
-    if (intensity > 40) {
-      control_laser_frequency(3910);
-    } else if (intensity > 10) {
-      control_laser_frequency(489);
-    } else {
-      control_laser_frequency(123);
-    }
+    // if (intensity > 40) {
+    //   control_laser_frequency(3910);
+    // } else if (intensity > 10) {
+    //   control_laser_frequency(489);
+    // } else {
+    //   control_laser_frequency(123);
+    // }
   #else
     // depending on intensity adapt PWM freq
     // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode

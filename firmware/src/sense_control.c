@@ -62,6 +62,8 @@ void control_init() {
     TCCR0B |= _BV(CS01);  // prescaler: 8
     // initial frequency
     control_laser_frequency(3910);
+    // control_laser_frequency(489);
+    // control_laser_frequency(123);
     // laser high/low mode
     ASSIST_DDR |= (1 << LASER_HIGHLOW_BIT);   // set as output pin
     control_laser_highlow(true);
@@ -94,6 +96,7 @@ void control_init() {
 }
 
 inline void control_laser_frequency(long freq) {
+  // period in us is: freq/16
   long cycles = (F_CPU/freq);                                                   // cycles for counter to reach TOP (OCR0A)
   cycles >>= 1;                                                                 // divide by 2, phase correct PWM implicitly doubles cycles
   // TCCR0B = _BV(WGM02);                                                          // reset timer registers
@@ -110,8 +113,9 @@ inline void control_laser_frequency(long freq) {
 inline void control_laser_intensity(uint8_t intensity) {
   #ifdef DRIVEBOARD_USB
     // map intensity 0-255 to 0-TOP
-    uint16_t temp = intensity*pwmTop;
-    OCR0B = temp >> 8;  // div by 256
+    // uint16_t temp = intensity*pwmTop;
+    // OCR0B = temp >> 8;  // div by 256
+    OCR0B = pwmTop >> 2;
   #else
     OCR0A = intensity;
   #endif
