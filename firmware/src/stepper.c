@@ -537,20 +537,21 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 
 
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
-  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-                               ((float)steps_per_minute/(float)current_block->nominal_rate);
-  uint8_t constrained_intensity = max(adjusted_intensity, 0);
   #ifdef DRIVEBOARD_USB
-    if (constrained_intensity < 64) {  // intensity < 25%
-      // low mode, drop laser IN (analog) to half
-      control_laser_highlow(false);
-      adjust_intensity(2*constrained_intensity);
-    } else {
-      // high mode, laser IN (analog) to full
-      control_laser_highlow(true);
-      adjust_intensity(constrained_intensity);
-    }
+    float ratio = (float)steps_per_minute/(float)current_block->nominal_rate;
+    uint8_t adjusted_intensity = max(0, current_block->nominal_laser_intensity*ratio);
+    // if (ratio < 0.25) {
+    //   control_laser_frequency(400);
+    // } else {
+    //   control_laser_frequency(100);
+    // }
+    // 100 - 10000 mm/min ~~ 10000 - 1000000 steps/min
+    // control_laser_frequency(steps_per_minute/15);
+    adjust_intensity(adjusted_intensity);
   #else
+    uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                                 ((float)steps_per_minute/(float)current_block->nominal_rate);
+    uint8_t constrained_intensity = max(adjusted_intensity, 0);
     adjust_intensity(constrained_intensity);
   #endif
 }

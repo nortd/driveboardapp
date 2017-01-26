@@ -23,10 +23,10 @@
 #include "stepper.h"
 #include "planner.h"
 
-
-static uint8_t pwmTop;
-static uint8_t clockSelectBits;
-
+#ifdef DRIVEBOARD_USB
+  static volatile uint8_t pwmTop;
+  static volatile uint8_t clockSelectBits;
+#endif
 
 void sense_init() {
   //// chiller, door
@@ -57,12 +57,14 @@ void control_init() {
     TCCR0A = _BV(WGM00);
     TCCR0A |= _BV(COM0B1);  // output to PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
     // initial frequency
-    control_laser_frequency(3910);  // 255us
-    // control_laser_frequency(489);  // 2044us
+    // control_laser_frequency(3910);  // 255us
+    control_laser_frequency(489);  // 2044us
+    // control_laser_frequency(350);
     // control_laser_frequency(123);  // 8130
     // laser high/low mode
     ASSIST_DDR |= (1 << LASER_HIGHLOW_BIT);   // set as output pin
-    control_laser_highlow(true);
+    // control_laser_highlow(true);
+    control_laser_highlow(false);
   #else
     //// laser control
     // Setup Timer0 for a 488.28125Hz "phase correct PWM" wave (assuming a 16Mhz clock)

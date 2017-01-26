@@ -119,7 +119,7 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
   // calculate nominal_speed (mm/min) and nominal_rate (step/min)
   // minimum stepper speed is limited by MINIMUM_STEPS_PER_MINUTE in stepper.c
   double inverse_minute = feed_rate * inverse_millimeters;
-  block->nominal_speed = block->millimeters * inverse_minute; // always > 0
+  block->nominal_speed = feed_rate; // always > 0
   block->nominal_rate = ceil(block->step_event_count * inverse_minute); // always > 0
 
   // compute the acceleration rate for this block. (step/min/acceleration_tick)
