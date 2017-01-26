@@ -1,8 +1,4 @@
 
-- laser freq
-  - freq always ~270us
-  - OCR0B = 0.5*TOP => 50%, OCR0B = 0.25*TOP => 33%
-
 - python-imaging dependancy
 - when serial port ato changes, fails to do so in flash module
 

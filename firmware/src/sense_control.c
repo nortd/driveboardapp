@@ -53,8 +53,6 @@ void control_init() {
     DDRD |= _BV(PORTD5); // set PD5 as an output
     // use pwm mode 5, phase-corrected, non-inverted
     // count from 0 to OCR0A and OCR0A to 0, output LOW while counter above OCR0B
-    // TCCR0A = _BV(WGM00) | _BV(WGM01);
-    // TCCR0B = _BV(WGM02);
     TCCR0B = _BV(WGM02);
     TCCR0A = _BV(WGM00);
     TCCR0A |= _BV(COM0B1);  // output to PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
@@ -97,8 +95,6 @@ inline void control_laser_frequency(long freq) {
   // period in us is: freq/16
   long cycles = (F_CPU/freq);                                                   // cycles for counter to reach TOP (OCR0A)
   cycles >>= 1;                                                                 // divide by 2, phase correct PWM implicitly doubles cycles
-  // TCCR0B = _BV(WGM02);                                                          // reset timer registers
-  // TCCR0A = _BV(WGM00);                                                          // reset timer registers
   if(cycles < 256) { clockSelectBits = _BV(CS00); }                             // no prescale, full xtal
   else if((cycles >>= 3) < 256) { clockSelectBits = _BV(CS01); }                // prescale by /8
   else if((cycles >>= 3) < 256) { clockSelectBits = _BV(CS01) | _BV(CS00); }    // prescale by /64
@@ -113,7 +109,7 @@ inline void control_laser_intensity(uint8_t intensity) {
   #ifdef DRIVEBOARD_USB
     // map intensity 0-255 to 0-TOP
     uint16_t temp = intensity*pwmTop;
-    OCR0B = temp/255;  // div by 256
+    OCR0B = temp/255;  // div by 255
     OCR0A = pwmTop;
     TCCR0B |= clockSelectBits;
   #else
