@@ -55,6 +55,7 @@
 #include "serial.h"  //for debug
 
 
+#define CYCLES_PER_MINUTE (60*F_CPU)  // 960000000
 #define CYCLES_PER_MICROSECOND (F_CPU/1000000)  //16000000/1000000 = 16
 #define CYCLES_PER_ACCELERATION_TICK (F_CPU/ACCELERATION_TICKS_PER_SECOND)  // 16MHz/100 = 160000
 
@@ -79,6 +80,12 @@ static volatile bool processing_flag;         // indicates if blocks are being p
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
 
+// static uint32_t pwm_frequency = CONFIG_PWM_MAX_FREQ;
+// static uint32_t min_pulse_x2 = CONFIG_PWM_MIN_PULSE*2;
+static volatile uint8_t pwm_counter = 1;
+static volatile uint8_t pwm_duty = 0;
+#define PWM_TRIGGER_EVERY 8
+
 
 // prototypes for static functions (non-accesible from other files)
 static bool acceleration_tick();
@@ -93,6 +100,12 @@ void stepper_init() {
   // Configure directions of interface pins
   STEPPING_DDR |= (STEPPING_MASK | DIRECTION_MASK);
   STEPPING_PORT = (STEPPING_PORT & ~(STEPPING_MASK | DIRECTION_MASK)) | INVERT_MASK;
+
+  // configure timer 0, pwm reset timer
+  TCCR0A = 0; // Normal operation
+  TCCR0B = 0; // Disable timer until needed.
+  TIMSK0 |= (1<<TOIE0); // Enable Timer0 interrupt flag
+  TCNT0 = 0;
 
   // waveform generation = 0100 = CTC
   TCCR1B &= ~(1<<WGM13);
@@ -194,6 +207,14 @@ void stepper_set_position(double x, double y, double z) {
 
 
 
+// The PWM Reset ISR
+// TIMER0 overflow interrupt service routine
+// called whenever TCNT0 overflows
+ISR(TIMER0_OVF_vect) {
+  ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+  TCCR0B = 0;  // disable
+}
+
 
 // The Stepper Reset ISR
 // It resets the motor port after a short period completing one step cycle.
@@ -260,6 +281,46 @@ ISR(TIMER1_COMPA_vect) {
       }
     #endif
   #endif
+
+  // pulse laser
+  if (pwm_counter < PWM_TRIGGER_EVERY) {
+    pwm_counter += 1;
+  } else {
+    // generate pulse
+    if (pwm_duty == 0) {
+      ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+    } else {
+      TCCR0B = 0;
+      ASSIST_PORT |= (1 << LASER_PWM_BIT);  // on
+      if (pwm_duty < 242) {
+        // pwm for these values
+        // pwm for higher values does not seem to be stable on osci but may be display/phase issue
+        //
+        // set timer0 for reset
+        // maximum is 0.01632s (261120 cycles)
+        // may limit pulse duration on very slow moves
+        // uint32_t cycles = (pwm_duty*cycles_per_step_event*pwm_counter)/255;
+        // uint32_t cycles = cycles_per_step_event*2*(pwm_duty/255.0);
+        // uint32_t cycles = (cycles_per_step_event*pwm_duty) >> 8;
+        // uint32_t cycles = (cycles_per_step_event/255)*pwm_duty;
+        // uint32_t cycles = ((CYCLES_PER_MINUTE/(adjusted_rate*255)))*pwm_duty;
+        // uint32_t cycles = (pwm_duty*CYCLES_PER_MINUTE)/(255*adjusted_rate);
+        // uint32_t cycles = (CYCLES_PER_MINUTE/adjusted_rate) >> 1;
+        // uint32_t cycles = (uint32_t)((float)cycles_per_step_event*((float)pwm_duty/255.0));
+        uint32_t cycles = PWM_TRIGGER_EVERY*pwm_duty*(cycles_per_step_event >> 8);
+        uint8_t prescaler = 0;
+        if(cycles < 256) { prescaler |= _BV(CS00); }                            // no prescale, full xtal
+        else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01); }               // prescale by /8
+        else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01) | _BV(CS00); }   // prescale by /64
+        else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02); }               // prescale by /256
+        else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02) | _BV(CS00); }   // prescale by /1024
+        else { cycles = 255, prescaler |= _BV(CS02) | _BV(CS00); }              // over 261120 cycles, set as maximum
+        TCNT0 = 256-cycles;  // isr is triggered when overflowing
+        TCCR0B = prescaler;
+      }
+    }
+    pwm_counter = 1;
+  }
 
   // pulse steppers
   STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
@@ -532,55 +593,75 @@ inline uint32_t config_step_timer(uint32_t cycles) {
 inline void adjust_speed( uint32_t steps_per_minute ) {
   // steps_per_minute is typicaly just adjusted_rate
   if (steps_per_minute < MINIMUM_STEPS_PER_MINUTE) { steps_per_minute = MINIMUM_STEPS_PER_MINUTE; }
-  cycles_per_step_event = config_step_timer((CYCLES_PER_MICROSECOND*1000000*60)/steps_per_minute);
+  cycles_per_step_event = config_step_timer(CYCLES_PER_MINUTE/steps_per_minute);
 }
 
 
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
-  #ifdef DRIVEBOARD_USB
-    float ratio = (float)steps_per_minute/(float)current_block->nominal_rate;
-    uint8_t adjusted_intensity = max(0, current_block->nominal_laser_intensity*ratio);
-    // if (ratio < 0.25) {
-    //   control_laser_frequency(400);
-    // } else {
-    //   control_laser_frequency(100);
-    // }
-    // 100 - 10000 mm/min ~~ 10000 - 1000000 steps/min
-    // control_laser_frequency(steps_per_minute/15);
-    adjust_intensity(adjusted_intensity);
-  #else
-    uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-                                 ((float)steps_per_minute/(float)current_block->nominal_rate);
-    uint8_t constrained_intensity = max(adjusted_intensity, 0);
-    adjust_intensity(constrained_intensity);
-  #endif
+  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+      (0.1 + 0.9*(((float)steps_per_minute/(float)current_block->nominal_rate)));
+  uint8_t constrained_intensity = max(adjusted_intensity, 0);
+  adjust_intensity(constrained_intensity);
+  // adjust_intensity(current_block->nominal_laser_intensity);
 }
 
 
 inline void adjust_intensity( uint8_t intensity ) {
-  // adjust intensity
-  #ifdef ENABLE_LASER_INTERLOCKS
-    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
-      control_laser_intensity(0);
-    } else {
-      control_laser_intensity(intensity);
-    }
-  #else
-    control_laser_intensity(intensity);
-  #endif
-
   // adjust frequency
   #ifdef DRIVEBOARD_USB
-    // PPI = PWMfreq/(feedrate/25.4/60)
-    // if (intensity > 40) {
-    //   control_laser_frequency(3910);
-    // } else if (intensity > 10) {
-    //   control_laser_frequency(489);
-    // } else {
-    //   control_laser_frequency(123);
+    // adjust frequency, make sure pulse duration does not go too low
+    // uint32_t pulse_dur = (1000000*intensity)/(pwm_frequency << 8);
+    // if (pulse_dur < CONFIG_PWM_MIN_PULSE + (256 - intensity >> 1)) {
+    //   pwm_frequency = max(pwm_frequency >> 1, CONFIG_PWM_MIN_FREQ); // half
+    // } else if (pulse_dur > min_pulse_x2) {
+    //   pwm_frequency = min(pwm_frequency << 1, CONFIG_PWM_MAX_FREQ);  // double
     // }
-  #else
-    // depending on intensity adapt PWM freq
+    // control_laser_frequency(pwm_frequency);
+
+    // uint32_t pulse_dur = (1000000*intensity)/(pwm_frequency << 8);
+    // if (pulse_dur < CONFIG_PWM_MIN_PULSE) {
+    //   control_laser_frequency(intensity/(pulse_dur << 8));
+    // }
+    //
+    // if (intensity > 80) {
+    //   control_laser_frequency(3840);
+    // } else if (intensity > 60) {
+    //   control_laser_frequency(1920);
+    // } else if (intensity > 40) {
+    //   control_laser_frequency(960);
+    // } else if (intensity > 20) {
+    //   control_laser_frequency(480);
+    // } else if (intensity > 10) {
+    //   control_laser_frequency(240);
+    // } else {
+    //   control_laser_frequency(80);
+    // }
+    //
+    // // control_laser_frequency(intensity*8);
+
+    // adjust intensity
+    #ifdef ENABLE_LASER_INTERLOCKS
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        pwm_duty = 0;
+      } else {
+        pwm_duty = intensity;
+      }
+    #else
+      pwm_duty = intensity;
+    #endif
+
+  #else  // Driveboard (standard)
+    // adjust intensity
+    #ifdef ENABLE_LASER_INTERLOCKS
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        control_laser_intensity(0);
+      } else {
+        control_laser_intensity(intensity);
+      }
+    #else
+      control_laser_intensity(intensity);
+    #endif
+    // adjust frequency
     // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
     if (intensity > 40) {
       // set PWM freq to 3.9kHz

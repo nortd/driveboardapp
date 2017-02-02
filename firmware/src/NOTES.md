@@ -16,6 +16,25 @@ What to do about the stack growing too big:
 - inline small functions (only works when not using size optimization -Os)
 
 
+New Beam Dynamics Contemplations
+================================
+
+While previous laser control and beam dynamics workes quite well there are still some edge cases that could be handled better. The challenge is to control very low intensity output while still have perforation free output at higher speeds. Here we run against limitations of the laser system:
+
+- The laser system has a ioniztion threshold. If the control pulse is too short we don't get any output.
+- Short pulse duration are dependant on the PWM frequency and intensity setting (pulse_dur_in_sec = intensity/(frequency*top_intensity))
+- Additionally the laser system can deal with slightly shorter pulse duration when frequency is higher (roughly: 100Hz -> 200us and 500Hz+ -> 100us).
+
+Pegging the pulses to motor steps
+---------------------------------
+
+Initiating the pulses along with motor steps gives us automatic beam dynamics (PPI, so to say).
+
+- ~ 100 uSteps/mm
+- @6000mm/min -> 10000uSteps/sec
+- @120mm/min -> 200uSteps/sec
+- trigger every other step => 100 - 5000 Hz
+
 
 
 Beam Dynamics Contemplations
