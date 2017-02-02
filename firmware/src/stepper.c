@@ -598,8 +598,11 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 
 
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
+  float dimm = 0.1+((0.9*(float)current_block->nominal_laser_intensity)/255.0);
   uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-      (0.1 + 0.9*(((float)steps_per_minute/(float)current_block->nominal_rate)));
+      ((1.0-dimm) + dimm*(((float)steps_per_minute/(float)current_block->nominal_rate)));
+  // uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+  //     (0.1 + 0.9*(((float)steps_per_minute/(float)current_block->nominal_rate)));
   uint8_t constrained_intensity = max(adjusted_intensity, 0);
   adjust_intensity(constrained_intensity);
   // adjust_intensity(current_block->nominal_laser_intensity);
