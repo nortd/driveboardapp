@@ -47,7 +47,7 @@
   #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Z_AXIS 0  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_BEAMDYNAMICS_START 0.1   // 0-1.0, progressive dimming
+  #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
   #define CONFIG_BEAMDYNAMICS_EVERY 8     // trigger mode, multiples of steps
 #else
   #define CONFIG_INVERT_X_AXIS 0  // 0 is regular, 1 inverts the y direction

@@ -1,6 +1,7 @@
 
 - python-imaging dependancy
 - when serial port ato changes, fails to do so in flash module
+- images don't load in one go
 
 
 

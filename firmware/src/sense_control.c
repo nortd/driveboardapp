@@ -81,8 +81,8 @@ void control_init() {
 
   #ifdef DRIVEBOARD_USB
     ASSIST_DDR |= (1 << LASER_HIGHLOW_BIT);   // set as output pin
-    // control_laser_highlow(true);
-    control_laser_highlow(false);
+    control_laser_highlow(true);
+    // control_laser_highlow(false);
   #else
     ASSIST_DDR |= (1 << AUX1_ASSIST_BIT);  // set as output pin
     control_aux1_assist(false);
@@ -107,8 +107,9 @@ inline void control_laser_intensity(uint8_t intensity) {
   #else
     // adjust intensity
     #ifdef ENABLE_LASER_INTERLOCKS
-      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF || intensity == 0) {
         pwm_duty = 0;
+        ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
       } else {
         pwm_duty = intensity;
       }

@@ -584,13 +584,17 @@ inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
   // Laser pulses are triggered along with motion steps (freq linked to speed).
   // Additional progressive dimming with increasing intensity is added here.
   // map intensity [0,255] -> [CONFIG_PWM_DIMM_OFFSET, 1.0]
-  float dimm = CONFIG_BEAMDYNAMICS_START+(((1.0-CONFIG_BEAMDYNAMICS_START) *
-                 (float)current_block->nominal_laser_intensity)/255.0);
-  // actual dimming function, (1-d) + (d * slowdown_factor)
-  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-                 ((1.0-dimm) + dimm*(((float)steps_per_minute/
-                 (float)current_block->nominal_rate)));
+  // float dimm = CONFIG_BEAMDYNAMICS_START+(((1.0-CONFIG_BEAMDYNAMICS_START) *
+  //                (float)current_block->nominal_laser_intensity)/255.0);
+  // // actual dimming function, (1-d) + (d * slowdown_factor)
+  // uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+  //                ((1.0-dimm) + dimm*(((float)steps_per_minute/
+  //                (float)current_block->nominal_rate)));
   // adjusted_intensity = max(adjusted_intensity, 0);
+
+  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                 (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
+                 (((float)steps_per_minute/(float)current_block->nominal_rate)));
   control_laser_intensity(adjusted_intensity);
 }
 
