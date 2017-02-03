@@ -80,19 +80,15 @@ static volatile bool processing_flag;         // indicates if blocks are being p
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
 
-// static uint32_t pwm_frequency = CONFIG_PWM_MAX_FREQ;
-// static uint32_t min_pulse_x2 = CONFIG_PWM_MIN_PULSE*2;
-static volatile uint8_t pwm_counter = 1;
-static volatile uint8_t pwm_duty = 0;
-#define PWM_TRIGGER_EVERY 8
-
+#ifndef STATIC_PWM_FREQ
+  static volatile uint8_t pwm_counter = 1;
+#endif
 
 // prototypes for static functions (non-accesible from other files)
 static bool acceleration_tick();
 static void adjust_speed( uint32_t steps_per_minute );
 static void adjust_beam_dynamics( uint32_t steps_per_minute );
 static uint32_t config_step_timer(uint32_t cycles);
-static void adjust_intensity( uint8_t intensity );
 
 
 // Initialize and start the stepper motor subsystem
@@ -100,12 +96,6 @@ void stepper_init() {
   // Configure directions of interface pins
   STEPPING_DDR |= (STEPPING_MASK | DIRECTION_MASK);
   STEPPING_PORT = (STEPPING_PORT & ~(STEPPING_MASK | DIRECTION_MASK)) | INVERT_MASK;
-
-  // configure timer 0, pwm reset timer
-  TCCR0A = 0; // Normal operation
-  TCCR0B = 0; // Disable timer until needed.
-  TIMSK0 |= (1<<TOIE0); // Enable Timer0 interrupt flag
-  TCNT0 = 0;
 
   // waveform generation = 0100 = CTC
   TCCR1B &= ~(1<<WGM13);
@@ -123,7 +113,7 @@ void stepper_init() {
   TIMSK2 |= (1<<TOIE2); // Enable Timer2 interrupt flag
 
   adjust_speed(MINIMUM_STEPS_PER_MINUTE);
-  adjust_intensity(0);
+  control_laser_intensity(0);
   clear_vector(stepper_position);
   stepper_set_position( CONFIG_X_ORIGIN_OFFSET,
                         CONFIG_Y_ORIGIN_OFFSET,
@@ -282,45 +272,37 @@ ISR(TIMER1_COMPA_vect) {
     #endif
   #endif
 
-  // pulse laser
-  if (pwm_counter < PWM_TRIGGER_EVERY) {
-    pwm_counter += 1;
-  } else {
-    // generate pulse
-    if (pwm_duty == 0) {
-      ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+  #ifndef STATIC_PWM_FREQ
+    // pulse laser
+    uint8_t duty = control_get_intensity();
+    if (pwm_counter < CONFIG_BEAMDYNAMICS_EVERY) {
+      pwm_counter += 1;
     } else {
-      TCCR0B = 0;
-      ASSIST_PORT |= (1 << LASER_PWM_BIT);  // on
-      if (pwm_duty < 242) {
-        // pwm for these values
-        // pwm for higher values does not seem to be stable on osci but may be display/phase issue
-        //
+      // generate pulse
+      if (duty == 0) {
+        ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+      } else {
+        TCCR0B = 0;
+        ASSIST_PORT |= (1 << LASER_PWM_BIT);  // on
         // set timer0 for reset
         // maximum is 0.01632s (261120 cycles)
         // may limit pulse duration on very slow moves
-        // uint32_t cycles = (pwm_duty*cycles_per_step_event*pwm_counter)/255;
-        // uint32_t cycles = cycles_per_step_event*2*(pwm_duty/255.0);
-        // uint32_t cycles = (cycles_per_step_event*pwm_duty) >> 8;
-        // uint32_t cycles = (cycles_per_step_event/255)*pwm_duty;
-        // uint32_t cycles = ((CYCLES_PER_MINUTE/(adjusted_rate*255)))*pwm_duty;
-        // uint32_t cycles = (pwm_duty*CYCLES_PER_MINUTE)/(255*adjusted_rate);
-        // uint32_t cycles = (CYCLES_PER_MINUTE/adjusted_rate) >> 1;
-        // uint32_t cycles = (uint32_t)((float)cycles_per_step_event*((float)pwm_duty/255.0));
-        uint32_t cycles = PWM_TRIGGER_EVERY*pwm_duty*(cycles_per_step_event >> 8);
-        uint8_t prescaler = 0;
-        if(cycles < 256) { prescaler |= _BV(CS00); }                            // no prescale, full xtal
-        else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01); }               // prescale by /8
-        else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01) | _BV(CS00); }   // prescale by /64
-        else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02); }               // prescale by /256
-        else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02) | _BV(CS00); }   // prescale by /1024
-        else { cycles = 255, prescaler |= _BV(CS02) | _BV(CS00); }              // over 261120 cycles, set as maximum
-        TCNT0 = 256-cycles;  // isr is triggered when overflowing
-        TCCR0B = prescaler;
+        if (duty < 242) {  // TODO: osci-test again for higher values, for now just leave at 100%/full duty cycle
+          uint32_t cycles = CONFIG_BEAMDYNAMICS_EVERY*duty*(cycles_per_step_event >> 8);
+          uint8_t prescaler = 0;
+          if(cycles < 256) { prescaler |= _BV(CS00); }                            // no prescale, full xtal
+          else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01); }               // prescale by /8
+          else if((cycles >>= 3) < 256) { prescaler |= _BV(CS01) | _BV(CS00); }   // prescale by /64
+          else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02); }               // prescale by /256
+          else if((cycles >>= 2) < 256) { prescaler |= _BV(CS02) | _BV(CS00); }   // prescale by /1024
+          else { cycles = 255, prescaler |= _BV(CS02) | _BV(CS00); }              // over 261120 cycles, set as maximum
+          TCNT0 = 256-cycles;  // isr is triggered when overflowing
+          TCCR0B = prescaler;
+        }
       }
+      pwm_counter = 1;
     }
-    pwm_counter = 1;
-  }
+  #endif
 
   // pulse steppers
   STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
@@ -351,7 +333,7 @@ ISR(TIMER1_COMPA_vect) {
       acceleration_tick_counter = CYCLES_PER_ACCELERATION_TICK/2; // start halfway, midpoint rule.
       adjust_speed( adjusted_rate ); // initialize cycles_per_step_event
       if (current_block->type == TYPE_RASTER_LINE) {
-        adjust_intensity(0);  // set only through raster data
+        control_laser_intensity(0);  // set only through raster data
       } else {
         adjust_beam_dynamics(adjusted_rate);
       }
@@ -419,7 +401,7 @@ ISR(TIMER1_COMPA_vect) {
             }
             adjust_speed( adjusted_rate );
             if (current_block->type == TYPE_RASTER_LINE) {
-              adjust_intensity(0);  // set only through raster data
+              control_laser_intensity(0);  // set only through raster data
             } else {
               adjust_beam_dynamics(adjusted_rate);
             }
@@ -444,7 +426,7 @@ ISR(TIMER1_COMPA_vect) {
             }
             adjust_speed( adjusted_rate );
             if (current_block->type == TYPE_RASTER_LINE) {
-              adjust_intensity(0);  // set only through raster data
+              control_laser_intensity(0);  // set only through raster data
             } else {
               adjust_beam_dynamics(adjusted_rate);
             }
@@ -457,7 +439,7 @@ ISR(TIMER1_COMPA_vect) {
             adjusted_rate = current_block->nominal_rate;
             adjust_speed( adjusted_rate );
             if (current_block->type == TYPE_RASTER_LINE) {
-              adjust_intensity(0);  // set only through raster data
+              control_laser_intensity(0);  // set only through raster data
             } else {
               adjust_beam_dynamics(adjusted_rate);
             }
@@ -475,7 +457,7 @@ ISR(TIMER1_COMPA_vect) {
               sei();
               // map [128,255] -> [0, nominal_laser_intensity]
               // (chr-128)*2 * (current_block->nominal_laser_intensity/255)
-              adjust_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );
+              control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );
             }
           }
         }
@@ -598,85 +580,18 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 
 
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
-  float dimm = 0.1+((0.9*(float)current_block->nominal_laser_intensity)/255.0);
+  // Adjust intensity with speed.
+  // Laser pulses are triggered along with motion steps (freq linked to speed).
+  // Additional progressive dimming with increasing intensity is added here.
+  // map intensity [0,255] -> [CONFIG_PWM_DIMM_OFFSET, 1.0]
+  float dimm = CONFIG_BEAMDYNAMICS_START+(((1.0-CONFIG_BEAMDYNAMICS_START) *
+                 (float)current_block->nominal_laser_intensity)/255.0);
+  // actual dimming function, (1-d) + (d * slowdown_factor)
   uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-      ((1.0-dimm) + dimm*(((float)steps_per_minute/(float)current_block->nominal_rate)));
-  // uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-  //     (0.1 + 0.9*(((float)steps_per_minute/(float)current_block->nominal_rate)));
-  uint8_t constrained_intensity = max(adjusted_intensity, 0);
-  adjust_intensity(constrained_intensity);
-  // adjust_intensity(current_block->nominal_laser_intensity);
-}
-
-
-inline void adjust_intensity( uint8_t intensity ) {
-  // adjust frequency
-  #ifdef DRIVEBOARD_USB
-    // adjust frequency, make sure pulse duration does not go too low
-    // uint32_t pulse_dur = (1000000*intensity)/(pwm_frequency << 8);
-    // if (pulse_dur < CONFIG_PWM_MIN_PULSE + (256 - intensity >> 1)) {
-    //   pwm_frequency = max(pwm_frequency >> 1, CONFIG_PWM_MIN_FREQ); // half
-    // } else if (pulse_dur > min_pulse_x2) {
-    //   pwm_frequency = min(pwm_frequency << 1, CONFIG_PWM_MAX_FREQ);  // double
-    // }
-    // control_laser_frequency(pwm_frequency);
-
-    // uint32_t pulse_dur = (1000000*intensity)/(pwm_frequency << 8);
-    // if (pulse_dur < CONFIG_PWM_MIN_PULSE) {
-    //   control_laser_frequency(intensity/(pulse_dur << 8));
-    // }
-    //
-    // if (intensity > 80) {
-    //   control_laser_frequency(3840);
-    // } else if (intensity > 60) {
-    //   control_laser_frequency(1920);
-    // } else if (intensity > 40) {
-    //   control_laser_frequency(960);
-    // } else if (intensity > 20) {
-    //   control_laser_frequency(480);
-    // } else if (intensity > 10) {
-    //   control_laser_frequency(240);
-    // } else {
-    //   control_laser_frequency(80);
-    // }
-    //
-    // // control_laser_frequency(intensity*8);
-
-    // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
-      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
-        pwm_duty = 0;
-      } else {
-        pwm_duty = intensity;
-      }
-    #else
-      pwm_duty = intensity;
-    #endif
-
-  #else  // Driveboard (standard)
-    // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
-      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
-        control_laser_intensity(0);
-      } else {
-        control_laser_intensity(intensity);
-      }
-    #else
-      control_laser_intensity(intensity);
-    #endif
-    // adjust frequency
-    // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
-    if (intensity > 40) {
-      // set PWM freq to 3.9kHz
-      TCCR0B = _BV(CS01);
-    } else if (intensity > 10) {
-      // set PWM freq to 489Hz
-      TCCR0B = _BV(CS01) | _BV(CS00);
-    } else {
-      // set PWM freq to 122Hz
-      TCCR0B = _BV(CS02);
-    }
-  #endif
+                 ((1.0-dimm) + dimm*(((float)steps_per_minute/
+                 (float)current_block->nominal_rate)));
+  // adjusted_intensity = max(adjusted_intensity, 0);
+  control_laser_intensity(adjusted_intensity);
 }
 
 
