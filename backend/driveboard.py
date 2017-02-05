@@ -984,7 +984,7 @@ def job(jobdict):
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
                 print "--- start of image processing ---"
-                import Image
+                from PIL import Image
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':

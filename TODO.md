@@ -5,10 +5,6 @@
 
 
 
-DriveboardUSB TODO
-------------------
-- new freq control
-
 
 bugs
 ----
