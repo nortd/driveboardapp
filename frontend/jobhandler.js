@@ -122,7 +122,7 @@ jobhandler = {
 
       var image_to_load = -1
       function allImagesLoaded() {
-        if (image_to_load == 0) {
+        if (image_to_load <= 0) {
           // passes, show in gui
           passes_set_assignments()
           donefunc()
@@ -165,6 +165,7 @@ jobhandler = {
       $('#info_content').html(html)
 
       // no images, still need to run some code
+      $().uxmessage('notice', "image_to_load: " + image_to_load)
       if (image_to_load == -1) {
         allImagesLoaded()
       }
