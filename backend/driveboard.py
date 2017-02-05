@@ -12,11 +12,6 @@ import serial
 import serial.tools.list_ports
 from config import conf, write_config_fields
 
-try:
-    from PIL import Image
-except ImportError:
-    print "Pillow module missing, raster mode will fail."
-
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
@@ -989,6 +984,7 @@ def job(jobdict):
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
                 print "--- start of image processing ---"
+                from PIL import Image
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':

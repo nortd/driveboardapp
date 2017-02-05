@@ -39,7 +39,7 @@ if not sys.platform == "darwin":  # Linux Windows
                  pathex=[os.path.abspath('__file__')],
                  binaries=None,
                  datas=data_files,
-                 hiddenimports=['pkg_resources', 'encodings', 'PIL'],
+                 hiddenimports=['pkg_resources', 'encodings'],
                  hookspath=None,
                  runtime_hooks=[],
                  excludes=[],
