@@ -97,21 +97,18 @@ function import_open(jobname, from_library) {
       jobhandler.draw()
 
       // debug, show image, stats
-      // if ('rasters' in job) {
-        // for (var i=0; i<job.rasters.length; i++) {
-        //   var raster = job.rasters[i];
-        //   // convert base64 to Image object
-        //   var imgid = 'rasterimg' + i;
-        //   $('#tab_import').append('<img id="'+imgid+'" src="'+raster['image']+'">');
-        //   var img = document.getElementById(imgid);
-        //
-        //   // stats
-        //   raster_stats = {'pos':raster['pos'],
-        //                   'size_mm':raster['size_mm'],
-        //                   'size_px':[img.width, img.height],
-        //                   'len':raster['image'].length}
-        //   $('#tab_import').append('<p>'+JSON.stringify(raster_stats)+'</p>');
-        // }
+      // if ('defs' in job) {
+      //   for (var i=0; i<job.defs.length; i++) {
+      //     var rasterdef = job.defs[i];
+      //     if (rasterdef.kind == "image") {
+      //       $('#log_content').prepend('<img src="'+rasterdef.data.src+'">')
+      //       if ('data' in rasterdef) {
+      //         $().uxmessage('notice'," data: " + rasterdef.data)
+      //       } else {
+      //         $().uxmessage('notice', "no raster data")
+      //       }
+      //     }
+      //   }
       // }
     },
     error: function (data) {
