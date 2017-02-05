@@ -95,7 +95,7 @@ jobhandler = {
 
   // setters //////////////////////////////////
 
-  set : function(job, name, optimize) {
+  set : function(job, name, optimize, donefunc) {
     this.clear()
     this.name = name
     $('title').html("DriveboardApp - "+name)
@@ -125,6 +125,7 @@ jobhandler = {
         if (image_to_load == 0) {
           // passes, show in gui
           passes_set_assignments()
+          donefunc()
         } else {
           image_to_load -= 1
         }
@@ -162,7 +163,7 @@ jobhandler = {
       var html = ''
       html += "name : " + this.name + "<br>"
       $('#info_content').html(html)
-      
+
       // no images, still need to run some code
       if (image_to_load == -1) {
         allImagesLoaded()

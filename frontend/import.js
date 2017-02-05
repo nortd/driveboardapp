@@ -91,10 +91,14 @@ function import_open(jobname, from_library) {
     success: function (job) {
       // alert(JSON.stringify(data))
       // $().uxmessage('notice', data)
-      jobhandler.set(job, jobname, true)
-      tools_addfill_init()
-      jobhandler.render()
-      jobhandler.draw()
+
+      function jobhandler_done() {
+        tools_addfill_init()
+        jobhandler.render()
+        jobhandler.draw()
+      }
+      
+      jobhandler.set(job, jobname, true, jobhandler_done)
 
       // debug, show image, stats
       // if ('defs' in job) {
