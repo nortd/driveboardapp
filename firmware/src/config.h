@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1701             // int or float
+#define VERSION 1702             // int or float
 #define BAUD_RATE 57600
 // #define ENABLE_3AXES
 #define ENABLE_LASER_INTERLOCKS
