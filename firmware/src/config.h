@@ -23,12 +23,15 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1702             // int or float
+#define VERSION 1702               // int or float
 #define BAUD_RATE 57600
-// #define ENABLE_3AXES
-#define ENABLE_LASER_INTERLOCKS
-#define DRIVEBOARD_USB
+// #define ENABLE_3AXES            // enable/disable 3-axis mode (vs 2-axis)
+#define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
+#define DRIVEBOARD_USB          // configure IO pins for DriveboardUSB
 // #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
+#define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
+#define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
+#define CONFIG_BEAMDYNAMICS_EVERY 8      // freq as multiples of steps impulses
 
 
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
@@ -47,8 +50,6 @@
   #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Z_AXIS 0  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
-  #define CONFIG_BEAMDYNAMICS_EVERY 8     // trigger mode, multiples of steps
 #else
   #define CONFIG_INVERT_X_AXIS 0  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
@@ -73,11 +74,10 @@
 #define AIR_ASSIST_BIT          4           // Arduino: 4
 #ifdef DRIVEBOARD_USB
   #define LASER_PWM_BIT         5           // Arduino: 5
-  #define LASER_HIGHLOW_BIT     6           // Arduino: 6
+  #define AUX_ASSIST_BIT        6           // Arduino: 6
 #else
-  #define AUX2_ASSIST_BIT       5           // Arduino: 5
   #define LASER_PWM_BIT         6           // Arduino: 6
-  #define AUX1_ASSIST_BIT       7           // Arduino: 7
+  #define AUX_ASSIST_BIT        5           // Arduino: 5
 #endif
 
 #define LIMIT_DDR               DDRC

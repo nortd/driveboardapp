@@ -485,31 +485,17 @@ ISR(TIMER1_COMPA_vect) {
       planner_discard_current_block();
       break;
 
-#ifndef DRIVEBOARD_USB
-    case TYPE_AUX1_ASSIST_ENABLE:
-      control_aux1_assist(true);
+    case TYPE_AUX_ASSIST_ENABLE:
+      control_aux_assist(true);
       current_block = NULL;
       planner_discard_current_block();
       break;
 
-    case TYPE_AUX1_ASSIST_DISABLE:
-      control_aux1_assist(false);
+    case TYPE_AUX_ASSIST_DISABLE:
+      control_aux_assist(false);
       current_block = NULL;
       planner_discard_current_block();
       break;
-
-    case TYPE_AUX2_ASSIST_ENABLE:
-      control_aux2_assist(true);
-      current_block = NULL;
-      planner_discard_current_block();
-      break;
-
-    case TYPE_AUX2_ASSIST_DISABLE:
-      control_aux2_assist(false);
-      current_block = NULL;
-      planner_discard_current_block();
-      break;
-#endif
   }
 
   busy = false;
@@ -581,21 +567,14 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
   // Adjust intensity with speed.
-  // Laser pulses are triggered along with motion steps (freq linked to speed).
-  // Additional progressive dimming with increasing intensity is added here.
-  // map intensity [0,255] -> [CONFIG_PWM_DIMM_OFFSET, 1.0]
-  // float dimm = CONFIG_BEAMDYNAMICS_START+(((1.0-CONFIG_BEAMDYNAMICS_START) *
-  //                (float)current_block->nominal_laser_intensity)/255.0);
-  // // actual dimming function, (1-d) + (d * slowdown_factor)
-  // uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-  //                ((1.0-dimm) + dimm*(((float)steps_per_minute/
-  //                (float)current_block->nominal_rate)));
-  // adjusted_intensity = max(adjusted_intensity, 0);
-
+  #ifdef CONFIG_BEAMDYNAMICS
   uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
                  (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
                  (((float)steps_per_minute/(float)current_block->nominal_rate)));
   control_laser_intensity(adjusted_intensity);
+  #else
+  control_laser_intensity(current_block->nominal_laser_intensity);
+  #endif
 }
 
 

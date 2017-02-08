@@ -1,5 +1,5 @@
 
-- python-imaging dependancy
+- image raster cuts off some 5mm at the end
 - when serial port ato changes, fails to do so in flash module
 
 

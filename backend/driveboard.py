@@ -49,8 +49,8 @@ CMD_SEL_OFFSET_CUSTOM = "K"
 
 CMD_AIR_ENABLE = "L"
 CMD_AIR_DISABLE = "M"
-# CMD_AUX1_ENABLE = "N"
-# CMD_AUX1_DISABLE = "O"
+CMD_AUX_ENABLE = "N"
+CMD_AUX_DISABLE = "O"
 # CMD_AUX2_ENABLE = "P"
 # CMD_AUX2_DISABLE = "Q"
 
@@ -149,8 +149,8 @@ markers_tx = {
 
     "L": "CMD_AIR_ENABLE",
     "M": "CMD_AIR_DISABLE",
-    # "N": "CMD_AUX1_ENABLE",
-    # "O": "CMD_AUX1_DISABLE",
+    "N": "CMD_AUX_ENABLE",
+    "O": "CMD_AUX_DISABLE",
     # "P": "CMD_AUX2_ENABLE",
     # "Q": "CMD_AUX2_DISABLE",
 
@@ -936,7 +936,7 @@ def job(jobdict):
 
     # reset vavles
     air_off()
-    # aux1_off()
+    # aux_off()
 
     # loop passes
     for pass_ in jobdict['passes']:
@@ -954,8 +954,8 @@ def job(jobdict):
                 air_on()
         else:
             air_on()    # also default this behavior
-        # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-        #     aux1_on()
+        # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
+        #     aux_on()
         # seekrate
         if 'seekrate' in pass_:
             seekrate = pass_['seekrate']
@@ -1013,8 +1013,8 @@ def job(jobdict):
                 # assists on, beginning of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_on()
-                # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                #     aux1_on()
+                # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                #     aux_on()
                 ### go through image lines ####
                 pxarray = imgobj.getdata()
                 # if len(pxarray) % size[0] != 0:
@@ -1052,8 +1052,8 @@ def job(jobdict):
                 # assists off, end of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_off()
-                # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                #     aux1_off()
+                # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                #     aux_off()
 
             elif kind == "fill" or kind == "path":
                 path = def_['data']
@@ -1075,8 +1075,8 @@ def job(jobdict):
                             # also air_assist defaults to 'feed'
                             if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                                 air_on()
-                            # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                            #     aux1_on()
+                            # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                            #     aux_on()
                             # TODO dwell according to pierce time
                             if is_2d:
                                 for i in xrange(1, len(polyline)):
@@ -1087,8 +1087,8 @@ def job(jobdict):
                             # turn off assists if set to 'feed'
                             if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                                 air_off()
-                            # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                            #     aux1_off()
+                            # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                            #     aux_off()
 
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:
@@ -1096,8 +1096,8 @@ def job(jobdict):
                 air_off()
         else:
             air_off()  # also default this behavior
-        # if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-        #     aux1_off()
+        # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
+        #     aux_off()
 
     # return to origin
     feedrate(conf['seekrate'])
@@ -1154,28 +1154,15 @@ def air_off():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AIR_DISABLE)
 
+def aux_on():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_ENABLE)
 
-# def aux1_on():
-#     global SerialLoop
-#     with SerialLoop.lock:
-#         SerialLoop.send_command(CMD_AUX1_ENABLE)
-#
-# def aux1_off():
-#     global SerialLoop
-#     with SerialLoop.lock:
-#         SerialLoop.send_command(CMD_AUX1_DISABLE)
-#
-#
-# def aux2_on():
-#     global SerialLoop
-#     with SerialLoop.lock:
-#         SerialLoop.send_command(CMD_AUX2_ENABLE)
-#
-# def aux2_off():
-#     global SerialLoop
-#     with SerialLoop.lock:
-#         SerialLoop.send_command(CMD_AUX2_DISABLE)
-
+def aux_off():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_DISABLE)
 
 def set_offset_table():
     global SerialLoop
