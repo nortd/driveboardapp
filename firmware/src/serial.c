@@ -301,7 +301,6 @@ inline uint8_t serial_raster_read() {
     // oops, not even in raster mode
     // sending side seems to be flaking
     return 128;     // 128 encodes 0 intensity
-    // return 160;     // DEBUG
   }
 }
 

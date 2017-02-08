@@ -1032,6 +1032,7 @@ def job(jobdict):
                     end += px_w
                     # move to start of line
                     feedrate(seekrate)
+                    # intensity(0.0)
                     move(leadinpos, line_y)
                     # lead-in
                     feedrate(feedrate_)

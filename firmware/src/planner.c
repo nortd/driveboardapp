@@ -85,7 +85,7 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
   // set block type to line command
   if (pixel_width != 0.0) {
     block->type = TYPE_RASTER_LINE;
-    block->pixel_steps = lround(pixel_width*CONFIG_X_STEPS_PER_MM);
+    block->pixel_steps = pixel_width*CONFIG_X_STEPS_PER_MM;
   } else {
     block->type = TYPE_LINE;
   }

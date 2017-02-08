@@ -69,6 +69,7 @@ static int32_t counter_x,       // Counter variables for the bresenham line trac
                counter_y,
                counter_z;
 static uint32_t step_events_completed; // The number of step events executed in the current block
+static float next_pixel_at_steps;
 static volatile bool busy;  // true when stepper ISR is in already running
 
 // Variables used by the trapezoid generation
@@ -334,6 +335,7 @@ ISR(TIMER1_COMPA_vect) {
       adjust_speed( adjusted_rate ); // initialize cycles_per_step_event
       if (current_block->type == TYPE_RASTER_LINE) {
         control_laser_intensity(0);  // set only through raster data
+        next_pixel_at_steps = 0.0;
       } else {
         adjust_beam_dynamics(adjusted_rate);
       }
@@ -447,7 +449,11 @@ ISR(TIMER1_COMPA_vect) {
           // Special case raster line.
           // Adjust intensity according raster buffer.
           if (current_block->type == TYPE_RASTER_LINE) {
-            if ((step_events_completed % current_block->pixel_steps) == 0) {
+            if (next_pixel_at_steps == 0) {  // starting raster_cruise
+              next_pixel_at_steps += step_events_completed;
+            }
+            if (step_events_completed >= next_pixel_at_steps) {
+              next_pixel_at_steps += current_block->pixel_steps;
               // for every pixel width get the next raster value
               // disable nested interrupts
               // this is to prevent race conditions with the serial interrupt
