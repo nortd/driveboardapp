@@ -47,14 +47,11 @@ void sense_init();
 void control_init();
 
 void control_laser_intensity(uint8_t intensity);  //0-255 is 0-100%
+#ifndef STATIC_PWM_FREQ
+  uint8_t control_get_intensity();
+#endif
 
 void control_air_assist(bool enable);
-
-#ifdef DRIVEBOARD_USB
-  void control_laser_highlow(bool enable);
-#else
-  void control_aux1_assist(bool enable);
-  void control_aux2_assist(bool enable);
-#endif
+void control_aux_assist(bool enable);
 
 #endif

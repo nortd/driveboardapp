@@ -203,19 +203,19 @@ def air_off():
     driveboard.air_off()
     return '{}'
 
-# @bottle.route('/aux1_on')
-# @bottle.auth_basic(checkuser)
-# @checkserial
-# def aux1_on():
-#     driveboard.aux1_on()
-#     return '{}'
-#
-# @bottle.route('/aux1_off')
-# @bottle.auth_basic(checkuser)
-# @checkserial
-# def aux1_off():
-#     driveboard.aux1_off()
-#     return '{}'
+@bottle.route('/aux_on')
+@bottle.auth_basic(checkuser)
+@checkserial
+def aux_on():
+    driveboard.aux_on()
+    return '{}'
+
+@bottle.route('/aux_off')
+@bottle.auth_basic(checkuser)
+@checkserial
+def aux_off():
+    driveboard.aux_off()
+    return '{}'
 
 @bottle.route('/offset/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
