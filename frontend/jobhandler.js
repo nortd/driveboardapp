@@ -95,7 +95,7 @@ jobhandler = {
 
   // setters //////////////////////////////////
 
-  set : function(job, name, optimize) {
+  set : function(job, name, optimize, donefunc) {
     this.clear()
     this.name = name
     $('title').html("DriveboardApp - "+name)
@@ -119,15 +119,35 @@ jobhandler = {
       if (optimize) {
         this.segmentizeLongLines()
       }
+
+      var image_to_load = -1
+      function allImagesLoaded() {
+        if (image_to_load <= 0) {
+          // passes, show in gui
+          passes_set_assignments()
+          donefunc()
+        } else {
+          image_to_load -= 1
+        }
+      }
+
       // convert base64 image data to Image objects
+      for (var i = 0; i < this.defs.length; i++) {
+        var def = this.defs[i]
+        if (def.kind == "image") {
+          image_to_load += 1
+        }
+      }
       for (var i = 0; i < this.defs.length; i++) {
         var def = this.defs[i]
         if (def.kind == "image") {
           var img_base64 = def.data
           def.data = new Image()
-          def.data.src = img_base64
+          def.data.onload = allImagesLoaded
+          def.data.src = img_base64  // NOTE: this is async
         }
       }
+
       // colors
       this.normalizeColors()
       // stats
@@ -143,8 +163,11 @@ jobhandler = {
       var html = ''
       html += "name : " + this.name + "<br>"
       $('#info_content').html(html)
-      // passes, show in gui
-      passes_set_assignments()
+
+      // no images, still need to run some code
+      if (image_to_load == -1) {
+        allImagesLoaded()
+      }
     }
   },
 

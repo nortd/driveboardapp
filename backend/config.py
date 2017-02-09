@@ -1,9 +1,10 @@
+# -*- coding: UTF-8 -*-
 # Configuration of DriveboardApp
 #
 # NOTE!
 # -----
 # To add/change config parameters create a file named
-# userconfig.py and write something like this:
+# userfileig.py and write something like this:
 #
 # conf = {
 #     'network_port': 4411,
@@ -14,16 +15,22 @@
 import os
 import sys
 import glob
+import json
+import copy
+
+from encodings import hex_codec  # explicit for pyinstaller
+from encodings import ascii  # explicit for pyinstaller
+from encodings import utf_8  # explicit for pyinstaller
+from encodings import mac_roman  # explicit for pyinstaller
 
 
 conf = {
     'appname': 'driveboardapp',
-    'version': '16.10-alpha',
+    'version': '17.02-beta',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
-    'websocket_port': 4411,
-    'serial_port': '/dev/ttyACM0',         # set to '' for auto (req. firmware)
+    'serial_port': '',                     # set to '' for auto (req. firmware)
     'baudrate': 57600,
     'rootdir': None,                       # defined further down (../)
     'stordir': None,                       # defined further down
@@ -46,19 +53,27 @@ conf = {
         'laser': 'laser',
     },
 }
+conf_defaults = copy.deepcopy(conf)
+
+userconfigurable = {
+    'network_host': "IP (NIC) to run server on. Leave '' for all.",
+    'network_port': "Port to run server on.",
+    'serial_port': "Serial port for Driveboard hardware.",
+    'workspace': "[x,y,z] dimensions of machine's work area in mm.",
+    'grid_mm': "Visual grid of UI in mm.",
+    'seekrate': "Default seek rate in mm/min",
+    'feedrate': "Default feed rate in mm/min.",
+    'intensity': "Default intensity setting 0-100.",
+    'kerf': "Typical kerf of a cut.",
+    'pxsize': "Default kerf setting for rastering.",
+    'max_jobs_in_list': "Jobs to keep in the history list.",
+    'fill_leadin': "Leadin for vector fills in mm.",
+    'raster_leadin': "Leadin for raster fills in mm.",
+    'users': "List of user cendentials for UI access."
+}
 
 
 ### make some 'smart' default setting choices
-
-
-### serial port
-#
-if conf['serial_port'] == '':
-    import driveboard
-    conf['serial_port'] = driveboard.find_controller()
-    reload(driveboard)  # so port defaults are correct
-#
-###
 
 
 ### rootdir
@@ -113,9 +128,9 @@ if sys.platform == "linux2":
 ###
 
 
-
-
-if conf['hardware'] == 'beaglebone':
+if conf['hardware'] == 'standard':
+    conf['firmware'] = 'DriveboardUSBFirmware.hex'
+elif conf['hardware'] == 'beaglebone':
     conf['serial_port'] = '/dev/ttyO1'
     # if running as root
     if os.geteuid() == 0:
@@ -254,10 +269,33 @@ elif conf['hardware'] == 'raspberrypi':
 
 
 
-### overwrite conf with parameters from userconfig.py
-try:
-    import userconfig
-    conf.update(userconfig.conf)
-    print "Config: using userconfig.py"
-except ImportError:
-    pass
+### user configuration file
+userfile = os.path.join(conf['stordir'], "config.json")
+if os.path.exists(userfile):
+    print "CONFIG: reading " + userfile
+    # apply user config
+    with open(userfile) as fp:
+        try:
+            userconf = json.load(fp)
+            for k in userconfigurable.keys():
+                if k in userconf:
+                    conf[k] = userconf[k]
+        except ValueError:
+            print "ERROR: failed to read config file"
+else:
+    # copy default config to user config
+    with open(userfile, "w") as fp:
+        confout = {k:v for k,v in conf.items() if k in userconfigurable}
+        json.dump(confout, fp, indent=4)
+
+
+def write_config_fields(subconfigdict):
+    conftemp = None
+    if os.path.exists(userfile):
+        with open(userfile) as fp:
+            conftemp = json.load(fp)
+    else:
+        conftemp = {}
+    conftemp.update(subconfigdict)
+    with open(userfile, "w") as fp:
+        json.dump(conftemp, fp, indent=4)

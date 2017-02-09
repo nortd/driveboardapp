@@ -1,4 +1,4 @@
-
+# -*- coding: UTF-8 -*-
 import os
 import io
 import sys
@@ -10,8 +10,12 @@ import threading
 import itertools
 import serial
 import serial.tools.list_ports
-from config import conf
-import statserver
+from config import conf, write_config_fields
+
+try:
+    from PIL import Image
+except ImportError:
+    print "Pillow module missing, raster mode will fail."
 
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -45,10 +49,10 @@ CMD_SEL_OFFSET_CUSTOM = "K"
 
 CMD_AIR_ENABLE = "L"
 CMD_AIR_DISABLE = "M"
-CMD_AUX1_ENABLE = "N"
-CMD_AUX1_DISABLE = "O"
-CMD_AUX2_ENABLE = "P"
-CMD_AUX2_DISABLE = "Q"
+CMD_AUX_ENABLE = "N"
+CMD_AUX_DISABLE = "O"
+# CMD_AUX2_ENABLE = "P"
+# CMD_AUX2_DISABLE = "Q"
 
 
 PARAM_TARGET_X = "x"
@@ -145,10 +149,10 @@ markers_tx = {
 
     "L": "CMD_AIR_ENABLE",
     "M": "CMD_AIR_DISABLE",
-    "N": "CMD_AUX1_ENABLE",
-    "O": "CMD_AUX1_DISABLE",
-    "P": "CMD_AUX2_ENABLE",
-    "Q": "CMD_AUX2_DISABLE",
+    "N": "CMD_AUX_ENABLE",
+    "O": "CMD_AUX_DISABLE",
+    # "P": "CMD_AUX2_ENABLE",
+    # "Q": "CMD_AUX2_DISABLE",
 
 
     "x": "PARAM_TARGET_X",
@@ -390,17 +394,12 @@ class SerialLoopClass(threading.Thread):
                         self._status['progress'] = 1.0
                     else:
                         self._status['progress'] = \
-                          round(SerialLoop.tx_pos/float(SerialLoop.job_size),3)
+                          round(self.tx_pos/float(self.job_size),3)
                     self._s['stops'].clear()
                     self._s['info'].clear()
                     self._s['ready'] = False
                     self._s['underruns'] = self._status['underruns']
                     self._s['stackclear'] = self._status['stackclear']
-                    # send through status server
-                    if statserver.is_running() and statserver.msg_every_now():
-                        statusjson = json.dumps(self._status)
-                        statserver.send(statusjson)
-                        statserver.on_connected_message(statusjson)
             elif 31 < ord(char) < 65:  ### stop error markers
                 # chr is in [!-@], process flag
                 if char == ERROR_LIMIT_HIT_X1:
@@ -504,7 +503,7 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_FEEDRATE:
                     self._s['feedrate'] = num
                 elif char == INFO_INTENSITY:
-                    self._s['intensity'] = num
+                    self._s['intensity'] = 100*num/255
                 elif char == INFO_DURATION:
                     self._s['duration'] = num
                 elif char == INFO_PIXEL_WIDTH:
@@ -610,41 +609,74 @@ class SerialLoopClass(threading.Thread):
 ###########################################################################
 
 
-def find_controller(baudrate=conf['baudrate']):
-    if os.name == 'posix':
-        iterator = sorted(serial.tools.list_ports.grep('tty'))
-        for port, desc, hwid in iterator:
-            print "Looking for controller on port: " + port
-            try:
-                s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
-                lasaur_hello = s.read(8)
-                if lasaur_hello.find(INFO_HELLO) > -1:
-                    return port
+# def find_controller(baudrate=conf['baudrate'], verbose=True):
+#     if os.name == 'posix':
+#         iterator = sorted(serial.tools.list_ports.grep('tty'))
+#         for port, desc, hwid in iterator:
+#             # print "Looking for controller on port: " + port
+#             try:
+#                 s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+#                 lasaur_hello = s.read(8)
+#                 if lasaur_hello.find(INFO_HELLO) > -1:
+#                     return port
+#                 s.close()
+#             except serial.SerialException:
+#                 pass
+#     else:
+#         # windows hack because pyserial does not enumerate USB-style com ports
+#         if verbose:
+#             print "Trying to find controller ..."
+#         for i in range(24):
+#             try:
+#                 s = serial.Serial(port=i, baudrate=baudrate, timeout=2.0)
+#                 lasaur_hello = s.read(8)
+#                 if lasaur_hello.find(INFO_HELLO) > -1:
+#                     return s.portstr
+#                 s.close()
+#             except serial.SerialException:
+#                 pass
+#     if verbose:
+#         print "ERROR: No controller found."
+#     return None
+def find_controller(baudrate=conf['baudrate'], verbose=True):
+    iterator = sorted(serial.tools.list_ports.comports())
+    # look for Arduinos
+    arduinos = []
+    for port, desc, hwid in iterator:
+        if "uino" in desc:
+            arduinos.append(port)
+    # check these arduinos for driveboard firmware, take first
+    for port in arduinos:
+        try:
+            s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+            lasaur_hello = s.read(8)
+            if lasaur_hello.find(INFO_HELLO) > -1:
                 s.close()
-            except serial.SerialException:
-                pass
-    else:
-        # windows hack because pyserial does not enumerate USB-style com ports
-        print "Trying to find controller ..."
-        for i in range(24):
-            try:
-                s = serial.Serial(port=i, baudrate=baudrate, timeout=2.0)
-                lasaur_hello = s.read(8)
-                if lasaur_hello.find(INFO_HELLO) > -1:
-                    return s.portstr
+                return port
+            s.close()
+        except serial.SerialException:
+            pass
+    # check all comports for driveboard firmware
+    for port, desc, hwid in iterator:
+        try:
+            s = serial.Serial(port=port, baudrate=baudrate, timeout=2.0)
+            lasaur_hello = s.read(8)
+            if lasaur_hello.find(INFO_HELLO) > -1:
                 s.close()
-            except serial.SerialException:
-                pass
-    print "ERROR: No controller found."
+                return port
+            s.close()
+        except serial.SerialException:
+            pass
+    # handle the case Arduino without firmware
+    if arduinos:
+        return arduinos[0]
+    # none found
+    if verbose:
+        print "ERROR: No controller found."
     return None
 
 
-
-def connect(port=conf['serial_port'], baudrate=conf['baudrate'], server=False):
-    # start up status server
-    if server:
-        statserver.start()
-
+def connect(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
     global SerialLoop
     if not SerialLoop:
         SerialLoop = SerialLoopClass()
@@ -680,35 +712,48 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate'], server=False):
             start = time.time()
             while True:
                 if time.time() - start > 2:
-                    print "ERROR: Cannot get 'hello' from controller"
+                    if verbose:
+                        print "ERROR: Cannot get 'hello' from controller"
                     raise serial.SerialException
                 char = SerialLoop.device.read(1)
                 if char == INFO_HELLO:
-                    print "Controller says Hello!"
+                    if verbose:
+                        print "Controller says Hello!"
                     break
 
             SerialLoop.start()  # this calls run() in a thread
         except serial.SerialException:
             SerialLoop = None
-            print "ERROR: Cannot connect serial on port: %s" % (port)
-            if server:
-                # keep sending statserver messages
-                def run_fallback_stat_msgs():
-                    while True:
-                        if statserver.is_running():
-                            statusjson = json.dumps({'ready': False, 'serial': False})
-                            statserver.send(statusjson)
-                            statserver.on_connected_message(statusjson)
-                            time.sleep(4.0)
-                        else:
-                            print "driveboard:statusthread: stopped."
-                            break
-                global fallback_msg_thread
-                fallback_msg_thread = threading.Thread(target=run_fallback_stat_msgs)
-                fallback_msg_thread.deamon = True  # kill thread when main thread exits
-                fallback_msg_thread.start()
+            if verbose:
+                print "ERROR: Cannot connect serial on port: %s" % (port)
     else:
-        print "ERROR: disconnect first"
+        if verbose:
+            print "ERROR: disconnect first"
+
+
+def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
+    connect(port=port, baudrate=baudrate, verbose=verbose)
+    if not connected():
+        # try finding driveboard
+        if verbose:
+            print "WARN: Cannot connect to configured serial port."
+            print "INFO: Trying to find port."
+        serialfindresult = find_controller(verbose=verbose)
+        if serialfindresult:
+            if verbose:
+                print "INFO: Hardware found at %s." % serialfindresult
+            connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
+        if connected():
+            if verbose:
+                print "INFO: Connected at %s." % serialfindresult
+            conf['serial_port'] = serialfindresult
+            write_config_fields({'serial_port':serialfindresult})
+        else:
+            if verbose:
+                print "-----------------------------------------------------------------------------"
+                print "How to configure:"
+                print "https://github.com/nortd/driveboardapp/blob/master/docs/configure.md"
+                print "-----------------------------------------------------------------------------"
 
 
 def connected():
@@ -717,11 +762,6 @@ def connected():
 
 
 def close():
-    # stop status server
-    statserver.stop()
-    if fallback_msg_thread and fallback_msg_thread.is_alive():
-        fallback_msg_thread.join()
-
     global SerialLoop
     if SerialLoop:
         if SerialLoop.device:
@@ -775,11 +815,14 @@ def reset():
 
 def status():
     """Get status."""
-    global SerialLoop
-    with SerialLoop.lock:
-        stats = copy.deepcopy(SerialLoop._status)
-        stats['serial'] = connected()  # make sure serial flag is up-to-date
-    return stats
+    if connected():
+        global SerialLoop
+        with SerialLoop.lock:
+            stats = copy.deepcopy(SerialLoop._status)
+            stats['serial'] = connected()  # make sure serial flag is up-to-date
+        return stats
+    else:
+        return {'serial':False, 'ready':False}
 
 
 def homing():
@@ -800,6 +843,7 @@ def feedrate(val):
 def intensity(val):
     global SerialLoop
     with SerialLoop.lock:
+        val = max(min(255*val/100, 255), 0)
         SerialLoop.send_param(PARAM_INTENSITY, val)
 
 def duration(val):
@@ -867,7 +911,6 @@ def job(jobdict):
               "pierce_time": 0,      # optional, default: 0
               "pxsize": [0.4],       # optional
               "air_assist": "pass",  # optional (feed, pass, off), default: pass
-              "aux1_assist": "off",  # optional (feed, pass, off), default: off
           }
       ],
      "items": [
@@ -893,7 +936,7 @@ def job(jobdict):
 
     # reset vavles
     air_off()
-    aux1_off()
+    # aux_off()
 
     # loop passes
     for pass_ in jobdict['passes']:
@@ -911,8 +954,8 @@ def job(jobdict):
                 air_on()
         else:
             air_on()    # also default this behavior
-        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-            aux1_on()
+        # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
+        #     aux_on()
         # seekrate
         if 'seekrate' in pass_:
             seekrate = pass_['seekrate']
@@ -946,7 +989,6 @@ def job(jobdict):
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
                 print "--- start of image processing ---"
-                import Image
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':
@@ -971,8 +1013,8 @@ def job(jobdict):
                 # assists on, beginning of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_on()
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                    aux1_on()
+                # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                #     aux_on()
                 ### go through image lines ####
                 pxarray = imgobj.getdata()
                 # if len(pxarray) % size[0] != 0:
@@ -990,6 +1032,7 @@ def job(jobdict):
                     end += px_w
                     # move to start of line
                     feedrate(seekrate)
+                    # intensity(0.0)
                     move(leadinpos, line_y)
                     # lead-in
                     feedrate(feedrate_)
@@ -1010,8 +1053,8 @@ def job(jobdict):
                 # assists off, end of feed if set to 'feed'
                 if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                     air_off()
-                if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                    aux1_off()
+                # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                #     aux_off()
 
             elif kind == "fill" or kind == "path":
                 path = def_['data']
@@ -1033,8 +1076,8 @@ def job(jobdict):
                             # also air_assist defaults to 'feed'
                             if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                                 air_on()
-                            if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                                aux1_on()
+                            # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                            #     aux_on()
                             # TODO dwell according to pierce time
                             if is_2d:
                                 for i in xrange(1, len(polyline)):
@@ -1045,8 +1088,8 @@ def job(jobdict):
                             # turn off assists if set to 'feed'
                             if 'air_assist' in pass_ and pass_['air_assist'] == 'feed':
                                 air_off()
-                            if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'feed':
-                                aux1_off()
+                            # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
+                            #     aux_off()
 
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:
@@ -1054,8 +1097,8 @@ def job(jobdict):
                 air_off()
         else:
             air_off()  # also default this behavior
-        if 'aux1_assist' in pass_ and pass_['aux1_assist'] == 'pass':
-            aux1_off()
+        # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
+        #     aux_off()
 
     # return to origin
     feedrate(conf['seekrate'])
@@ -1112,28 +1155,15 @@ def air_off():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AIR_DISABLE)
 
-
-def aux1_on():
+def aux_on():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX1_ENABLE)
+        SerialLoop.send_command(CMD_AUX_ENABLE)
 
-def aux1_off():
+def aux_off():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX1_DISABLE)
-
-
-def aux2_on():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX2_ENABLE)
-
-def aux2_off():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX2_DISABLE)
-
+        SerialLoop.send_command(CMD_AUX_DISABLE)
 
 def set_offset_table():
     global SerialLoop

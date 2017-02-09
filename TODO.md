@@ -1,9 +1,13 @@
 
+- image raster cuts off some 5mm at the end
+- when serial port ato changes, fails to do so in flash module
+
 
 bugs
 ----
 - stall between certain x-axis jogs
   - send a pierce command in between
+- unplugging usb is not always ahndled gracfully
 
 beauty bugs
 -----------
@@ -16,7 +20,6 @@ optimizations
 
 features
 --------
-- websocket fallback to http
 - lasertags
 - pixel size assignment for image rasters
 - gcode editor

@@ -12,7 +12,8 @@ import webbrowser
 import wsgiref.simple_server
 import bottle
 import traceback
-from config import conf
+from config import conf, userconfigurable, write_config_fields, conf_defaults
+
 import driveboard
 import jobimport
 
@@ -21,6 +22,7 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
 DEBUG = False
 bottle.BaseRequest.MEMFILE_MAX = 1024*1024*100 # max 100Mb files
+time_status_last = 0
 
 
 def checkuser(user, pw):
@@ -98,16 +100,50 @@ def download(filename, dlname):
 ### LOW-LEVEL
 
 @bottle.route('/config')
+@bottle.route('/config/<key>/<value:path>')
 @bottle.auth_basic(checkuser)
-def config():
-    confcopy = copy.deepcopy(conf)
-    del confcopy['users']
-    return json.dumps(confcopy)
+def config(key=None, value=None):
+    if not key or not value:
+        confcopy = copy.deepcopy(conf)
+        del confcopy['users']
+        return json.dumps(confcopy)
+    else:
+        if key in userconfigurable:
+            if value == "_default_":
+                value = conf_defaults[key]
+            else:
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    pass
+            conf[key] = value
+            write_config_fields({key:value})
+            return "Written to config file."
+        else:
+            return "Not a user-configurable key."
+
+
+@bottle.route('/confserial')
+@bottle.route('/confserial/<port>')
+@bottle.auth_basic(checkuser)
+def confserial(port=None):
+    """Write serial port to configuration file."""
+    if port:
+        conf['serial_port'] = port
+        write_config_fields({'serial_port':port})
+        return "Serial port written to config file."
+    else:
+        return conf['serial_port']
+
+
 
 @bottle.route('/status')
 @bottle.auth_basic(checkuser)
-@checkserial
 def status():
+    global time_status_last
+    if not driveboard.connected() and (time.time()-time_status_last) > 6.0:
+        driveboard.connect_withfind(verbose=False)
+    time_status_last = time.time()
     return json.dumps(driveboard.status())
 
 
@@ -167,18 +203,18 @@ def air_off():
     driveboard.air_off()
     return '{}'
 
-@bottle.route('/aux1_on')
+@bottle.route('/aux_on')
 @bottle.auth_basic(checkuser)
 @checkserial
-def aux1_on():
-    driveboard.aux1_on()
+def aux_on():
+    driveboard.aux_on()
     return '{}'
 
-@bottle.route('/aux1_off')
+@bottle.route('/aux_off')
 @bottle.auth_basic(checkuser)
 @checkserial
-def aux1_off():
-    driveboard.aux1_off()
+def aux_off():
+    driveboard.aux_off()
     return '{}'
 
 @bottle.route('/offset/<x:float>/<y:float>/<z:float>')
@@ -573,7 +609,7 @@ class Server(threading.Thread):
                 self.server.handle_request()
             except KeyboardInterrupt:
                 break
-        print "\nShutting down..."
+        print "\nServer shutting down..."
         driveboard.close()
 
     def stop(self):
@@ -584,7 +620,7 @@ class Server(threading.Thread):
 S = Server()
 
 
-def start(threaded=True, browser=False, debug=False):
+def start(browser=False, debug=False):
     """ Start a bottle web server.
         Derived from WSGIRefServer.run()
         to have control over the main loop.
@@ -610,26 +646,12 @@ def start(threaded=True, browser=False, debug=False):
     S.server.quiet = not debug
     if debug:
         bottle.debug(True)
+    print "Internal storage root is: " + conf['rootdir']
     print "Persistent storage root is: " + conf['stordir']
     print "-----------------------------------------------------------------------------"
-    print "Bottle server starting up ..."
-    # print "Serial is set to %d bps" % BITSPERSECOND
-    print "Point your browser to: "
-    print "http://%s:%d/      (local)" % ('127.0.0.1', conf['network_port'])
-    print "Use Ctrl-C to quit."
+    print "Starting server at http://%s:%d/" % ('127.0.0.1', conf['network_port'])
     print "-----------------------------------------------------------------------------"
-    print
-    driveboard.connect(server=True)  # also start websocket stat server
-    if not driveboard.connected():
-        print "---------------"
-        print "HOW TO configure the SERIAL PORT:"
-        print "in DriveboardApp/backend/ create a configuration file"
-        print "userconfig.py, and add something like:"
-        print "conf = {"
-        print "    'serial_port': 'COM3',"
-        print "}"
-        print "Any settings in this conf dictionary will overwrite config.py"
-        print "---------------"
+    driveboard.connect_withfind()
     # open web-browser
     if browser:
         try:
@@ -638,12 +660,8 @@ def start(threaded=True, browser=False, debug=False):
             print "Cannot open Webbrowser, please do so manually."
     sys.stdout.flush()  # make sure everything gets flushed
     # start server
-    if threaded:
-        print "INFO: Starting web server thread."
-        S.start()
-    else:
-        print "INFO: Entering main loop."
-        S.run()
+    print "INFO: Starting web server thread."
+    S.start()
 
 
 

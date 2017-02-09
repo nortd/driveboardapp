@@ -1,12 +1,17 @@
 
-var status_websocket = undefined
-var status_server_cache = false
 var status_cache = {}
+var status_every_default = 500
+var status_every = status_every_default
+var status_last_refresh = 0
+var status_last_interval = 0
+var status_refresh_intime_count = 0
+
 
 function status_init() {
   status_cache = {
     //// always
-    'serial': false,                // is serial connected
+    'server': false,
+    'serial': undefined,            // is serial connected
     'ready': false,                 // is hardware idle (and not stop mode)
     //// when hardware connected
     'appver': undefined,
@@ -36,6 +41,58 @@ function status_init() {
   }
 }
 
+
+function status_ready() {
+  status_init()
+  // start polling loop
+  // polls at interval set by 'status_every' or however fast it can
+  status_refresh()
+}
+
+
+function status_refresh() {
+  status_last_interval = Date.now()-status_last_refresh
+  // request
+  if (status_last_interval > status_every) {
+    // refresh inverval throttling
+    if (status_last_interval > 1.1*status_every) {
+      status_every_default = Math.min(Math.round(1.1*status_every_default), 2000)  // increase interval
+      status_set_refresh()
+      $("#head_position").clearQueue()
+      // $().uxmessage('notice', "status refresh slow. " + status_last_interval + "instead of" + status_every)
+    } else {
+      status_refresh_intime_count += 1
+      if (status_refresh_intime_count > 10) {
+        status_refresh_intime_count = 0
+        status_every_default = Math.max(Math.round(0.8*status_every_default), 500)  // decrease interval
+      }
+      status_set_refresh()
+    }
+    // get appconfig from server
+    status_last_refresh = Date.now()
+    request_get({
+      url:'/status',
+      success: function (data) {
+        $("#status_glyph").animate({"opacity": 1.0},50).animate({"opacity": 0.5},200)
+        // $().uxmessage('success', "status received.")
+        // var data = JSON.parse(e.data)
+        data.server = true
+        status_handle_message(data)
+      },
+      error: function (data) {
+        // $().uxmessage('error', "Failed to receive status.")
+        status_handle_message({'server':false, 'serial':false})
+      },
+      complete: function (data) {
+        // recursive call
+        status_refresh()
+      }
+    })
+  } else {
+    // try again a little later
+    setTimeout(status_refresh, 100)
+  }
+}
 
 
 function status_handle_message(status) {
@@ -91,9 +148,11 @@ function status_check_new(data1, data2) {
 
 
 function status_set_main_button(status) {
-  if (!status_websocket || (status_websocket.readyState == 3)) {  // disconnected
+  if (!status.server) {  // disconnected
+    $('#connect_modal').modal('show')
     $("#status_btn").removeClass("btn-warning btn-success").addClass("btn-danger")
   } else {  // connected
+    $('#connect_modal').modal('hide')
     if (!$.isEmptyObject(status.stops) || !status.serial) {  // connected but stops, serial down
       $("#status_btn").removeClass("btn-warning btn-success").addClass("btn-danger")
     } else {
@@ -106,21 +165,16 @@ function status_set_main_button(status) {
   }
 }
 
-
 function status_set_refresh() {
-  if (status_websocket && status_websocket.readyState == 1) {  // connected
-    var every = 2
-    if (app_visibility) {  // app focused
-      if (status_cache.ready) {  // focused and ready -> idle
-        every = 4
-      }  // else: every = 2
-    } else {  // app blured
-      every = 10
+  status_every = status_every_default  // focused and busy
+  if (app_visibility) {  // app focused
+    if (!status_cache.serial || status_cache.ready) {  // focused and ready -> idle
+      status_every = 4000
     }
-    // send request to statserver
-    status_websocket.send('{"status_every":'+every+'}')
-    // console.log("every: " + every)
+  } else {  // app blured
+    status_every = 10000
   }
+  // console.log(status_every)
 }
 
 
@@ -134,16 +188,13 @@ var status_handlers = {
       $().uxmessage('success', "Server says HELLO!")
       $("#status_server").removeClass("label-danger").addClass("label-success")
       status_init()
-      status_server_cache = true
+      status.server = true
     } else {  // server disconnected
-      if (status_server_cache) {
-        status_server_cache = false
-        $().uxmessage('warning', "Server LOST.")
-        $("#status_server").removeClass("label-success").addClass("label-danger")
-        // gray-out all dependant indicators
-        $('#status_serial').removeClass("label-danger label-success").addClass("label-default")
-        $(".status_hw").removeClass("label-success label-danger label-warning").addClass("label-default")
-      }
+      $().uxmessage('warning', "Server LOST.")
+      $("#status_server").removeClass("label-success").addClass("label-danger")
+      // gray-out all dependant indicators
+      $('#status_serial').removeClass("label-danger label-success").addClass("label-default")
+      $(".status_hw").removeClass("label-success label-danger label-warning").addClass("label-default")
     }
     status_set_main_button(status)
   },
@@ -217,7 +268,7 @@ var status_handlers = {
     $("#head_position").animate({
       left: Math.round((status.pos[0]+status.offset[0])*jobview_mm2px-10),
       top: Math.round((status.pos[1]+status.offset[1])*jobview_mm2px-10),
-    }, 1000, 'linear' )
+    }, status_every, 'linear' )
   },
   'underruns': function (status) {},
   'stackclear': function (status) {
