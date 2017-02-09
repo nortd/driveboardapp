@@ -4,6 +4,8 @@ DriveboardUSB
 
 ![DriveboardUSB Ports](img/DriveboardUSB_ports.png)
 
+The DriveboardUSB is a simple yet robust CNC controller that integrates with the DriveboardApp software. It's designed to be used in laser and plasma cutters, routers, and mills. A distinguishing feature is its opto-isolated sensor and control wires. Additionally enclosure and wire shields can be tied to AC ground.
+
 Ports
 -----
 
