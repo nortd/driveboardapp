@@ -52,7 +52,9 @@
   #define CONFIG_INVERT_Z_AXIS 0  // 0 is regular, 1 inverts the y direction
 #else
   #define CONFIG_INVERT_X_AXIS 0  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
+//  #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
+// jet's lasersaur is backwards
+  #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
   #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
 #endif
 
