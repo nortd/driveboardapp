@@ -16,8 +16,8 @@ This module provides a networked interface to the machine. It's a simple web ser
 /move/<x:float>/<y:float>/<z:float>
 /air_on
 /air_off
-/aux1_on
-/aux1_off
+/aux_on
+/aux_off
 /offset/<x:float>/<y:float>/<z:float>
 /clear_offset
 /load
