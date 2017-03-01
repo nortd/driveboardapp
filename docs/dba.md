@@ -39,6 +39,7 @@ Complete File Description
           "seekrate": 6000,      # optional, rate to first vertex
           "feedrate": 2000,      # optional, rate to other vertices
           "intensity": 100,      # optional, default: 0 (in percent)
+          "seekzero": False,     # optional, default: True
           "pierce_time": 0,      # optional, default: 0
           "pxsize": 0.4,         # optional
           "air_assist": "pass",  # optional (feed, pass, off), default: pass
