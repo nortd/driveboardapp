@@ -1,9 +1,11 @@
+# -*- coding: UTF-8 -*-
 # Super Awesome DriveboardFirmware python flash script.
 #
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
 
 import os, sys, subprocess, shutil
+from config import conf
 
 # Make sure you have the Arduino IDE installed (we've tested this on 022 and newer).
 # While build.py does not use the IDE directly it makes use of its tool chain.
@@ -48,8 +50,7 @@ def build_firmware(firmware_name="DriveboardFirmware"):
     """
     ret = 0
 
-    thislocation = os.path.dirname(os.path.realpath(__file__))
-    firmware_dir = os.path.join(thislocation, '..', 'firmware')
+    firmware_dir = os.path.join(conf['rootdir'], 'firmware')
     source_dir = os.path.join(firmware_dir, 'src')
 
     cwd_temp = os.getcwd()

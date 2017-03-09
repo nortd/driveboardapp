@@ -43,7 +43,7 @@ Complete File Description
           "pierce_time": 0,      # optional, default: 0
           "pxsize": 0.4,         # optional
           "air_assist": "pass",  # optional (feed, pass, off), default: pass
-          "aux1_assist": "off",  # optional (feed, pass, off), default: off
+          "aux_assist": "off",   # optional (feed, pass, off), default: off
       }
   ],
  "items": [

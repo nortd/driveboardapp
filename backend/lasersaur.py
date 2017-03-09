@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # lasersaur.py - control a networked Lasersaur from python
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
@@ -129,11 +130,11 @@ class Lasersaur(object):
     def air_off(self):
         self._request('/air_off')
 
-    def aux1_on(self):
-        self._request('/aux1_on')
+    def aux_on(self):
+        self._request('/aux_on')
 
-    def aux1_off(self):
-        self._request('/aux1_off')
+    def aux_off(self):
+        self._request('/aux_off')
 
     def offset(self, x, y, z=0.0):
         self._request('/offset/%.4f/%.4f/%.4f' % (x,y,z))
@@ -448,8 +449,8 @@ absolute = lasersaur.absolute
 move = lasersaur.move
 air_on = lasersaur.air_on
 air_off = lasersaur.air_off
-aux1_on = lasersaur.aux1_on
-aux1_off = lasersaur.aux1_off
+aux_on = lasersaur.aux_on
+aux_off = lasersaur.aux_off
 offset = lasersaur.offset
 clear_offset = lasersaur.clear_offset
 ### JOBS QUEUE

@@ -29,17 +29,13 @@
 #define TYPE_RASTER_LINE 1
 #define TYPE_AIR_ASSIST_ENABLE 2
 #define TYPE_AIR_ASSIST_DISABLE 3
-#define TYPE_AUX1_ASSIST_ENABLE 4
-#define TYPE_AUX1_ASSIST_DISABLE 5
-#define TYPE_AUX2_ASSIST_ENABLE 6
-#define TYPE_AUX2_ASSIST_DISABLE 7
+#define TYPE_AUX_ASSIST_ENABLE 4
+#define TYPE_AUX_ASSIST_DISABLE 5
 
 #define planner_control_air_assist_enable() planner_command(TYPE_AIR_ASSIST_ENABLE)
 #define planner_control_air_assist_disable() planner_command(TYPE_AIR_ASSIST_DISABLE)
-#define planner_control_aux1_assist_enable() planner_command(TYPE_AUX1_ASSIST_ENABLE)
-#define planner_control_aux1_assist_disable() planner_command(TYPE_AUX1_ASSIST_DISABLE)
-#define planner_control_aux2_assist_enable() planner_command(TYPE_AUX2_ASSIST_ENABLE)
-#define planner_control_aux2_assist_disable() planner_command(TYPE_AUX2_ASSIST_DISABLE)
+#define planner_control_aux_assist_enable() planner_command(TYPE_AUX_ASSIST_ENABLE)
+#define planner_control_aux_assist_disable() planner_command(TYPE_AUX_ASSIST_DISABLE)
 
 // This struct is used when buffering the setup for each linear movement "nominal" values are as specified in
 // the source g-code and may never actually be reached if acceleration management is active.
@@ -64,8 +60,8 @@ typedef struct {
   int32_t rate_delta;                 // The steps/minute to add or subtract when changing speed (must be positive)
   uint32_t accelerate_until;          // The index of the step event on which to stop acceleration
   uint32_t decelerate_after;          // The index of the step event on which to start decelerating
-
-  uint16_t pixel_steps;               // Number of steps for each raster pixel (only in TYPE_RASTER_LINE)
+  // raster
+  uint32_t pixel_steps_x1024;         // Number of steps for each raster pixel * 1024 (only in TYPE_RASTER_LINE)
 } block_t;
 
 // Initialize the motion plan subsystem

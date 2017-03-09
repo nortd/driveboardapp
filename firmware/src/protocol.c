@@ -248,17 +248,11 @@ inline void on_cmd(uint8_t command) {
     case CMD_AIR_DISABLE:
       planner_control_air_assist_disable();
       break;
-    case CMD_AUX1_ENABLE:
-      planner_control_aux1_assist_enable();
+    case CMD_AUX_ENABLE:
+      planner_control_aux_assist_enable();
       break;
-    case CMD_AUX1_DISABLE:
-      planner_control_aux1_assist_disable();
-      break;
-    case CMD_AUX2_ENABLE:
-      planner_control_aux2_assist_enable();
-      break;
-    case CMD_AUX2_DISABLE:
-      planner_control_aux2_assist_disable();
+    case CMD_AUX_DISABLE:
+      planner_control_aux_assist_disable();
       break;
     default:
       stepper_request_stop(STOPERROR_INVALID_COMMAND);
@@ -387,16 +381,22 @@ inline void protocol_idle() {
   //   ASSIST_PORT &= ~(1 << AIR_ASSIST_BIT);
   // }
 
+  #ifdef ENABLE_LASER_INTERLOCKS
+    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+      control_laser_intensity(0);
+    }
+  #endif
+
   if (stepper_stop_requested()) {
     // TODO: make sure from the time triggered to time handled in protocol loop nothing weird happens
-    // WARN: this is contiuously call during a stop condition
+    // WARN: this is contiuously called during a stop condition
     // TODO: reset serial rx buffer
     planner_reset_block_buffer();
     planner_set_position(stepper_get_position_x(), stepper_get_position_y(), stepper_get_position_z());
     pdata.count = 0;
   }
 
-
+  //// status reporting, up the serial connection
   if (status_requested || superstatus_requested) {
     status_requested = false;
     // idle flag
@@ -419,25 +419,29 @@ inline void protocol_idle() {
       serial_write(stop_code);
     }
 
-    // always report limits
-    if (SENSE_X1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_X1) {
-      serial_write(STOPERROR_LIMIT_HIT_X1);
-    }
-    if (SENSE_X2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_X2) {
-      serial_write(STOPERROR_LIMIT_HIT_X2);
-    }
-    if (SENSE_Y1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Y1) {
-      serial_write(STOPERROR_LIMIT_HIT_Y1);
-    }
-    if (SENSE_Y2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Y2) {
-      serial_write(STOPERROR_LIMIT_HIT_Y2);
-    }
-    if (SENSE_Z1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Z1) {
-      serial_write(STOPERROR_LIMIT_HIT_Z1);
-    }
-    if (SENSE_Z2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Z2) {
-      serial_write(STOPERROR_LIMIT_HIT_Z2);
-    }
+    #ifdef ENABLE_LASER_INTERLOCKS
+      // always report limits
+      if (SENSE_X1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_X1) {
+        serial_write(STOPERROR_LIMIT_HIT_X1);
+      }
+      if (SENSE_X2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_X2) {
+        serial_write(STOPERROR_LIMIT_HIT_X2);
+      }
+      if (SENSE_Y1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Y1) {
+        serial_write(STOPERROR_LIMIT_HIT_Y1);
+      }
+      if (SENSE_Y2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Y2) {
+        serial_write(STOPERROR_LIMIT_HIT_Y2);
+      }
+      #ifdef ENABLE_3AXES
+        if (SENSE_Z1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Z1) {
+          serial_write(STOPERROR_LIMIT_HIT_Z1);
+        }
+        if (SENSE_Z2_LIMIT && stop_code != STOPERROR_LIMIT_HIT_Z2) {
+          serial_write(STOPERROR_LIMIT_HIT_Z2);
+        }
+      #endif
+    #endif
 
     // position, an absolute coord, report relative to current offset
     serial_write_param(INFO_POS_X, stepper_get_position_x()-st.offsets[3*st.offselect+X_AXIS]);

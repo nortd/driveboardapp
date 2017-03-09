@@ -1,4 +1,4 @@
-
+# -*- coding: UTF-8 -*-
 import os
 import time
 
@@ -18,4 +18,3 @@ lasersaur.run_file(jobfile, feedrate=4000, intensity=53, progress=True, local=Tr
 
 
 # web.stop()
-

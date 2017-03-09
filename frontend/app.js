@@ -93,6 +93,13 @@ $(document).ready(function(){
     // console.log("onblur")
   }
 
+  // connecting modal
+  $('#connect_modal').modal({
+    show: true,
+    keyboard: false,
+    backdrop: 'static'
+  })
+
   // get appconfig from server
   request_get({
     url:'/config',
@@ -130,60 +137,6 @@ function config_received() {
   queue_ready()
   // call 'ready' of library
   library_ready()
-
-  // connect to status channel via websocket
-  // connect and also continuously check connection and reconnect if closed
-  app_status_connect()
-  setInterval(function () {
-      if (!status_websocket || status_websocket.readyState == 3) {
-        app_status_connect()
-      }
-    }, 8000)
+  // call 'ready' of status
+  status_ready()
 }
-
-
-function app_status_connect() {
-  var url = "ws://"+location.hostname+":"+app_config_main.websocket_port+"/"
-  status_websocket = new WebSocket(url)
-  status_websocket.onopen = function(e) {
-    status_handlers.server({'server':true})
-  }
-  status_websocket.onclose = function(e) {
-    status_handlers.server({'server':false, 'serial':false})
-  }
-  status_websocket.onerror = function(e) {
-    if (status_websocket.readyState != 3) {
-      $().uxmessage('error', "Server")
-    }
-  }
-  status_websocket.onmessage = function(e) {
-    // pudbate
-    $("#status_glyph").animate({"opacity": 1.0},50).animate({"opacity": 0.5},200)
-
-    // handle data
-    var data = JSON.parse(e.data)
-    // console.log(data)
-
-    // // show in config modal
-    // var html = ''
-    // var keys_sorted = Object.keys(data).sort()
-    // for (var i=0; i<keys_sorted.length; i++) {
-    //   var val = data[keys_sorted[i]]
-    //   if (typeof(val) === 'object' && val !== null) {
-    //     html += keys_sorted[i]+"<br>"
-    //     // iterate over sub-asso-array
-    //     var subkeys_sorted = Object.keys(val).sort()
-    //     for (var j = 0; j < subkeys_sorted.length; j++) {
-    //       html += "--"+subkeys_sorted[j] + ": " + val[subkeys_sorted[j]] + "<br>"
-    //     }
-    //   } else  {
-    //     html += keys_sorted[i] + " : " + data[keys_sorted[i]] + "<br>"
-    //   }
-    // }
-    // $('#status_content').html(html)
-
-    // call handlers, only when status changes
-    status_handle_message(data)
-
-  }  // status_websocket.onmessage
-}  // start_status_channel

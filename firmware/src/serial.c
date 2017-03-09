@@ -287,7 +287,7 @@ inline uint8_t serial_raster_read() {
       return 128;    // 128 encodes 0 intensity
     } else {
       uint8_t data = serial_read();
-      if (127 < data < 256) {
+      if ((127 < data) && (data < 256)) {
         return data;
       } else if (data == CMD_RASTER_DATA_END) {
         raster_mode = false;
