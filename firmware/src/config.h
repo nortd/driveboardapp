@@ -27,7 +27,7 @@
 #define BAUD_RATE 57600
 // #define ENABLE_3AXES            // enable/disable 3-axis mode (vs 2-axis)
 #define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
-// #define DRIVEBOARD_USB          // configure IO pins for DriveboardUSB
+#define DRIVEBOARD_USB          // configure IO pins for DriveboardUSB
 // #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
 #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply

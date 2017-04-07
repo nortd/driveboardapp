@@ -261,11 +261,11 @@ ISR(TIMER1_COMPA_vect) {
       return;
     }
     #ifdef ENABLE_3AXES
-      else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
+      else if (SENSE_Z1_LIMIT) {
         stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
         busy = false;
         return;
-      } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
+      } else if (SENSE_Z2_LIMIT) {
         stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
         busy = false;
         return;
@@ -463,7 +463,7 @@ ISR(TIMER1_COMPA_vect) {
               sei();
               // map [128,255] -> [0, nominal_laser_intensity]
               // (chr-128)*2 * (current_block->nominal_laser_intensity/255)
-              control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );
+              control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );  // TODO: Maybe do this in preprocessing
             }
           }
         }
