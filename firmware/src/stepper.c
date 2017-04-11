@@ -81,7 +81,8 @@ static volatile bool processing_flag;         // indicates if blocks are being p
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
 
-#ifndef STATIC_PWM_FREQ
+// #ifndef STATIC_PWM_FREQ
+#if PWM_MODE == SYNCED_FREQ
   static volatile uint8_t pwm_counter = 1;
 #endif
 
@@ -273,7 +274,8 @@ ISR(TIMER1_COMPA_vect) {
     #endif
   #endif
 
-  #ifndef STATIC_PWM_FREQ
+  // #ifndef STATIC_PWM_FREQ
+  #if PWM_MODE == SYNCED_FREQ
     // pulse laser
     uint8_t duty = control_get_intensity();
     if (pwm_counter < CONFIG_BEAMDYNAMICS_EVERY) {
