@@ -576,10 +576,16 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
   // Adjust intensity with speed.
   #ifdef CONFIG_BEAMDYNAMICS
-  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-                 (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
-                 (((float)steps_per_minute/(float)current_block->nominal_rate)));
-  control_laser_intensity(adjusted_intensity);
+    #if (PWM_MODE == STEPPED_FREQ) || (PWM_MODE == STATIC_FREQ)
+      uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                                   ((float)steps_per_minute/(float)current_block->nominal_rate);
+      adjusted_intensity = max(adjusted_intensity, 0);
+    #elif PWM_MODE == SYNCED_FREQ
+      uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                     (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
+                     (((float)steps_per_minute/(float)current_block->nominal_rate)));
+    #endif
+    control_laser_intensity(adjusted_intensity);
   #else
   control_laser_intensity(current_block->nominal_laser_intensity);
   #endif
