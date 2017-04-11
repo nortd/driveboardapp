@@ -66,7 +66,7 @@ def build_all():
             # buid
             r = build_firmware(firmware_name)
             if r != 0:
-                r = 1
+                ret = 1
         finally:
             # revert config.h
             if os.path.exists('~config.h'):
