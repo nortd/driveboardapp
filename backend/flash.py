@@ -9,7 +9,7 @@ from config import conf
 
 
 def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'], firmware=conf['firmware']):
-    firmware_file = firmware_file.replace("/", "").replace("\\", "")  # make sure no evil injection
+    firmware = firmware.replace("/", "").replace("\\", "")  # make sure no evil injection
     FIRMWARE = os.path.join(resources_dir, 'firmware', "firmware.%s.hex" % (firmware))
 
     if not os.path.exists(FIRMWARE):
