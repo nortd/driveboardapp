@@ -73,6 +73,7 @@ def build_all():
                 shutil.move('~config.h', 'config.h')
     # restore cwd
     os.chdir(cwd_temp)
+    return ret
 
 
 
