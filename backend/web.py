@@ -547,16 +547,14 @@ def unstop():
 ### MCU MANAGMENT
 
 @bottle.route('/build')
-# @bottle.route('/build/<firmware>')
 @bottle.auth_basic(checkuser)
-def build(firmware_name=None):
-    """Build firmware from firmware/src files."""
-    buildname = "DriveboardFirmware_from_src"
-    return_code = driveboard.build(firmware_name=buildname)
+def build():
+    """Build firmware from firmware/src files (for all config files)."""
+    return_code = driveboard.build()
     if return_code != 0:
         bottle.abort(400, "Build failed.")
     else:
-        return '{"flash_url": "/flash/%s.hex"}' % (buildname)
+        return '{}'
 
 
 @bottle.route('/flash')
@@ -567,7 +565,7 @@ def flash(firmware=None):
     if firmware is None:
         return_code = driveboard.flash()
     else:
-        return_code = driveboard.flash(firmware_file=firmware)
+        return_code = driveboard.flash(firmware=firmware)
     if return_code != 0:
         bottle.abort(400, "Flashing failed.")
     else:

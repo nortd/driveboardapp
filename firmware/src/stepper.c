@@ -618,7 +618,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       limit_bits ^= LIMIT_MASK;
     }
 
-    #ifdef DRIVEBOARD_USB
+    #ifdef SENSE_INVERT
       bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT));
       bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT));
       bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT));

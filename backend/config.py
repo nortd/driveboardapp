@@ -35,7 +35,7 @@ conf = {
     'rootdir': None,                       # defined further down (../)
     'stordir': None,                       # defined further down
     'hardware': None,                      # defined further down
-    'firmware': 'DriveboardFirmware.hex',
+    'firmware': None,                      # defined further down
     'tolerance': 0.01,
     'workspace': [1220,610,0],
     'grid_mm': 100,
@@ -59,6 +59,7 @@ userconfigurable = {
     'network_host': "IP (NIC) to run server on. Leave '' for all.",
     'network_port': "Port to run server on.",
     'serial_port': "Serial port for Driveboard hardware.",
+    'firmware': "Default firmware. Use designator matching the * in config.*.h"
     'workspace': "[x,y,z] dimensions of machine's work area in mm.",
     'grid_mm': "Visual grid of UI in mm.",
     'seekrate': "Default seek rate in mm/min",
@@ -129,8 +130,11 @@ if sys.platform == "linux2":
 
 
 if conf['hardware'] == 'standard':
-    conf['firmware'] = 'DriveboardUSBFirmware.hex'
+    if not conf['firmware']:
+        conf['firmware'] = 'driveboardusb'
 elif conf['hardware'] == 'beaglebone':
+    if not conf['firmware']:
+        conf['firmware'] = 'driveboard1403'
     conf['serial_port'] = '/dev/ttyO1'
     # if running as root
     if os.geteuid() == 0:
@@ -242,6 +246,8 @@ elif conf['hardware'] == 'beaglebone':
     print "Stepper driver configure pin is: " + str(ret)
 
 elif conf['hardware'] == 'raspberrypi':
+    if not conf['firmware']:
+        conf['firmware'] = 'driveboard1403'
     conf['serial_port'] = '/dev/ttyAMA0'
     # if running as root
     if os.geteuid() == 0:

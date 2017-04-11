@@ -23,7 +23,7 @@
 
 
 void sense_init();
-#ifdef DRIVEBOARD_USB
+#ifdef SENSE_INVERT
   #define SENSE_X1_LIMIT ((LIMIT_PIN >> X1_LIMIT_BIT) & 1)
   #define SENSE_X2_LIMIT ((LIMIT_PIN >> X2_LIMIT_BIT) & 1)
   #define SENSE_Y1_LIMIT ((LIMIT_PIN >> Y1_LIMIT_BIT) & 1)

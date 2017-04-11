@@ -780,13 +780,13 @@ def close():
 
 
 
-def flash(serial_port=conf['serial_port'], firmware_file=conf['firmware']):
+def flash(serial_port=conf['serial_port'], firmware=conf['firmware']):
     import flash
     reconnect = False
     if connected():
         close()
         reconnect = True
-    ret = flash.flash_upload(serial_port=serial_port, firmware_file=firmware_file)
+    ret = flash.flash_upload(serial_port=serial_port, firmware=firmware)
     if reconnect:
         connect()
     if ret != 0:
@@ -794,11 +794,11 @@ def flash(serial_port=conf['serial_port'], firmware_file=conf['firmware']):
     return ret
 
 
-def build(firmware_name="DriveboardFirmware"):
+def build():
     import build
-    ret = build.build_firmware(firmware_name=firmware_name)
+    ret = build.build_all()
     if ret != 0:
-        print "ERROR: build failed"
+        print "ERROR: build_all failed"
     return ret
 
 

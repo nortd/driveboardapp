@@ -80,20 +80,12 @@ function controls_ready() {
     return false
   })
 
-  $("#flash_source_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
-  $("#flash_source_btn").click(function(e){
+  $("#rebuild_btn").tooltip({placement:'bottom', delay: {show:1000, hide:100}})
+  $("#rebuild_btn").click(function(e){
     request_get({
       url:'/build',
       success: function (data) {
         $().uxmessage('notice', "Firmware build successful.")
-        // flash new firmware
-        request_get({
-          url:data.flash_url,
-          success: function (data) {
-            status_cache.firmver = undefined
-            $().uxmessage('success', "Flashing successful.")
-          }
-        })
       }
     })
     $("body").trigger("click")
