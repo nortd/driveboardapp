@@ -52,7 +52,17 @@ void control_init() {
     TCCR0B = 0; // Disable timer until needed.
     TIMSK0 |= (1<<TOIE0); // Enable Timer0 interrupt flag
     TCNT0 = 0;
-  #elif PWM_MODE == STEPPED_FREQ
+  #elif PWM_MODE == STEPPED_FREQ_PD5
+    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
+    // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
+    TCCR0B = _BV(WGM02);
+    TCCR0A = _BV(WGM00);
+    // output trigger, PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
+    TCCR0A |= _BV(COM0B1);
+    OCR0A = 0xFF;                            // set TOP
+    OCR0B = 0;                               // set PWM to a 0% duty cycle
+  // #else
+  #elif PWM_MODE == STEPPED_FREQ_PD6
     ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
     OCR0A = 0;                               // set PWM to a 0% duty cycle
     TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
@@ -112,7 +122,22 @@ inline void control_laser_intensity(uint8_t intensity) {
     #else
       OCR0B = (intensity*pwmTop)/255;
     #endif
-  #elif PWM_MODE == STEPPED_FREQ
+  #elif PWM_MODE == STEPPED_FREQ_PD5
+    OCR0B = intensity;
+    // depending on intensity adapt PWM freq
+    // assuming phase correct PWM mode
+    if (intensity > 40) {
+      // set PWM freq to 3.9kHz
+      TCCR0B = _BV(CS01);
+    } else if (intensity > 10) {
+      // set PWM freq to 489Hz
+      TCCR0B = _BV(CS01) | _BV(CS00);
+    } else {
+      // set PWM freq to 122Hz
+      TCCR0B = _BV(CS02);
+    }
+  // #else
+  #elif PWM_MODE == STEPPED_FREQ_PD6
     OCR0A = intensity;
     // depending on intensity adapt PWM freq
     // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
