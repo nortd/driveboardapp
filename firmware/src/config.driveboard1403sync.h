@@ -39,7 +39,7 @@
 #define PWM_MODE SYNCED_FREQ
 #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
-#define CONFIG_BEAMDYNAMICS_EVERY 8      // freq as multiples of steps impulses
+#define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
 
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm

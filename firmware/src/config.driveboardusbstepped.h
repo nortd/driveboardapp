@@ -36,10 +36,10 @@
 // #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
 
 #define SENSE_INVERT                     // invert how sense input is interpreted
-#define PWM_MODE SYNCED_FREQ
+#define PWM_MODE STEPPED_FREQ_PD5
 #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
-#define CONFIG_BEAMDYNAMICS_EVERY 8      // freq as multiples of steps impulses
+#define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
 
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
