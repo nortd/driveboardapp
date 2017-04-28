@@ -123,7 +123,15 @@ inline void control_laser_intensity(uint8_t intensity) {
       OCR0B = (intensity*pwmTop)/255;
     #endif
   #elif PWM_MODE == STEPPED_FREQ_PD5
-    OCR0B = intensity;
+    #ifdef ENABLE_LASER_INTERLOCKS
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        OCR0B = 0;
+      } else {
+        OCR0B = intensity;
+      }
+    #else
+      OCR0B = intensity;
+    #endif
     // depending on intensity adapt PWM freq
     // assuming phase correct PWM mode
     if (intensity > 40) {
@@ -138,7 +146,15 @@ inline void control_laser_intensity(uint8_t intensity) {
     }
   // #else
   #elif PWM_MODE == STEPPED_FREQ_PD6
-    OCR0A = intensity;
+    #ifdef ENABLE_LASER_INTERLOCKS
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        OCR0A = 0;
+      } else {
+        OCR0A = intensity;
+      }
+    #else
+      OCR0A = intensity;
+    #endif
     // depending on intensity adapt PWM freq
     // assuming: TCCR0A = _BV(COM0A1) | _BV(WGM00);  // phase correct PWM mode
     if (intensity > 40) {
