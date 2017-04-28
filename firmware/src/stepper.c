@@ -439,7 +439,8 @@ ISR(TIMER1_COMPA_vect) {
         // cruising
         } else {
           // No accelerations. Make sure we cruise exactly at the nominal rate.
-          if (adjusted_rate != current_block->nominal_rate) {
+          // if (adjusted_rate != current_block->nominal_rate) {
+          if ( acceleration_tick() ) {  // scheduled speed change
             adjusted_rate = current_block->nominal_rate;
             adjust_speed( adjusted_rate );
             if (current_block->type == TYPE_RASTER_LINE) {
