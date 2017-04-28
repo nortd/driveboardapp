@@ -183,12 +183,18 @@ inline void control_laser_intensity(uint8_t intensity) {
   #endif
 }
 
-// #ifndef STATIC_PWM_FREQ
-#if PWM_MODE == SYNCED_FREQ
-  inline uint8_t control_get_intensity() {
+
+inline uint8_t control_get_intensity() {
+  #if PWM_MODE == STATIC_FREQ
+    return (OCR0B*255)/pwmTop;
+  #elif PWM_MODE == STEPPED_FREQ_PD5
+    return OCR0B;
+  #elif PWM_MODE == STEPPED_FREQ_PD6
+    return OCR0A;
+  #elif PWM_MODE == SYNCED_FREQ
     return pwm_duty;
-  }
-#endif
+  #endif
+}
 
 
 inline void control_air_assist(bool enable) {

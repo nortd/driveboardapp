@@ -439,15 +439,9 @@ ISR(TIMER1_COMPA_vect) {
         // cruising
         } else {
           // No accelerations. Make sure we cruise exactly at the nominal rate.
-          // if (adjusted_rate != current_block->nominal_rate) {
-          if ( acceleration_tick() ) {  // scheduled speed change
+          if (adjusted_rate != current_block->nominal_rate) {
             adjusted_rate = current_block->nominal_rate;
             adjust_speed( adjusted_rate );
-            if (current_block->type == TYPE_RASTER_LINE) {
-              control_laser_intensity(0);  // set only through raster data
-            } else {
-              adjust_beam_dynamics(adjusted_rate);
-            }
           }
           // Special case raster line.
           // Adjust intensity according raster buffer.
@@ -468,6 +462,9 @@ ISR(TIMER1_COMPA_vect) {
               // (chr-128)*2 * (current_block->nominal_laser_intensity/255)
               control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );  // TODO: Maybe do this in preprocessing
             }
+          // otherwise make sure intensity at nominal
+          } else {
+            control_laser_intensity(current_block->nominal_laser_intensity);
           }
         }
       } else {  // block finished
