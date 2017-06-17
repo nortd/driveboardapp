@@ -780,13 +780,13 @@ def close():
 
 
 
-def flash(serial_port=conf['serial_port'], firmware_file=conf['firmware']):
+def flash(serial_port=conf['serial_port'], firmware=conf['firmware']):
     import flash
     reconnect = False
     if connected():
         close()
         reconnect = True
-    ret = flash.flash_upload(serial_port=serial_port, firmware_file=firmware_file)
+    ret = flash.flash_upload(serial_port=serial_port, firmware=firmware)
     if reconnect:
         connect()
     if ret != 0:
@@ -794,11 +794,11 @@ def flash(serial_port=conf['serial_port'], firmware_file=conf['firmware']):
     return ret
 
 
-def build(firmware_name="DriveboardFirmware"):
+def build():
     import build
-    ret = build.build_firmware(firmware_name=firmware_name)
+    ret = build.build_all()
     if ret != 0:
-        print "ERROR: build failed"
+        print "ERROR: build_all failed"
     return ret
 
 
@@ -908,6 +908,7 @@ def job(jobdict):
               "seekrate": 6000,      # optional, rate to first vertex
               "feedrate": 2000,      # optional, rate to other vertices
               "intensity": 100,      # optional, default: 0 (in percent)
+              "seekzero": False,     # optional, default: True
               "pierce_time": 0,      # optional, default: 0
               "pxsize": [0.4],       # optional
               "air_assist": "pass",  # optional (feed, pass, off), default: pass
@@ -1062,7 +1063,10 @@ def job(jobdict):
                     if len(polyline) > 0:
                         # first vertex -> seek
                         feedrate(seekrate)
-                        intensity(0.0)
+                        if 'seekzero' in pass_ and not pass_['seekzero']:
+                            intensity(intensity_)
+                        else:
+                            intensity(0.0)
                         is_2d = len(polyline[0]) == 2
                         if is_2d:
                             move(polyline[0][0], polyline[0][1])

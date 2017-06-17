@@ -60,8 +60,8 @@ typedef struct {
   int32_t rate_delta;                 // The steps/minute to add or subtract when changing speed (must be positive)
   uint32_t accelerate_until;          // The index of the step event on which to stop acceleration
   uint32_t decelerate_after;          // The index of the step event on which to start decelerating
-
-  uint16_t pixel_steps;               // Number of steps for each raster pixel (only in TYPE_RASTER_LINE)
+  // raster
+  uint32_t pixel_steps_x1024;         // Number of steps for each raster pixel * 1024 (only in TYPE_RASTER_LINE)
 } block_t;
 
 // Initialize the motion plan subsystem

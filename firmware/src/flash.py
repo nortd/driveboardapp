@@ -16,12 +16,12 @@ import os, sys
 # Please verify the following locations are correct for you platform:
 
 if sys.platform == "darwin":  # OSX
-    AVRDUDEAPP    = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avrdude"
-    AVRGCCAPP     = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-gcc"
-    AVROBJCOPYAPP = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-objcopy"
-    AVRSIZEAPP    = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-size"
-    AVROBJDUMPAPP = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-objdump"
-    AVRDUDECONFIG = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/etc/avrdude.conf"
+    AVRDUDEAPP    = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude"
+    AVRGCCAPP     = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-gcc"
+    AVROBJCOPYAPP = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-objcopy"
+    AVRSIZEAPP    = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-size"
+    AVROBJDUMPAPP = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-objdump"
+    AVRDUDECONFIG = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf"
 
 elif sys.platform == "win32": # Windows
     AVRDUDEAPP    = "C:\\arduino\\hardware\\tools\\avr\\bin\\avrdude"

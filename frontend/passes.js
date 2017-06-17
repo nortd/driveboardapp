@@ -117,7 +117,7 @@ function passes_pass_html(num, feedrate, intensity, pxsize) {
     '</a>'+
     '<div class="collapse" id="pass_conf_'+num+'"><div class="well" style="margin-bottom:10px">'+
       '<div class="input-group" style="margin-right:4px">'+
-        '<div class="input-group-addon">pxsize</div>'+
+        '<div class="input-group-addon">pxsize [mm]</div>'+
         '<input type="text" class="form-control input-sm pxsize"'+
           'style="width:44px;" value="'+pxsize+'" title="size of physical raster pixel in mm">'+
       '</div>'+

@@ -69,7 +69,7 @@ static int32_t counter_x,       // Counter variables for the bresenham line trac
                counter_y,
                counter_z;
 static uint32_t step_events_completed; // The number of step events executed in the current block
-static float next_pixel_at_steps;
+static uint32_t next_pixel_at_steps;
 static volatile bool busy;  // true when stepper ISR is in already running
 
 // Variables used by the trapezoid generation
@@ -81,7 +81,8 @@ static volatile bool processing_flag;         // indicates if blocks are being p
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
 
-#ifndef STATIC_PWM_FREQ
+// #ifndef STATIC_PWM_FREQ
+#if PWM_MODE == SYNCED_FREQ
   static volatile uint8_t pwm_counter = 1;
 #endif
 
@@ -261,11 +262,11 @@ ISR(TIMER1_COMPA_vect) {
       return;
     }
     #ifdef ENABLE_3AXES
-      else if (SENSE_Z1_LIMIT && ENABLE_3AXES) {
+      else if (SENSE_Z1_LIMIT) {
         stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
         busy = false;
         return;
-      } else if (SENSE_Z2_LIMIT && ENABLE_3AXES) {
+      } else if (SENSE_Z2_LIMIT) {
         stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
         busy = false;
         return;
@@ -273,7 +274,8 @@ ISR(TIMER1_COMPA_vect) {
     #endif
   #endif
 
-  #ifndef STATIC_PWM_FREQ
+  // #ifndef STATIC_PWM_FREQ
+  #if PWM_MODE == SYNCED_FREQ
     // pulse laser
     uint8_t duty = control_get_intensity();
     if (pwm_counter < CONFIG_BEAMDYNAMICS_EVERY) {
@@ -335,7 +337,7 @@ ISR(TIMER1_COMPA_vect) {
       adjust_speed( adjusted_rate ); // initialize cycles_per_step_event
       if (current_block->type == TYPE_RASTER_LINE) {
         control_laser_intensity(0);  // set only through raster data
-        next_pixel_at_steps = 0.0;
+        next_pixel_at_steps = 0;
       } else {
         adjust_beam_dynamics(adjusted_rate);
       }
@@ -440,20 +442,15 @@ ISR(TIMER1_COMPA_vect) {
           if (adjusted_rate != current_block->nominal_rate) {
             adjusted_rate = current_block->nominal_rate;
             adjust_speed( adjusted_rate );
-            if (current_block->type == TYPE_RASTER_LINE) {
-              control_laser_intensity(0);  // set only through raster data
-            } else {
-              adjust_beam_dynamics(adjusted_rate);
-            }
           }
           // Special case raster line.
           // Adjust intensity according raster buffer.
           if (current_block->type == TYPE_RASTER_LINE) {
             if (next_pixel_at_steps == 0) {  // starting raster_cruise
-              next_pixel_at_steps += step_events_completed;
+              next_pixel_at_steps += (step_events_completed << 10);  // * 1024
             }
-            if (step_events_completed >= next_pixel_at_steps) {
-              next_pixel_at_steps += current_block->pixel_steps;
+            if ((step_events_completed << 10) >= next_pixel_at_steps) {
+              next_pixel_at_steps += current_block->pixel_steps_x1024;
               // for every pixel width get the next raster value
               // disable nested interrupts
               // this is to prevent race conditions with the serial interrupt
@@ -463,8 +460,11 @@ ISR(TIMER1_COMPA_vect) {
               sei();
               // map [128,255] -> [0, nominal_laser_intensity]
               // (chr-128)*2 * (current_block->nominal_laser_intensity/255)
-              control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );
+              control_laser_intensity( (chr-128)*2*current_block->nominal_laser_intensity/255 );  // TODO: Maybe do this in preprocessing
             }
+          // otherwise make sure intensity at nominal
+          } else {
+            control_laser_intensity(current_block->nominal_laser_intensity);
           }
         }
       } else {  // block finished
@@ -574,10 +574,16 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
   // Adjust intensity with speed.
   #ifdef CONFIG_BEAMDYNAMICS
-  uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
-                 (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
-                 (((float)steps_per_minute/(float)current_block->nominal_rate)));
-  control_laser_intensity(adjusted_intensity);
+    #if (PWM_MODE == STEPPED_FREQ_PD5) || (PWM_MODE == STEPPED_FREQ_PD6) || (PWM_MODE == STATIC_FREQ)
+      uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                                   ((float)steps_per_minute/(float)current_block->nominal_rate);
+      adjusted_intensity = max(adjusted_intensity, 0);
+    #elif PWM_MODE == SYNCED_FREQ
+      uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
+                     (CONFIG_BEAMDYNAMICS_START + (1.0-CONFIG_BEAMDYNAMICS_START)*
+                     (((float)steps_per_minute/(float)current_block->nominal_rate)));
+    #endif
+    control_laser_intensity(adjusted_intensity);
   #else
   control_laser_intensity(current_block->nominal_laser_intensity);
   #endif
@@ -618,7 +624,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       limit_bits ^= LIMIT_MASK;
     }
 
-    #ifdef DRIVEBOARD_USB
+    #ifdef SENSE_INVERT
       bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT));
       bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT));
       bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT));

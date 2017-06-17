@@ -4,7 +4,7 @@
 # Copyright (c) 2011 Nortd Labs
 # Open Source by the terms of the Gnu Public License (GPL3) or higher.
 
-import os, sys, subprocess, shutil
+import os, sys, subprocess, shutil, glob
 from config import conf
 
 # Make sure you have the Arduino IDE installed (we've tested this on 022 and newer).
@@ -13,12 +13,12 @@ from config import conf
 # Please verify the following locations are correct for you platform:
 
 if sys.platform == "darwin":  # OSX
-    AVRDUDEAPP    = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avrdude"
-    AVRGCCAPP     = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-gcc"
-    AVROBJCOPYAPP = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-objcopy"
-    AVRSIZEAPP    = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-size"
-    AVROBJDUMPAPP = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-objdump"
-    AVRDUDECONFIG = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/etc/avrdude.conf"
+    AVRDUDEAPP    = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude"
+    AVRGCCAPP     = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-gcc"
+    AVROBJCOPYAPP = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-objcopy"
+    AVRSIZEAPP    = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-size"
+    AVROBJDUMPAPP = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-objdump"
+    AVRDUDECONFIG = "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf"
 
 elif sys.platform == "win32": # Windows
     AVRDUDEAPP    = "C:\\arduino\\hardware\\tools\\avr\\bin\\avrdude"
@@ -42,6 +42,41 @@ elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
 # No need to edit anything below this line
 
 
+def build_all():
+    """Build firmwares for all config files.
+    Each config.*.h becomes a firmware called firmware.*.hex
+    """
+    firmware_dir = os.path.join(conf['rootdir'], 'firmware')
+    source_dir = os.path.join(firmware_dir, 'src')
+    # set cwd
+    cwd_temp = os.getcwd()
+    os.chdir(source_dir)
+    # gather all firmware config files
+    config_files = glob.glob("config.*.h")
+
+    ret = 0
+    for config_file in config_files:
+        hardware_designator = config_file.split('.')[1:-1][0]
+        # activate
+        shutil.copy('config.h', '~config.h')
+        shutil.copy(config_file, 'config.h')
+        try:
+            firmware_name = "firmware.%s" % (hardware_designator)
+            print "INFO: building for %s" % (config_file)
+            # buid
+            r = build_firmware(firmware_name)
+            if r != 0:
+                ret = 1
+        finally:
+            # revert config.h
+            if os.path.exists('~config.h'):
+                shutil.move('~config.h', 'config.h')
+    # restore cwd
+    os.chdir(cwd_temp)
+    return ret
+
+
+
 def build_firmware(firmware_name="DriveboardFirmware"):
     """Build the firmware and name it firmware_name.hex.
     The source code is assumed to be in ../firmware/src/
@@ -55,13 +90,6 @@ def build_firmware(firmware_name="DriveboardFirmware"):
 
     cwd_temp = os.getcwd()
     os.chdir(source_dir)
-
-    # honor src/config.user.h if exists
-    if os.path.exists('config.user.h'):
-        shutil.copy('config.h', 'config.orig.h')
-        shutil.copy('config.user.h', 'config.h')
-        firmware_name = firmware_name + '_user'
-        print "INFO: using config.user.h"
 
     DEVICE = "atmega328p"
     CLOCK = "16000000"
@@ -92,9 +120,6 @@ def build_firmware(firmware_name="DriveboardFirmware"):
         return "Error: failed to build"
 
     try:
-        # honor src/config.user.h if exists
-        if os.path.exists('config.user.h'):
-            shutil.move('config.orig.h', 'config.h')
         ## clean after upload
         print "Cleaning up build files."
         for fileobj in OBJECTS:
@@ -118,11 +143,4 @@ def build_firmware(firmware_name="DriveboardFirmware"):
 
 
 if __name__ == '__main__':
-    import driveboard
-    from config import conf
-    buildname = conf['firmware']
-    if buildname.endswith('.hex'):
-        buildname = buildname[:-4]
-    return_code = driveboard.build(firmware_name=buildname)
-    if return_code != 0:
-        bottle.abort(400, "Build failed.")
+    build_all()

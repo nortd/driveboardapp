@@ -23,7 +23,7 @@
 
 
 void sense_init();
-#ifdef DRIVEBOARD_USB
+#ifdef SENSE_INVERT
   #define SENSE_X1_LIMIT ((LIMIT_PIN >> X1_LIMIT_BIT) & 1)
   #define SENSE_X2_LIMIT ((LIMIT_PIN >> X2_LIMIT_BIT) & 1)
   #define SENSE_Y1_LIMIT ((LIMIT_PIN >> Y1_LIMIT_BIT) & 1)
@@ -47,9 +47,7 @@ void sense_init();
 void control_init();
 
 void control_laser_intensity(uint8_t intensity);  //0-255 is 0-100%
-#ifndef STATIC_PWM_FREQ
-  uint8_t control_get_intensity();
-#endif
+uint8_t control_get_intensity();
 
 void control_air_assist(bool enable);
 void control_aux_assist(bool enable);

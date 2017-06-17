@@ -36,7 +36,7 @@ function tools_addfill_init() {
       '<form class="form-inline">'+
         '<div class="form-group">'+
           '<div class="input-group" style="margin:10px">'+
-            '<div class="input-group-addon" style="width:10px">Pixel Size [mm]</div>'+
+            '<div class="input-group-addon" style="width:10px">pxsize [mm]</div>'+
             '<input id="fillpxsize" type="text" class="form-control input-sm" style="width:40px;"'+
               'value="'+app_config_main.pxsize+'" title="match this to laser focus size">'+
           '</div>'+

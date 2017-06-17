@@ -1,3 +1,6 @@
+/*
+  config.h - compile time configuration
+  Part of DriveboardFirmware
 
   Copyright (c) 2009-2011 Simen Svale Skogsrud
   Copyright (c) 2011 Sungeun K. Jeon
@@ -20,15 +23,23 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1702               // int or float
+#define VERSION 1705               // int or float
 #define BAUD_RATE 57600
 // #define ENABLE_3AXES            // enable/disable 3-axis mode (vs 2-axis)
 #define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
-// #define DRIVEBOARD_USB          // configure IO pins for DriveboardUSB
+
+// PWM_MODE enumeration
+#define STATIC_FREQ 0
+#define STEPPED_FREQ_PD5 1
+#define STEPPED_FREQ_PD6 2
+#define SYNCED_FREQ 3
 // #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
-// #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
+
+#define SENSE_INVERT                     // invert how sense input is interpreted
+#define PWM_MODE STEPPED_FREQ_PD5
+#define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
-#define CONFIG_BEAMDYNAMICS_EVERY 8      // freq as multiples of steps impulses
+#define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
 
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
@@ -43,41 +54,25 @@
 #define CONFIG_X_ORIGIN_OFFSET 5.0  // mm, x-offset of table origin from physical home
 #define CONFIG_Y_ORIGIN_OFFSET 5.0  // mm, y-offset of table origin from physical home
 #define CONFIG_Z_ORIGIN_OFFSET 0.0   // mm, z-offset of table origin from physical home
-#ifdef DRIVEBOARD_USB
-  #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_INVERT_Z_AXIS 0  // 0 is regular, 1 inverts the y direction
-#else
-  #define CONFIG_INVERT_X_AXIS 0  // 0 is regular, 1 inverts the y direction
-//  #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
-// jet's lasersaur is backwards
-  #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
-  #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
-#endif
-
+#define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
+#define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
+#define CONFIG_INVERT_Z_AXIS 0  // 0 is regular, 1 inverts the y direction
 
 
 #define SENSE_DDR               DDRD
 #define SENSE_PORT              PORTD
 #define SENSE_PIN               PIND
 #define CHILLER_BIT             3           // Arduino: 3
-#ifdef DRIVEBOARD_USB
-  #define DOOR1_BIT             2           // Arduino: 2
-  #define DOOR2_BIT             7           // Arduino: 7
-#else
-  #define DOOR_BIT              2           // Arduino: 2
-#endif
+#define DOOR1_BIT               2           // Arduino: 2
+#define DOOR2_BIT               7           // Arduino: 7
+
 
 #define ASSIST_DDR              DDRD
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
-#ifdef DRIVEBOARD_USB
-  #define LASER_PWM_BIT         5           // Arduino: 5
-  #define AUX_ASSIST_BIT        6           // Arduino: 6
-#else
-  #define LASER_PWM_BIT         6           // Arduino: 6
-  #define AUX_ASSIST_BIT        5           // Arduino: 5
-#endif
+#define LASER_PWM_BIT           5           // Arduino: 5
+#define AUX_ASSIST_BIT          6           // Arduino: 6
+
 
 #define LIMIT_DDR               DDRC
 #define LIMIT_PORT              PORTC
@@ -89,7 +84,6 @@
 #define Z1_LIMIT_BIT            4           // Arduino: A4
 #define Z2_LIMIT_BIT            5           // Arduino: A5
 
-
 #define STEPPING_DDR            DDRB
 #define STEPPING_PORT           PORTB
 #define X_STEP_BIT              0           // Arduino: 8
@@ -100,11 +94,7 @@
 #define Z_DIRECTION_BIT         5           // Arduino: 13
 
 
-#ifdef DRIVEBOARD_USB
-  #define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR1_BIT)|(1<<DOOR2_BIT))
-#else
-  #define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR_BIT))
-#endif
+#define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR1_BIT)|(1<<DOOR2_BIT))
 #define LIMIT_MASK ((1<<X1_LIMIT_BIT)|(1<<X2_LIMIT_BIT)|(1<<Y1_LIMIT_BIT)|(1<<Y2_LIMIT_BIT)|(1<<Z1_LIMIT_BIT)|(1<<Z2_LIMIT_BIT))
 #define STEPPING_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT))
 #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT))

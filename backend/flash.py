@@ -8,17 +8,9 @@ import os, sys, time, subprocess, stat
 from config import conf
 
 
-def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'], firmware_file=conf['firmware']):
-    firmware_file = firmware_file.replace("/", "").replace("\\", "")  # make sure no evil injection
-    FIRMWARE = os.path.join(resources_dir, "firmware", firmware_file)
-
-    # honor src/config.user.h if exists
-    if os.path.exists(os.path.join(resources_dir, "firmware", 'src', 'config.user.h')):
-        name, ext = os.path.splitext(FIRMWARE)
-        FIRMWARE = name + '_user' + ext
-        print "INFO: using %s" % FIRMWARE
-        if not os.path.exists(FIRMWARE):
-            print "ERROR: first build 'config.user.h'-based firmware"
+def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'], firmware=conf['firmware']):
+    firmware = firmware.replace("/", "").replace("\\", "")  # make sure no evil injection
+    FIRMWARE = os.path.join(resources_dir, 'firmware', "firmware.%s.hex" % (firmware))
 
     if not os.path.exists(FIRMWARE):
         print "ERROR: invalid firmware path"
@@ -39,12 +31,17 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
             os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)
 
         elif sys.platform == "win32": # Windows
-            AVRDUDEAPP    = os.path.join(resources_dir, "firmware", "tools_win", "avrdude")
-            AVRDUDECONFIG = os.path.join(resources_dir, "firmware", "tools_win", "avrdude.conf")
+            AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude")
+            AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude.conf")
 
         elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
             AVRDUDEAPP    = os.path.join(resources_dir, "/usr/bin/avrdude")
             AVRDUDECONFIG = os.path.join(resources_dir, "/etc/avrdude.conf")
+            # AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude64")
+            # AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude.conf")
+            # chmod +x
+            # st = os.stat(AVRDUDEAPP)
+            # os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)
 
         # call avrdude, returns 0 on success
         command = ('"%(dude)s" -c %(programmer)s -b %(bps)s -P %(port)s -p %(device)s -C "%(dudeconf)s" -Uflash:w:"%(firmware)s":i'
