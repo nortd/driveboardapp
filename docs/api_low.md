@@ -54,10 +54,8 @@ unstop()
 
 air_on()
 air_off()
-aux1_on()
-aux1_off()
-aux2_on()
-aux2_off()
+aux_on()
+aux_off()
 
 set_offset_table()
 set_offset_custom()
