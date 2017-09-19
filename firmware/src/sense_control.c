@@ -77,11 +77,11 @@ void control_init() {
     // PPI = PWMfreq/(feedrate/25.4/60)
   // #else
   #elif PWM_MODE == STATIC_FREQ
-    // Setup Timer0 for  to granular freq
+    // Setup Timer0 for granular freq
     // also see: http://arduino.cc/en/Tutorial/SecretsOfArduinoPWM
     // see: https://sites.google.com/site/qeewiki/books/avr-guide/pwm-on-the-atmega328
     ASSIST_DDR |= (1 << LASER_PWM_BIT);   // set as output pin
-    if (LASER_PWM_BIT == 5) {  // granular freq only works with PDS
+    if (LASER_PWM_BIT == 5) {  // granular freq only works with PD5
       // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
       TCCR0B = _BV(WGM02);
       TCCR0A = _BV(WGM00);
