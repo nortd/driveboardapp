@@ -81,7 +81,6 @@ static volatile bool processing_flag;         // indicates if blocks are being p
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
 
-// #ifndef STATIC_PWM_FREQ
 #if PWM_MODE == SYNCED_FREQ
   static volatile uint8_t pwm_counter = 1;
 #endif
@@ -274,7 +273,6 @@ ISR(TIMER1_COMPA_vect) {
     #endif
   #endif
 
-  // #ifndef STATIC_PWM_FREQ
   #if PWM_MODE == SYNCED_FREQ
     // pulse laser
     uint8_t duty = control_get_intensity();
@@ -574,7 +572,8 @@ inline void adjust_speed( uint32_t steps_per_minute ) {
 inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
   // Adjust intensity with speed.
   #ifdef CONFIG_BEAMDYNAMICS
-    #if (PWM_MODE == STEPPED_FREQ_PD5) || (PWM_MODE == STEPPED_FREQ_PD6) || (PWM_MODE == STATIC_FREQ)
+    #if (PWM_MODE == STEPPED_FREQ_PD5) || (PWM_MODE == STEPPED_FREQ_PD6) || \
+        (PWM_MODE == STATIC_FREQ_PD5) || (PWM_MODE == STATIC_FREQ_PD6)
       uint8_t adjusted_intensity = current_block->nominal_laser_intensity *
                                    ((float)steps_per_minute/(float)current_block->nominal_rate);
       adjusted_intensity = max(adjusted_intensity, 0);
@@ -600,7 +599,9 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
   uint8_t limit_bits;
   uint8_t x_overshoot_count = 6;
   uint8_t y_overshoot_count = 6;
+  #ifdef ENABLE_3AXES
   uint8_t z_overshoot_count = 6;
+  #endif
 
   if (x_axis) { out_bits |= (1<<X_STEP_BIT); }
   if (y_axis) { out_bits |= (1<<Y_STEP_BIT); }
@@ -627,11 +628,15 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
     #ifdef SENSE_INVERT
       bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT));
       bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT));
+      #ifdef ENABLE_3AXES
       bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT));
+      #endif
     #else
       bool sense_x1_limit = !(limit_bits & (1<<X1_LIMIT_BIT));
       bool sense_y1_limit = !(limit_bits & (1<<Y1_LIMIT_BIT));
+      #ifdef ENABLE_3AXES
       bool sense_z1_limit = !(limit_bits & (1<<Z1_LIMIT_BIT));
+      #endif
     #endif
 
     if (x_axis && sense_x1_limit) {

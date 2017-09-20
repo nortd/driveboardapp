@@ -23,20 +23,21 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1705               // int or float
+#define VERSION 1708               // int or float
 #define BAUD_RATE 57600
 #define ENABLE_3AXES               // enable/disable 3-axis mode (vs 2-axis)
 #define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
 
 // PWM_MODE enumeration
-#define STATIC_FREQ 0
-#define STEPPED_FREQ_PD5 1
-#define STEPPED_FREQ_PD6 2
-#define SYNCED_FREQ 3
-#define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
+#define STATIC_FREQ_PD5 0
+#define STATIC_FREQ_PD6 1
+#define STEPPED_FREQ_PD5 2
+#define STEPPED_FREQ_PD6 3
+#define SYNCED_FREQ 4
+// #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
 
 // #define SENSE_INVERT                     // invert how sense input is interpreted
-#define PWM_MODE STATIC_FREQ
+#define PWM_MODE STATIC_FREQ_PD6
 // #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
 // #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
 // #define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
@@ -48,12 +49,12 @@
 #define CONFIG_PULSE_MICROSECONDS 5
 #define CONFIG_FEEDRATE 400.0 // in millimeters per minute
 #define CONFIG_SEEKRATE 400.0
-#define CONFIG_HOMINGRATE 3000  // ms/pulse
-#define CONFIG_ACCELERATION 300000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
+#define CONFIG_HOMINGRATE 500  // ms/pulse
+#define CONFIG_ACCELERATION 100000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
 #define CONFIG_JUNCTION_DEVIATION 0.006 // mm
-#define CONFIG_X_ORIGIN_OFFSET 5.0  // mm, x-offset of table origin from physical home
-#define CONFIG_Y_ORIGIN_OFFSET 5.0  // mm, y-offset of table origin from physical home
-#define CONFIG_Z_ORIGIN_OFFSET 0.0   // mm, z-offset of table origin from physical home
+#define CONFIG_X_ORIGIN_OFFSET 239.0  // mm, x-offset of table origin from physical home
+#define CONFIG_Y_ORIGIN_OFFSET 80.0  // mm, y-offset of table origin from physical home
+#define CONFIG_Z_ORIGIN_OFFSET 200.0   // mm, z-offset of table origin from physical home
 #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
@@ -68,7 +69,7 @@
 #define ASSIST_DDR              DDRD
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
-#define LASER_PWM_BIT           5           // Arduino: 5
+#define LASER_PWM_BIT           6           // Arduino: 6
 #define AUX_ASSIST_BIT          7           // Arduino: 7
 
 #define LIMIT_DDR               DDRC
