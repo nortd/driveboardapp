@@ -106,88 +106,109 @@ class GcodeReader:
         self.tolerance = tolerance
         self.tolerance2 = tolerance**2
 
-        # parsed path data, paths by color
-        # {'#ff0000': [[path0, path1, ..], [path0, ..], ..]}
-        # Each path is a list of vertices which is a list of two floats.
-        self.boundarys = {'#000000':[]}
-        self.black_boundarys = self.boundarys['#000000']
+        self.job = {'passes':[], 'items':[], 'defs':[]}
+        self.next_pass()
+        self.next_segment()
+
+
+    def next_pass(self):
+        self.job['defs'].append({'kind':'mill', 'data':[], 'params':[]})
+        self.job['items'].append({'def':len(self.job['defs'])-1})
+        self.job['passes'].append({'items':len(self.job['items'])-1})
+
+        self.def_ = self.job['defs'][-1]
+        self.path = self.def_['data']
+        self.params = self.def_['params']
+
+
+    def next_segment(self):
+        self.path.append([])
+        self.segment = self.path[-1]
+        self.params.append([])
+        self.segparam = self.params[-1]
+
 
 
     def parse(self, gcodestring):
         """Convert gcode to a job file."""
 
-        # modal state
-        G_motion = ""
-        X_pos =
-        Y_pos =
-        Z_pos =
-        F_rate =
-        S_freq =
+        # paths = []
+        # current_path = []
+        #
+        # intensity = 0.0
+        # feedrate = 1000.0
+        # target = [0.0, 0.0, 0.0]
+        # prev_motion_was_seek = True
+        #
+        # re_feed = re.compile('(G93|G94)').findall
+        # re_F = re.compile('(F)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        # re_S = re.compile('(S)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        # re_T = re.compile('(T)([0-9]+)').findall
+        # re_io = re.compile('(M62|M63|M64|M65|M66|M68)').findall
+        # re_toolchange = re.compile('(M6|M61)').findall
+        # re_spindle = re.compile('(M3|M4|M5)').findall
+        # re_save = re.compile('(M70|M71|M72|M73)').findall
+        # re_coolant = re.compile('(M7|M8|M9)').findall
+        # re_overrides = re.compile('(M48|M49|M50|M51|M52|M53)').findall
+        # re_custom = re.compile('(M1[0-9][0-9])').findall
+        # re_dwell = re.compile('(G4)').findall
+        # re_plane = re.compile('(G17|G18|G9)').findall
+        # re_units = re.compile('(G20|G21)').findall
+        # re_rcomp = re.compile('(G40|G41|G42)').findall
+        # re_lcomp = re.compile('(G43|G49)').findall
+        # re_cs = re.compile('(G5[4-9]|G59\.[1-3])').findall
+        # re_path = re.compile('(G61|G61\.1|G64)').findall
+        # re_dist = re.compile('(G90|G91)').findall
+        # re_retract = re.compile('(G98|G99)').findall
+        # re_goref = re.compile('(G28|G30|G10|G92|G92\.1|G92\.2)').findall
+        # re_motion = re.compile('(G[0-3]|G33|G38\.[2-5]|G73|G76|G8[0-9]|G53)').findall
+        # re_stop = re.compile('(M0|M1|M2|M30|M60)').findall
+        # re_X = re.compile('(X)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        # re_Y = re.compile('(Y)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        # re_Z = re.compile('(Z)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        #
+        #
+        # # order of execution within every block (not sequential)
+        # # see (22.): http://linuxcnc.org/docs/html/gcode/overview.html
+        # block = collections.OrderedDict()
+        # block["feed"] = []
+        # block["F"] = []
+        # block["S"] = []
+        # block["T"] = []
+        # block["io"] = []
+        # block["toolchange"] = []
+        # block["spindle"] = []
+        # block["save"] = []
+        # block["coolant"] = []
+        # block["overrides"] = []
+        # block["custom"] = []
+        # block["dwell"] = []
+        # block["plane"] = []
+        # block["units"] = []
+        # block["rcomp"] = []
+        # block["lcomp"] = []
+        # block["cs"] = []
+        # block["path"] = []
+        # block["dist"] = []
+        # block["retract"] = []
+        # block["goref"] = []
+        # block["motion"] = []
+        # block["stop"] = []
+        # block["XYZ"] = []
 
-        paths = []
-        current_path = []
-
-        intensity = 0.0
-        feedrate = 1000.0
-        target = [0.0, 0.0, 0.0]
-        prev_motion_was_seek = True
-
-        re_feed = re.compile('(G93|G94)').findall
-        re_F = re.compile('(F)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        re_S = re.compile('(S)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        re_T = re.compile('(T)([0-9]+)').findall
-        re_io = re.compile('(M62|M63|M64|M65|M66|M68)').findall
-        re_toolchange = re.compile('(M6|M61)').findall
-        re_spindle = re.compile('(M3|M4|M5)').findall
-        re_save = re.compile('(M70|M71|M72|M73)').findall
-        re_coolant = re.compile('(M7|M8|M9)').findall
-        re_overrides = re.compile('(M48|M49|M50|M51|M52|M53)').findall
-        re_custom = re.compile('(M1[0-9][0-9])').findall
-        re_dwell = re.compile('(G4)').findall
-        re_plane = re.compile('(G17|G18|G9)').findall
-        re_units = re.compile('(G20|G21)').findall
-        re_rcomp = re.compile('(G40|G41|G42)').findall
-        re_lcomp = re.compile('(G43|G49)').findall
-        re_cs = re.compile('(G5[4-9]|G59\.[1-3])').findall
-        re_path = re.compile('(G61|G61\.1|G64)').findall
-        re_dist = re.compile('(G90|G91)').findall
-        re_retract = re.compile('(G98|G99)').findall
-        re_goref = re.compile('(G28|G30|G10|G92|G92\.1|G92\.2)').findall
-        re_motion = re.compile('(G[0-3]|G33|G38\.[2-5]|G73|G76|G8[0-9]|G53)').findall
-        re_stop = re.compile('(M0|M1|M2|M30|M60)').findall
-        re_X = re.compile('(X)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        re_Y = re.compile('(Y)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        re_Z = re.compile('(Z)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
 
         re_parts = re.compile('([X,Y,Z,G,M,T,S,F])(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
 
-        # order of execution within every block (not sequential)
-        # see (22.): http://linuxcnc.org/docs/html/gcode/overview.html
-        block = collections.OrderedDict()
-        block["feed"] = []
-        block["F"] = []
-        block["S"] = []
-        block["T"] = []
-        block["io"] = []
-        block["toolchange"] = []
-        block["spindle"] = []
-        block["save"] = []
-        block["coolant"] = []
-        block["overrides"] = []
-        block["custom"] = []
-        block["dwell"] = []
-        block["plane"] = []
-        block["units"] = []
-        block["rcomp"] = []
-        block["lcomp"] = []
-        block["cs"] = []
-        block["path"] = []
-        block["dist"] = []
-        block["retract"] = []
-        block["goref"] = []
-        block["motion"] = []
-        block["stop"] = []
-        block["XYZ"] = []
+        # modal state
+        G_motion = 0
+        X_pos = 0.0
+        Y_pos = 0.0
+        Z_pos = 0.0
+        F_rate = 0
+        S_freq = 0
+        M_cool = False
+        T_num = 0
+
 
         for line in gcodestring.splitlines():
             # reject lines condition
@@ -196,51 +217,56 @@ class GcodeReader:
                     print("line rejected: %s" % (line))
                 continue
 
-            codes = []
 
             # lines with valid start char
             for code in re_parts(line):
-                # convert numeral
-                # code[1] = float(code[1])
-                # if code[1].is_integer(): code[1] = int(code[1])
+                convert numeral
+                code[1] = float(code[1])
+                if code[1].is_integer(): code[1] = int(code[1])
 
-                # sort out and filter
-                if code[0] in ('X','Y','Z'):
-                    block['XYZ'].append(code)
-                elif char == "G":
-                    # suported
-                    if code[1] in ('0', '1'):
-                        block['motion'].append(code)
-                    elif code[1] in ('21'):
-                        block['units'].append(code)
-                    elif code[1] in ('54'):
-                        block['cs'].append(code)
-                    elif code[1] in ('90'):
-                        block['dist'].append(code)
-                    elif code[1] in ('94'):
-                        block['feed'].append(code)
-                    #unsupported
-                    else:
-                        if debug:
-                            print("unsupported code: G%s" % (code[1]))
-                elif char == "M":
-                    # suported
-                    if code[1] in ('3', '4', '5'):
-                        block['spindle'].append(code)
-                    elif code[1] in ('7', '8', '9'):
-                        block['coolant'].append(code)
-                    #unsupported
-                    else:
-                        if debug:
-                            print("unsupported code: M%s" % (code[1]))
-                elif char == "T":
-                    block['T'].append(code)
-                elif char == "S":
-                    block['S'].append(code)
-                elif char == "F":
-                    block['F'].append(code)
+                # collect state
+                if code[0] == 'X':
+                    X_pos = code[1]
+                    bMotion = True
+                elif code[0] == 'Y':
+                    Y_pos = code[1]
+                    bMotion = True
+                elif code[0] == 'Z':
+                    Z_pos = code[1]
+                    bMotion = True
 
-            # assemble block sorted by proper order (gcode standard)
-            for k, v in d.items():
-                for cmd in v:
-                    codes.append(cmd)
+                elif code[0] == 'F':
+                    F_rate = code[1]
+                elif code[0] == 'S':
+                    S_freq = code[1]
+                elif code[0] == 'T':
+                    T_num = code[1]
+
+                # handle actions
+
+                elif code[0] == 'M' and code[1] == 6:
+                    #handle tool change
+                    self.next_pass()
+                elif code[0] == 'M' and code[1] in (3,4,5):
+                    #handle spindel freq change
+                    bParamChange = True
+                elif code[0] == 'M' and code[1] in (7,8,9):
+                    #handle coolant change
+                    bParamChange = True
+                elif code[0] == 'F':
+                    #handle feedrate change
+                    bParamChange = True
+                elif code[0] == 'G' and (code[1] == 0 or code[1] == 1):
+                    if code[1] != G_motion:
+                        # handle implicit feedrate change
+                        self.next_segment()
+                        G_motion = code[1]
+
+                if bMotion:
+                    segment.append((X_pos, Y_pos, Z_pos))
+                    bMotion = False
+
+                if bParamChange:
+                    self.next_segment()
+                    segparam.append({'F_rate':F_rate, 'S_freq': S_freq, 'M_cool':M_cool})  #TODO only pass what changed
+                    bParamChange = False
