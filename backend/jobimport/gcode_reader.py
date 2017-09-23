@@ -206,8 +206,9 @@ class GcodeReader:
         Z_pos = 0.0
         F_rate = 0
         S_freq = 0
-        M_cool = False
         T_num = 0
+
+        F_rapidrate =
 
 
         for line in gcodestring.splitlines():
@@ -243,30 +244,49 @@ class GcodeReader:
                     T_num = code[1]
 
                 # handle actions
-
                 elif code[0] == 'M' and code[1] == 6:
                     #handle tool change
                     self.next_pass()
                 elif code[0] == 'M' and code[1] in (3,4,5):
                     #handle spindel freq change
-                    bParamChange = True
+                    self.next_segment()
+                    segparam.append({'S_freq': S_freq})
                 elif code[0] == 'M' and code[1] in (7,8,9):
                     #handle coolant change
-                    bParamChange = True
+                    self.next_segment()
+                    segparam.append({'M_cool':M_cool})
                 elif code[0] == 'F':
                     #handle feedrate change
-                    bParamChange = True
+                    self.next_segment()
+                    segparam.append({'F_rate':F_rate})
                 elif code[0] == 'G' and (code[1] == 0 or code[1] == 1):
                     if code[1] != G_motion:
                         # handle implicit feedrate change
                         self.next_segment()
+                        segparam.append({'F_rate':F_rapidrate})
                         G_motion = code[1]
 
+                # handle reporting of unsupported gcode
+                elif code[0] == 'G' and code[1] in (2,3):
+                    print("ERROR: G2,G3 arc motions not supported")
+                elif code[0] == 'G' and code[1] in (4):
+                    print("ERROR: G4 dwell motions not supported")
+                elif code[0] == 'G' and code[1] in (53):
+                    print("ERROR: G53 machine CS motion not supported")
+                elif code[0] == 'G' and code[1] in (55,56,57,58,59):
+                    print("ERROR: G55-G59 CS not supported")
+                elif code[0] == 'G' and code[1] in (91):
+                    print("ERROR: G91 relative motion not supported")
+                elif code[0] == 'G' and code[1] in (92):
+                    print("ERROR: G92 shift CS not supported")
+                elif code[0] == 'G' and code[1] in (93,95):
+                    print("ERROR: G93,G95 alternative distance modes not supported")
+                elif code[0] == 'M' and code[1] in (0,1):
+                    print("ERROR: M0,M1 pause not supported")
+                elif code[0] == 'M' and code[1] == 20:
+                    print("ERROR: inch units not supported")
+
+                # commit motion
                 if bMotion:
                     segment.append((X_pos, Y_pos, Z_pos))
                     bMotion = False
-
-                if bParamChange:
-                    self.next_segment()
-                    segparam.append({'F_rate':F_rate, 'S_freq': S_freq, 'M_cool':M_cool})  #TODO only pass what changed
-                    bParamChange = False
