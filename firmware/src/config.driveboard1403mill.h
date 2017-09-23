@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1708               // int or float
+#define VERSION 1706               // int or float
 #define BAUD_RATE 57600
 #define ENABLE_3AXES               // enable/disable 3-axis mode (vs 2-axis)
 #define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
@@ -47,13 +47,13 @@
 #define CONFIG_Y_STEPS_PER_MM 623.684 //microsteps/mm
 #define CONFIG_Z_STEPS_PER_MM 797.812 //microsteps/mm
 #define CONFIG_PULSE_MICROSECONDS 5
-#define CONFIG_FEEDRATE 400.0 // in millimeters per minute
-#define CONFIG_SEEKRATE 400.0
-#define CONFIG_HOMINGRATE 500  // ms/pulse
+#define CONFIG_FEEDRATE 800.0 // in millimeters per minute
+#define CONFIG_SEEKRATE 800.0
+#define CONFIG_HOMINGRATE 300  // ms/pulse
 #define CONFIG_ACCELERATION 100000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
 #define CONFIG_JUNCTION_DEVIATION 0.006 // mm
 #define CONFIG_X_ORIGIN_OFFSET 239.0  // mm, x-offset of table origin from physical home
-#define CONFIG_Y_ORIGIN_OFFSET 80.0  // mm, y-offset of table origin from physical home
+#define CONFIG_Y_ORIGIN_OFFSET 73.0  // mm, y-offset of table origin from physical home
 #define CONFIG_Z_ORIGIN_OFFSET 200.0   // mm, z-offset of table origin from physical home
 #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Y_AXIS 0  // 0 is regular, 1 inverts the y direction
@@ -70,7 +70,7 @@
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
 #define LASER_PWM_BIT           6           // Arduino: 6
-#define AUX_ASSIST_BIT          7           // Arduino: 7
+#define AUX_ASSIST_BIT          5           // Arduino: 5
 
 #define LIMIT_DDR               DDRC
 #define LIMIT_PORT              PORTC

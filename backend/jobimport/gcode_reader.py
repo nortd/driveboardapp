@@ -11,9 +11,94 @@ import StringIO
 
 
 
-class NGCReader:
+class GcodeReader:
     """Parse subset of G-Code.
-    TODO!!
+
+    GCODE
+    -----
+    See: http://linuxcnc.org/docs/html/gcode.html
+
+    G0 - rapid move
+    G1 - linear move
+    G2,G3 - arc move
+    G4 - dwell
+
+    G17 - select XY-plane (default)
+    G18 - select XZ-plane
+    G19 - select YZ-plane
+
+    G20 - inch mode
+    G21 - mm mode (default)
+
+    G28 - park machine
+        - without params, move to machine 0,0,0
+        - with params, first go there (in current cs), typ retract Z
+        - (unless G28.1 programmed a different origin)
+        - "G28 G91 Z0, G90" typically before tool change, same as "G53 Z0, G53 X0 Y0"
+
+    G38.2-G38.5 - probe
+
+    G53 - use machine coorinates for same block (G53 Z15), non-modal
+    G54 - use CS 1 from now on (default)
+    G55-G59 - more custom CSes
+
+    G90 - absolute mode (default)
+    G91 - relative mode
+
+    G92 - move CS (throw error)
+
+    G93 - inverse time mode
+    G94 - units/mm mode (default)
+    G95 - units/rev mode
+
+
+    M0, M1 - pause
+    M2, M30 - end
+
+    M3 - start spindel CW at whatever S has been set to
+    M4 - start spindel CCW at whatever S has been set to
+    M5 - stop spindel
+
+    M6 - stop, prompt for tool change, non-modal
+       - to whatever the most recent Tx was
+
+    M7 - mist coolant on
+    M8 - flood coolant on
+    M9 - all coolant off
+
+    M62-M65 - switch digital output
+
+
+    Sx - spindle speed in RPMs
+
+    Fx - feedrate (default: mm/min)
+
+    Tx - set active tool mode, schedule actual switch with M6
+
+
+    HOWTO
+    -----
+    One pass for every tool. UI to run one pass after the other.
+
+    - tool
+      - path
+        - params: feedrate, spindel, coolant
+        - segment
+          - move
+          - move
+          - ...
+        - params
+        - segment
+          - move
+          - ...
+        - ...
+      - retract
+    - tool
+      - ...
+
+    One path/tool. Within path, one segment for every param change.
+    Treat rapid moves like feeds with different rate.
+
     """
 
     def __init__(self, tolerance):
@@ -28,10 +113,8 @@ class NGCReader:
         self.black_boundarys = self.boundarys['#000000']
 
 
-    def parse(self, ngcstring):
-        """This is a total super quick HACK!!!!
-            Pretty much only parses the old example files.
-        """
+    def parse(self, gcodestring):
+        """Convert gcode to a job file."""
 
         paths = []
         current_path = []
