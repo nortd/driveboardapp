@@ -198,6 +198,8 @@ class GcodeReader:
 
 
         re_parts = re.compile('([X,Y,Z,G,M,T,S,F])(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        re_toolchange = re.compile('([M6])').findall
+        re_T = re.compile('([T])([0-9]+)').findall
 
         # modal state
         G_motion = 0
@@ -218,10 +220,26 @@ class GcodeReader:
                     print("line rejected: %s" % (line))
                 continue
 
+            if re_toolchange(line):
+                T_code = re_T(line)
+                if T_code:
+                    T_num = T_code[1]
+                    #sanity check
+                    if len(re_parts(line)) > 2:
+                        print("ERROR: M6 cluttered toolchange line")
+                else:
+                    if len(re_parts(line)) > 1:
+                        print("ERROR: M6 cluttered toolchange line")
+
+                self.next_pass()
+                continue
+
+
+            bMotion = False
 
             # lines with valid start char
             for code in re_parts(line):
-                convert numeral
+                # convert numeral
                 code[1] = float(code[1])
                 if code[1].is_integer(): code[1] = int(code[1])
 
@@ -244,9 +262,6 @@ class GcodeReader:
                     T_num = code[1]
 
                 # handle actions
-                elif code[0] == 'M' and code[1] == 6:
-                    #handle tool change
-                    self.next_pass()
                 elif code[0] == 'M' and code[1] in (3,4,5):
                     #handle spindel freq change
                     self.next_segment()
@@ -286,7 +301,6 @@ class GcodeReader:
                 elif code[0] == 'M' and code[1] == 20:
                     print("ERROR: inch units not supported")
 
-                # commit motion
-                if bMotion:
-                    segment.append((X_pos, Y_pos, Z_pos))
-                    bMotion = False
+            # commit motion
+            if bMotion:
+                segment.append((X_pos, Y_pos, Z_pos))
