@@ -103,6 +103,9 @@ class GcodeReader:
     This def is of kind "mill". A mill def has a data item which is a path.
     A mill path is a series of moves and param changes.
 
+    A def looks like this:
+    {'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''}
+
     The format of a path is a series of possible ath items:
     - ('G0',(x,y,z))      (mapped to move with seekrate)
     - ('G1',(x,y,z))      (mapped to move with feedrate)
@@ -133,10 +136,14 @@ class GcodeReader:
         self.M_mist = False
         self.M_flood = False
 
+        # tools table
+        self.toolinfo = {}
+
         # regexes
         self.re_parts = re.compile('(X|Y|Z|G|M|T|S|F)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
         self.re_toolchange = re.compile('(M6)').findall
         self.re_T = re.compile('(T)([0-9]+)').findall
+        self.re_toolinfo = re.compile('\((T[0-9]+) *(.+) *\)').findall
 
         # output job
         self.job = {'passes':[], 'items':[], 'defs':[]}
@@ -144,7 +151,7 @@ class GcodeReader:
 
     def next_pass(self):
         # print("INFO: Setting up pass for tool: T%s" % (self.T_num))
-        self.job['defs'].append({'kind':'mill', 'data':[]})
+        self.job['defs'].append({'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''})
         self.job['items'].append({'def':len(self.job['defs'])-1})
         self.job['passes'].append({'items':len(self.job['items'])-1})
         self.def_ = self.job['defs'][-1]
@@ -157,7 +164,6 @@ class GcodeReader:
         """
         T_code = self.re_T(line)
         if len(T_code) == 1:
-            print("INFO: %s%s" % T_code[0])
             self.T_num = T_code[0][1]
             nParts = 2
         else:
@@ -168,6 +174,11 @@ class GcodeReader:
         else:
             self.next_pass()
             self.bTool = True
+            # add tool, toolinfo to def
+            tool = 'T'+str(self.T_num)
+            self.def_['tool'] = tool
+            if tool in self.toolinfo:
+                self.def_['toolinfo'] = self.toolinfo[tool]
 
 
     def on_action(self, action):
@@ -182,9 +193,14 @@ class GcodeReader:
         for line in gcodestring.splitlines():
             # reject line condition
             if len(line) == 0 or line[0] not in ('X', 'Y', 'Z', 'G', 'M', 'T', 'S', 'F'):
-                # if debug:
-                #     print("WARN: line rejected: %s" % (line))
-                continue
+                # parse tool table
+                if line.startswith('(T'):
+                    toolinfo = self.re_toolinfo(line)
+                    if toolinfo:
+                        self.toolinfo[toolinfo[0][0]] = (toolinfo[0][1])
+                # reject
+                else:
+                    continue
 
             # on tool change action (M6)
             if self.re_toolchange(line):
