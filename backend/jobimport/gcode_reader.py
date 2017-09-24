@@ -8,14 +8,14 @@ import re
 import os.path
 import StringIO
 
-
+debug = True
 
 
 class GcodeReader:
     """Parse subset of G-Code.
 
-    GCODE
-    -----
+    GCODE OVERVIEW
+    --------------
     See: http://linuxcnc.org/docs/html/gcode.html
 
     G0 - rapid move
@@ -55,9 +55,9 @@ class GcodeReader:
     M0, M1 - pause
     M2, M30 - end
 
-    M3 - start spindel CW at whatever S has been set to
-    M4 - start spindel CCW at whatever S has been set to
-    M5 - stop spindel
+    M3 - start spindle CW at whatever S has been set to
+    M4 - start spindle CCW at whatever S has been set to
+    M5 - stop spindle
 
     M6 - stop, prompt for tool change, non-modal
        - to whatever the most recent Tx was
@@ -76,231 +76,226 @@ class GcodeReader:
     Tx - set active tool mode, schedule actual switch with M6
 
 
-    HOWTO
-    -----
+    STRATEGY
+    --------
     One pass for every tool. UI to run one pass after the other.
 
     - tool
       - path
-        - params: feedrate, spindel, coolant
-        - segment
-          - move
-          - move
-          - ...
-        - params
-        - segment
-          - move
-          - ...
+        - params: feedrate, spindle, coolant
+        - move
+        - move
+        - params: feedrate, spindle, coolant
+        - move
+        - move
         - ...
       - retract
     - tool
       - ...
 
-    One path/tool. Within path, one segment for every param change.
+    One path/tool. Within path, a series of moves and param changes.
     Treat rapid moves like feeds with different rate.
+
+
+    OUTPUT
+    ------
+    Output is a job where every "pass" has one "item" that has one "def".
+    This def is of kind "mill". A mill def has a data item which is a path.
+    A mill path is a series of moves and param changes.
+
+    The format of a path is a series of possible ath items:
+    - ('G0',(x,y,z))      (mapped to move with seekrate)
+    - ('G1',(x,y,z))      (mapped to move with feedrate)
+    - ('F',rate)          (mapped to feedrate)
+    - ('S',freq)          (mapped to intensity)
+    - ('MIST', onoff)     (mapped to air_on/off)
+    - ('FLOOD', onoff)    (mapped to aux_on/off)
+
+    Path example:
+    [('G0',(x,y,z)), ('F', 1000), ('S', 18000), ('FLOOD', True), ('G1', (x,y,z))]
+
 
     """
 
-    def __init__(self, tolerance):
-        # tolerance settings, used in tessalation, path simplification, etc
-        self.tolerance = tolerance
-        self.tolerance2 = tolerance**2
+    def __init__(self):
+        # flags
+        self.bTool = False
 
+        # modal state
+        self.G_motion = 'G0'
+        self.X_pos = 0.0
+        self.Y_pos = 0.0
+        self.Z_pos = 0.0
+        self.F_rate = 0
+        self.S_freq = 0
+        self.S_on = False
+        self.T_num = 0
+        self.M_mist = False
+        self.M_flood = False
+
+        # regexes
+        self.re_parts = re.compile('(X|Y|Z|G|M|T|S|F)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
+        self.re_toolchange = re.compile('(M6)').findall
+        self.re_T = re.compile('(T)([0-9]+)').findall
+
+        # output job
         self.job = {'passes':[], 'items':[], 'defs':[]}
-        self.next_pass()
-        self.next_segment()
 
 
     def next_pass(self):
-        self.job['defs'].append({'kind':'mill', 'data':[], 'params':[]})
+        # print("INFO: Setting up pass for tool: T%s" % (self.T_num))
+        self.job['defs'].append({'kind':'mill', 'data':[]})
         self.job['items'].append({'def':len(self.job['defs'])-1})
         self.job['passes'].append({'items':len(self.job['items'])-1})
-
         self.def_ = self.job['defs'][-1]
         self.path = self.def_['data']
-        self.params = self.def_['params']
 
 
-    def next_segment(self):
-        self.path.append([])
-        self.segment = self.path[-1]
-        self.params.append([])
-        self.segparam = self.params[-1]
+    def on_toolchange(self, line):
+        """Handle a tool change action (M6).
+           Account for T action on same line (nothing more).
+        """
+        T_code = self.re_T(line)
+        if len(T_code) == 1:
+            print("INFO: %s%s" % T_code[0])
+            self.T_num = T_code[0][1]
+            nParts = 2
+        else:
+            nParts = 1
+        # commit tool change
+        if len(self.re_parts(line)) != nParts:
+            print("ERROR: cannot handle anything but T on M6 toolchange line")
+        else:
+            self.next_pass()
+            self.bTool = True
 
+
+    def on_action(self, action):
+        if not self.bTool:
+            print("ERROR: no tool defined at: %s:%s" % action)
+            return
+        self.path.append(action)
 
 
     def parse(self, gcodestring):
         """Convert gcode to a job file."""
-
-        # paths = []
-        # current_path = []
-        #
-        # intensity = 0.0
-        # feedrate = 1000.0
-        # target = [0.0, 0.0, 0.0]
-        # prev_motion_was_seek = True
-        #
-        # re_feed = re.compile('(G93|G94)').findall
-        # re_F = re.compile('(F)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        # re_S = re.compile('(S)([0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        # re_T = re.compile('(T)([0-9]+)').findall
-        # re_io = re.compile('(M62|M63|M64|M65|M66|M68)').findall
-        # re_toolchange = re.compile('(M6|M61)').findall
-        # re_spindle = re.compile('(M3|M4|M5)').findall
-        # re_save = re.compile('(M70|M71|M72|M73)').findall
-        # re_coolant = re.compile('(M7|M8|M9)').findall
-        # re_overrides = re.compile('(M48|M49|M50|M51|M52|M53)').findall
-        # re_custom = re.compile('(M1[0-9][0-9])').findall
-        # re_dwell = re.compile('(G4)').findall
-        # re_plane = re.compile('(G17|G18|G9)').findall
-        # re_units = re.compile('(G20|G21)').findall
-        # re_rcomp = re.compile('(G40|G41|G42)').findall
-        # re_lcomp = re.compile('(G43|G49)').findall
-        # re_cs = re.compile('(G5[4-9]|G59\.[1-3])').findall
-        # re_path = re.compile('(G61|G61\.1|G64)').findall
-        # re_dist = re.compile('(G90|G91)').findall
-        # re_retract = re.compile('(G98|G99)').findall
-        # re_goref = re.compile('(G28|G30|G10|G92|G92\.1|G92\.2)').findall
-        # re_motion = re.compile('(G[0-3]|G33|G38\.[2-5]|G73|G76|G8[0-9]|G53)').findall
-        # re_stop = re.compile('(M0|M1|M2|M30|M60)').findall
-        # re_X = re.compile('(X)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        # re_Y = re.compile('(Y)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        # re_Z = re.compile('(Z)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        #
-        #
-        # # order of execution within every block (not sequential)
-        # # see (22.): http://linuxcnc.org/docs/html/gcode/overview.html
-        # block = collections.OrderedDict()
-        # block["feed"] = []
-        # block["F"] = []
-        # block["S"] = []
-        # block["T"] = []
-        # block["io"] = []
-        # block["toolchange"] = []
-        # block["spindle"] = []
-        # block["save"] = []
-        # block["coolant"] = []
-        # block["overrides"] = []
-        # block["custom"] = []
-        # block["dwell"] = []
-        # block["plane"] = []
-        # block["units"] = []
-        # block["rcomp"] = []
-        # block["lcomp"] = []
-        # block["cs"] = []
-        # block["path"] = []
-        # block["dist"] = []
-        # block["retract"] = []
-        # block["goref"] = []
-        # block["motion"] = []
-        # block["stop"] = []
-        # block["XYZ"] = []
-
-
-        re_parts = re.compile('([X,Y,Z,G,M,T,S,F])(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
-        re_toolchange = re.compile('([M6])').findall
-        re_T = re.compile('([T])([0-9]+)').findall
-
-        # modal state
-        G_motion = 0
-        X_pos = 0.0
-        Y_pos = 0.0
-        Z_pos = 0.0
-        F_rate = 0
-        S_freq = 0
-        T_num = 0
-
-        F_rapidrate =
-
-
         for line in gcodestring.splitlines():
-            # reject lines condition
+            # reject line condition
             if len(line) == 0 or line[0] not in ('X', 'Y', 'Z', 'G', 'M', 'T', 'S', 'F'):
-                if debug:
-                    print("line rejected: %s" % (line))
+                # if debug:
+                #     print("WARN: line rejected: %s" % (line))
                 continue
 
-            if re_toolchange(line):
-                T_code = re_T(line)
-                if T_code:
-                    T_num = T_code[1]
-                    #sanity check
-                    if len(re_parts(line)) > 2:
-                        print("ERROR: M6 cluttered toolchange line")
-                else:
-                    if len(re_parts(line)) > 1:
-                        print("ERROR: M6 cluttered toolchange line")
-
-                self.next_pass()
+            # on tool change action (M6)
+            if self.re_toolchange(line):
+                self.on_toolchange(line)
                 continue
-
 
             bMotion = False
+            bFeed = False
+            bSpindle = False
+            bMist = False
+            bFlood = False
 
             # lines with valid start char
-            for code in re_parts(line):
+            for code_ in self.re_parts(line):
                 # convert numeral
-                code[1] = float(code[1])
+                code = [code_[0], float(code_[1])]
                 if code[1].is_integer(): code[1] = int(code[1])
-
-                # collect state
+                # target coordinates
                 if code[0] == 'X':
-                    X_pos = code[1]
+                    self.X_pos = code[1]
                     bMotion = True
                 elif code[0] == 'Y':
-                    Y_pos = code[1]
+                    self.Y_pos = code[1]
                     bMotion = True
                 elif code[0] == 'Z':
-                    Z_pos = code[1]
+                    self.Z_pos = code[1]
                     bMotion = True
-
+                # params: feedrate, freq, tool
                 elif code[0] == 'F':
-                    F_rate = code[1]
+                    self.F_rate = code[1]
+                    bFeed = True
                 elif code[0] == 'S':
-                    S_freq = code[1]
+                    self.S_freq = code[1]
                 elif code[0] == 'T':
-                    T_num = code[1]
-
-                # handle actions
-                elif code[0] == 'M' and code[1] in (3,4,5):
-                    #handle spindel freq change
-                    self.next_segment()
-                    segparam.append({'S_freq': S_freq})
+                    self.T_num = code[1]
+                # spindle frequency change
+                elif code[0] == 'M' and code[1] in (3,5):
+                    if code[1] == 3:
+                        self.S_on = True
+                        bSpindle = True
+                    elif code[1] == 5:
+                        self.S_on = False
+                        bSpindle = True
+                # coolant valve change
                 elif code[0] == 'M' and code[1] in (7,8,9):
-                    #handle coolant change
-                    self.next_segment()
-                    segparam.append({'M_cool':M_cool})
-                elif code[0] == 'F':
-                    #handle feedrate change
-                    self.next_segment()
-                    segparam.append({'F_rate':F_rate})
-                elif code[0] == 'G' and (code[1] == 0 or code[1] == 1):
-                    if code[1] != G_motion:
-                        # handle implicit feedrate change
-                        self.next_segment()
-                        segparam.append({'F_rate':F_rapidrate})
-                        G_motion = code[1]
-
+                    if code[1] == 7:
+                        if not self.M_mist:
+                            self.M_mist = True
+                            bMist = True
+                    elif code[1] == 8:
+                        if not self.M_flood:
+                            self.M_flood = True
+                            bFlood = True
+                    elif code[1] == 9:
+                        if self.M_mist:
+                            self.M_mist = False
+                            bMist = True
+                        if self.M_flood:
+                            self.M_flood = False
+                            bFlood = True
+                # motion style change
+                elif code[0] == 'G' and code[1] in (0,1):
+                    self.G_motion = 'G'+str(code[1])
                 # handle reporting of unsupported gcode
                 elif code[0] == 'G' and code[1] in (2,3):
                     print("ERROR: G2,G3 arc motions not supported")
-                elif code[0] == 'G' and code[1] in (4):
+                elif code[0] == 'G' and code[1] in (4,):
                     print("ERROR: G4 dwell motions not supported")
-                elif code[0] == 'G' and code[1] in (53):
+                elif code[0] == 'G' and code[1] in (53,):
                     print("ERROR: G53 machine CS motion not supported")
                 elif code[0] == 'G' and code[1] in (55,56,57,58,59):
                     print("ERROR: G55-G59 CS not supported")
-                elif code[0] == 'G' and code[1] in (91):
+                elif code[0] == 'G' and code[1] in (91,):
                     print("ERROR: G91 relative motion not supported")
-                elif code[0] == 'G' and code[1] in (92):
+                elif code[0] == 'G' and code[1] in (92,):
                     print("ERROR: G92 shift CS not supported")
                 elif code[0] == 'G' and code[1] in (93,95):
                     print("ERROR: G93,G95 alternative distance modes not supported")
                 elif code[0] == 'M' and code[1] in (0,1):
                     print("ERROR: M0,M1 pause not supported")
-                elif code[0] == 'M' and code[1] == 20:
+                elif code[0] == 'M' and code[1] in (4,):
+                    print("ERROR: M4 reverse spindle not supported")
+                elif code[0] == 'M' and code[1] == (20,):
                     print("ERROR: inch units not supported")
 
+            ### commit actions in right order
+            # commit coolant
+            if bMist:
+                self.on_action(('MIST',self.M_mist))
+            if bFlood:
+                self.on_action(('FLOOD',self.M_flood))
+            # commit spindle
+            if bSpindle:
+                if self.S_on:
+                    self.on_action(('S',self.S_freq))
+                else:
+                    self.on_action(('S',0))
+            # commit feedrate
+            if bFeed:
+                self.on_action(('F',self.F_rate))
             # commit motion
             if bMotion:
-                segment.append((X_pos, Y_pos, Z_pos))
+                self.on_action((self.G_motion,(self.X_pos, self.Y_pos, self.Z_pos)))
+
+        return self.job
+
+
+if __name__ == '__main__':
+    path = sys.argv[1]
+    with open(path, 'r') as content_file:
+        content = content_file.read()
+        reader = GcodeReader()
+        job = reader.parse(content)
+        print(job)
