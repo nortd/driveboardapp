@@ -1157,6 +1157,9 @@ def job(jobdict):
         # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
         #     aux_off()
 
+    # leave machine in absolute mode
+    absolute()
+
     # return to origin
     feedrate(conf['seekrate'])
     intensity(0.0)
