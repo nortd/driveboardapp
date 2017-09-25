@@ -4,7 +4,7 @@ import os
 import time
 import argparse
 
-import web
+# import web
 from config import conf
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -24,6 +24,8 @@ argparser.add_argument('-c', '--cli', dest='cli', action='store_true',
                        default=False, help='run without server GUI window')
 argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
+argparser.add_argument('--mill_mode', dest='mill_mode', action='store_true',
+                       default=False, help='Start in cnc mill mode.')
 args = argparser.parse_args()
 
 try:
@@ -35,10 +37,13 @@ if not args.cli:
     import window
     root = window.init()
 
+conf['mill_mode'] = args.mill_mode
+
 print "DriveboardApp v" + conf['version']
 conf['usb_reset_hack'] = args.usbhack
 
 # start server in thread
+import web
 web.start(browser=(not args.nobrowser), debug=args.debug)
 
 # main thread loop

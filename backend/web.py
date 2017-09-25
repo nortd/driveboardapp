@@ -39,37 +39,41 @@ def checkserial(func):
     return _decorator
 
 
-
+if conf['mill_mode']:
+    frontend_path = 'frontend_mill'
+    print "INFO: loading mill mode frontend"
+else:
+    frontend_path = 'frontend'
 
 ### STATIC FILES
 
 @bottle.route('/')
 def default_handler():
-    return bottle.static_file('app.html', root=os.path.join(conf['rootdir'], 'frontend') )
+    return bottle.static_file('app.html', root=os.path.join(conf['rootdir'], frontend_path) )
 
 @bottle.route('/<file>')
 def static_bin_handler(file):
-    return bottle.static_file(file, root=os.path.join(conf['rootdir'], 'frontend'))
+    return bottle.static_file(file, root=os.path.join(conf['rootdir'], frontend_path))
 
 @bottle.route('/css/<path:path>')
 def static_css_handler(path):
-    return bottle.static_file(path, root=os.path.join(conf['rootdir'], 'frontend', 'css'))
+    return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'css'))
 
 @bottle.route('/fonts/<path:path>')
 def static_font_handler(path):
-    return bottle.static_file(path, root=os.path.join(conf['rootdir'], 'frontend', 'fonts'))
+    return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'fonts'))
 
 @bottle.route('/js/<path:path>')
 def static_js_handler(path):
-    return bottle.static_file(path, root=os.path.join(conf['rootdir'], 'frontend', 'js'))
+    return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'js'))
 
 @bottle.route('/img/<path:path>')
 def static_img_handler(path):
-    return bottle.static_file(path, root=os.path.join(conf['rootdir'], 'frontend', 'img'))
+    return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'img'))
 
 @bottle.route('/favicon.ico')
 def favicon_handler():
-    return bottle.static_file('favicon.ico', root=os.path.join(conf['rootdir'], 'frontend', 'img'))
+    return bottle.static_file('favicon.ico', root=os.path.join(conf['rootdir'], frontend_path, 'img'))
 
 
 @bottle.route('/temp', method='POST')
@@ -342,7 +346,7 @@ def load():
 
     Args:
         (Args come in through the POST request.)
-        job: Parsed dba or job string (dba, svg, dxf, or ngc).
+        job: Parsed dba or job string (dba, svg, dxf, or gcode).
         name: name of the job (string)
         optimize: flag whether to optimize (bool)
         overwrite: flag whether to overwite file if present (bool)

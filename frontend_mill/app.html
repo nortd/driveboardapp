@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="img/favicon.ico">
+
+    <title>DriveboardApp</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/jquery.toastmessage.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/ladda-themeless.min.css" rel="stylesheet">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.toastmessage.js"></script>
+    <script src="js/paper-full.min.js"></script>
+    <script src="js/mousetrap.min.js"></script>
+    <script src="js/FileSaver.js"></script>
+    <script src="js/spin.min.js"></script>
+    <script src="js/ladda.min.js"></script>
+
+		<!-- three.js -->
+		<script src="js/three.js"></script>
+		<script src="js/controls/DragControls.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/controls/TransformControls.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src="js/libs/dat.gui.min.js"></script>
+
+    <script src="request.js"></script>
+    <script src="jobview.js"></script>
+    <script src="tools.js"></script>
+    <script src="app.js"></script>
+    <script src="jobhandler.js"></script>
+    <script src="gcodehandler.js"></script>
+    <script src="import.js"></script>
+    <script src="controls.js"></script>
+    <script src="passes.js"></script>
+    <script src="queue.js"></script>
+    <script src="library.js"></script>
+    <script src="status.js"></script>
+    <script src="fills.js"></script>
+
+  </head>
+
+
+  <body>
+
+    <!-- fixed navbar -->
+    <nav id="main_navbar" class="navbar navbar-default">
+      <div class="container" style="width:100%; padding-left:0">
+
+        <div id="navbar" class="navbar pull-left" style="padding-left:0px; margin:0; border:0">
+          <ul class="nav navbar-nav" style="height:50px">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <span class="glyphicon glyphicon-menu-hamburger" style="font-size:1.4em"></span>
+              </a>
+              <ul id="hamburger" class="dropdown-menu" role="menu">
+                <!-- <li><a id="info_btn" href="#" data-toggle="modal" data-target="#info_modal" title="show job information [I]">Job Info</a></li> -->
+                <li><a id="export_btn" href="#" title="[E]">Export</a></li>
+                <li><a id="clear_btn" href="#" title="[DEL]">Clear</a></li>
+                <li class="divider"></li>
+                <li><a id="queue_btn" href="#" data-toggle="modal" data-target="#queue_modal" title="[Q]">Job Queue</a></li>
+                <li><a id="library_btn" href="#" data-toggle="modal" data-target="#library_modal" title="[L]">Library</a></li>
+                <li><a id="gcode_btn" href="#" data-toggle="modal" data-target="#gcode_modal" title="[G]">GCode Edior</a></li>
+                <li class="divider"></li>
+                <li><a href="#" data-toggle="modal" data-target="#about_modal">About</a></li>
+                <li><a href="https://github.com/nortd/lasersaur/wiki">Manual</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Admin</li>
+                <li><a id="flash_btn" href="#">Flash Firmware</a></li>
+                <li><a id="rebuild_btn" href="#" title="Rebuild firmware from sources.">Rebuild Firmware</a></li>
+                <li><a id="reset_btn" href="#">Reset Atmega</a></li>
+                <li><a id="config_btn" href="#" data-toggle="modal" data-target="#config_modal" title="[C]">Show Configuration</a></li>
+                <li><a id="log_btn" href="#" data-toggle="modal" data-target="#log_modal" title="[SHIFT-L]">Log</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <!-- open button -->
+        <div class="btn-group pull-left menu_btn">
+            <button id="open_btn" class="btn btn-default" type="submit"
+                    title="open new job [ENTER]" data-loading-text='<span class="glyphicon glyphicon-refresh spinning"></span>'>Open</button>
+        </div>
+        <form id="open_file_form" action="#" onsubmit="return false;">
+            <input type="file" id="open_file_fld" name="data" style="visibility:hidden; position:fixed">
+        </form>
+
+        <!-- process buttons -->
+        <div class="btn-group pull-left menu_btn">
+          <button id="run_btn" class="btn btn-primary ladda-button" data-style="expand-right" style="min-width:90px">
+            <span class="ladda-label">Run</span>
+          </button>
+        <!-- </div>
+        <div class="btn-group pull-left menu_btn"> -->
+          <button id="boundary_btn" class="btn btn-primary" type="submit" title="run bounding box [CTRL-SHIFT-ENTER]"
+            data-loading-text='<span class="glyphicon glyphicon-refresh spinning"></span>'>
+            <span class="glyphicon glyphicon-resize-full"></span>
+          </button>
+        </div>
+
+        <!-- pause/play/stop buttons -->
+        <div class="btn-group pull-left menu_btn">
+          <!-- pause button -->
+          <button id="pause_btn" class="btn btn-default" type="submit" title="toggle pause [SPACE]">
+            <span id="pause_glyph" class="glyphicon glyphicon-pause"></span>
+            <span id="play_glyph" class="glyphicon glyphicon-play" style="display:none"></span>
+          </button>
+          <!-- stop button -->
+          <button id="stop_btn" class="btn btn-default" type="submit" title="stop job [CTRL-ESC]">
+            <span class="glyphicon glyphicon-stop"></span>
+          </button>
+        </div>
+
+        <!-- job info -->
+        <div id="job_info" class="pull-left" style="font-size:1.2em; margin:13px; color:#666666">
+          <span id="job_info_name"></span><span id="job_info_length"></span>
+          <a id="info_btn" style="display:none; margin-left:4px; position:relative; top:1px"
+            href="#" data-toggle="modal" data-target="#info_modal">
+            <span class="glyphicon glyphicon-info-sign" style="color:#888888"></span>
+          </a>
+        </div>
+        <!-- <div id="job_info" class="pull-left" style="">hello</div> -->
+
+      </div>
+    </nav>
+
+    <!-- begin page content -->
+    <div id="main_container" class="container">
+
+      <!-- canvas -->
+      <div id="canvas_container" class="pull-left" style="margin:0;padding:0; border:solid 1px #bbbbbb">
+        <!-- <canvas id="job_canvas" resize></canvas> -->
+        <div id="job_canvas"></div>
+        <div id="head_position" style="position:absolute; top:0px; left:0px; pointer-events: none;">
+          <img src="img/head.png">
+        </div>
+      </div>
+      <!-- <canvas id="job_canvas" class="pull-left" resize>
+        <div id="head_position" style="position:absolute; top:0px; left:0px; width:5px; height:5px; Background: #ff0000;"></div>
+      </canvas> -->
+
+      <!-- info div -->
+      <div id="info_panel" class="pull-left" style="width:240px; overflow:auto">
+        <div id="job_passes" style="width:100%;padding:6px"></div>
+      </div>
+
+      <!-- connecting modal-->
+      <div id="connect_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content" style="width:562px">
+            <div class="modal-header">
+
+              <h4 class="modal-title" id="about_header"><span class="glyphicon glyphicon-refresh spinning"></span> Connecting ...</h4>
+            </div>
+            <div id="about_content" class="modal-body" style="width:60px;margin:30px;margin-left:auto;margin-right:auto">
+              <img src="/img/lasersaur-dino.png" style="width:60px">
+            </div>
+              <p style="margin:30px">
+                The frontend is trying to connect the server backend. This typically takes a couple of seconds.
+                If this takes longer it is probably because the server is not running any more. You may have to
+                manually start it again.
+              </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- about modal-->
+      <div id="about_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content" style="width:562px">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="about_header">About</h4>
+            </div>
+            <div id="about_content" class="modal-body">
+              <p><img src="/img/lasersaur-black_w530.jpg"></p>
+              <div style="width:60px;margin-left:auto;margin-right:auto;margin-top:20px;margin-bottom:20px"><img src="/img/lasersaur-dino.png" style="width:60px"></div>
+              <p>DriveboardApp is the offical control app for the Lasersaur laser cutter and part of the <a href="http://www.lasersaur.com/">Lasersaur project</a>.
+                 This software is made available under the <a href="https://gnu.org/licenses/gpl.html">GPLv3 (version 3 or later)</a> software license.
+                 Copyright (c) 2013-2016 <a href="http://labs.nortd.com/">Nortd Labs</a></p>
+              <ul>
+              <li>DriveboardApp version <span id="app_version">&lt;not received&gt;</span></li>
+              <li>DriveboardFirmware version <span id="firm_version">&lt;not received&gt;</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- log modal-->
+      <div id="log_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="log_header">Log</h4>
+            </div>
+            <div id="log_content" class="modal-body">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- config modal -->
+      <div id="config_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="config_header">Configuration</h4>
+            </div>
+            <div class="modal-body row" style="padding:40px">
+              <div id="config_content" class="pull-left"></div>
+              <div id="status_content" class="pull-right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- info modal -->
+      <div id="info_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="info_header">Job Info</h4>
+            </div>
+            <div id="info_content" class="modal-body">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- queue modal -->
+      <div id="queue_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="queue_header">Job Queue</h4>
+            </div>
+            <div id="queue_content" class="modal-body">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- library modal -->
+      <div id="library_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="library_header">Job Library</h4>
+            </div>
+            <div id="library_content" class="modal-body">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- end page content -->
+
+    <!-- footer -->
+    <footer id="main_footer" class="footer">
+      <div class="container" style="width:100%">
+
+        <a class="navbar-brand" href="/">
+          <img src="img/lasersaur-dino-driveboardapp.png" style="margin-right:6px">
+        </a>
+
+        <!-- status indicator -->
+        <div id="status_btn_div" class="btn-group dropup">
+          <button id="status_btn" class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Status <span id="status_glyph" class="glyphicon glyphicon-transfer" style="opacity:0.2; margin-left:6px"></span>
+          </button>
+          <ul class="dropdown-menu" style="padding:10px">
+            <li class="dropdown-header">Connections</li>
+            <li>
+              <span id="status_server" class="label label-danger">Server</span>
+              <span id="status_serial" class="label label-default">Serial</span>
+            </li>
+            <li class="dropdown-header">Errors</li>
+            <li>
+              <span id="status_limit_x1" class="label label-default status_hw">Limit x1</span>
+              <span id="status_limit_x2" class="label label-default status_hw">Limit x2</span>
+            </li><li>
+              <span id="status_limit_y1" class="label label-default status_hw">Limit y1</span>
+              <span id="status_limit_y2" class="label label-default status_hw">Limit y2</span>
+            </li><li>
+              <span id="status_limit_z1" class="label label-default status_hw">Limit z1</span>
+              <span id="status_limit_z2" class="label label-default status_hw">Limit z2</span>
+            </li><li>
+              <span id="status_requested" class="label label-default status_hw">Requested</span>
+              <span id="status_buffer" class="label label-default status_hw">Buffer</span>
+            </li><li>
+              <span id="status_marker" class="label label-default status_hw">Marker</span>
+              <span id="status_data" class="label label-default status_hw">Data</span>
+            </li><li>
+              <span id="status_command" class="label label-default status_hw">Command</span>
+              <span id="status_parameter" class="label label-default status_hw">Parameter</span>
+            </li><li>
+              <span id="status_transmission" class="label label-default status_hw">Transmission</span>
+            </li>
+            <!-- <li role="separator" class="divider"></li> -->
+            <li class="dropdown-header">Warnings</li>
+            <li>
+              <span id="status_door" class="label label-default status_hw">Door</span>
+              <span id="status_chiller" class="label label-default status_hw">Chiller</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="btn-group footer_btn">
+          <!-- origin button -->
+          <button id="origin_btn" class="btn btn-default" type="submit" title="move to origin [0]">
+            (0,0,0)
+          </button>
+          <!-- homing button -->
+          <button id="homing_btn" class="btn btn-default" type="submit" title="run homing cycle, find table origin [H]">
+            <span class="glyphicon glyphicon-home"></span>
+          </button>
+        </div>
+
+        <div class="btn-group footer_btn" data-toggle="buttons">
+          <label id="select_btn" class="btn btn-default active">
+            <input type="radio" name="options" autocomplete="off" checked> Select
+          </label>
+          <label id="offset_btn" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off"> Offset
+          </label>
+          <label id="motion_btn" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off"> Move
+          </label>
+          <label id="jog_btn" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off"> Jog
+          </label>
+        </div>
+
+        <div class="btn-group footer_btn">
+          <!-- add fill button -->
+          <div id="addfill_wgt" class="dropdown input-group dropup tool_extra_btn">
+            <button id="addfill_btn" class="btn btn-default dropdown-toggle ladda-button"
+              data-style="expand-right" data-spinner-color="#000000" type="button"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="add fill to paths">
+              <span class="glyphicon glyphicon-plus"></span> Fill
+            </button>
+            <ul id="addfill_colors" class="dropdown-menu dropdown-menu-right pass_color_dropdown" aria-labelledby="addfill_btn">
+              No job loaded.
+            </ul>
+          </div>
+          <!-- offset reset button -->
+          <button id="offset_reset_btn" class="btn btn-default tool_extra_btn" type="submit" style="display:none" title="reset offset [SHIFT-O]">
+            Reset Offset
+          </button>
+        </div>
+
+        <span id="jog_hotkey_hint" class="tool_extra_btn" style="display:none">Also arrow and shift-arrow keys.</span>
+
+        <!-- <button id="jog_btn" class="btn btn-default" type="submit" title="[J]">Jog</button> -->
+
+      </div>
+    </footer>
+
+  </body>
+
+
+</html>

@@ -52,6 +52,8 @@ conf = {
     'users': {
         'laser': 'laser',
     },
+    'mill_mode': False,
+    'mill_max_rpm': 18000,
 }
 conf_defaults = copy.deepcopy(conf)
 
@@ -70,7 +72,9 @@ userconfigurable = {
     'max_jobs_in_list': "Jobs to keep in the history list.",
     'fill_leadin': "Leadin for vector fills in mm.",
     'raster_leadin': "Leadin for raster fills in mm.",
-    'users': "List of user cendentials for UI access."
+    'users': "List of user cendentials for UI access.",
+    'mill_mode': "Activate CNC mill mode.",
+    'mill_max_rpm': "Maximum spindle RPM."
 }
 
 

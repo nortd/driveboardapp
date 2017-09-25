@@ -114,7 +114,7 @@ class GcodeReader:
     - ('MIST', onoff)     (mapped to air_on/off)
     - ('FLOOD', onoff)    (mapped to aux_on/off)
 
-    Path example:
+    Path example (job['defs'][0]['data']):
     [('G0',(x,y,z)), ('F', 1000), ('S', 18000), ('FLOOD', True), ('G1', (x,y,z))]
 
 
@@ -153,7 +153,7 @@ class GcodeReader:
         # print("INFO: Setting up pass for tool: T%s" % (self.T_num))
         self.job['defs'].append({'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''})
         self.job['items'].append({'def':len(self.job['defs'])-1})
-        self.job['passes'].append({'items':len(self.job['items'])-1})
+        self.job['passes'].append({'items':[len(self.job['items'])-1]})
         self.def_ = self.job['defs'][-1]
         self.path = self.def_['data']
 

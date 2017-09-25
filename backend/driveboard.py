@@ -921,6 +921,7 @@ def job(jobdict):
         {"kind":"path", "data":[[[0,10,0]]]},
         {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
         {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
+        {"kind":"mill", "data":[('G0',(x,y,z)), ('F', 1000), ('G1', (x,y,z))]},
      ],
      "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all":{}}
     }
@@ -1094,6 +1095,38 @@ def job(jobdict):
                                 air_off()
                             # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
                             #     aux_off()
+
+            elif kind == "mill":
+                feedrate(seekrate)
+                feedrate_active = seekrate
+                path = def_['data']
+                for item in path:
+                    if item[0] == 'G0':
+                        if feedrate_active != seekrate:
+                            feedrate(seekrate)
+                            feedrate_active = seekrate
+                        move(item[1][0],item[1][1],item[1][2])
+                    elif item[0] == 'G1':
+                        if feedrate_active != feedrate_:
+                            feedrate(feedrate_)
+                            feedrate_active = feedrate_
+                        move(item[1][0],item[1][1],item[1][2])
+                    elif item[0] == 'F':
+                        feedrate_ = item[1]
+                    elif item[0] == 'S':
+                        #convert RPMs to 0-100%
+                        intensity(item[1]*(100.0/conf['mill_max_rpm']))
+                    elif item[0] == 'MIST':
+                        if item[1] == True:
+                            air_on()
+                        elif item[1] == False:
+                            air_off()
+                    elif item[0] == 'FLOOD':
+                        if item[1] == True:
+                            aux_on()
+                        elif item[1] == False:
+                            aux_off()
+
 
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:

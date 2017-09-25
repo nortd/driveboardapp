@@ -4,7 +4,7 @@ import json
 from config import conf
 from svg_reader import SVGReader
 from dxf_parser import DXFParser
-from ngc_reader import NGCReader
+from gcode_reader import GcodeReader
 import pathoptimizer
 
 
@@ -13,10 +13,10 @@ __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 def convert(job, optimize=True, tolerance=conf['tolerance']):
-    """Convert a job string (dba, svg, dxf, or ngc).
+    """Convert a job string (dba, svg, dxf, or gcode).
 
     Args:
-        job: Parsed dba or job string (dba, svg, dxf, or ngc).
+        job: Parsed dba or job string (dba, svg, dxf, or gcode).
         optimize: Flag for optimizing path tolerances.
         tolerance: Tolerance used in convert/optimization.
 
@@ -40,8 +40,8 @@ def convert(job, optimize=True, tolerance=conf['tolerance']):
                        tolerance, optimize=optimize)
     elif type_ == 'dxf':
         job = read_dxf(job, tolerance, optimize=optimize)
-    elif type_ == 'ngc':
-        job = read_ngc(job, tolerance, optimize=optimize)
+    elif type_ == 'gcode':
+        job = read_gcode(job, tolerance, optimize=optimize)
     else:
         print "ERROR: file type not recognized"
         raise TypeError
@@ -131,31 +131,13 @@ def read_dxf(dxf_string, tolerance, optimize=True):
             vec['optimized'] = tolerance
     return job
 
-def read_ngc(ngc_string, tolerance, optimize=False):
+def read_gcode(gcode_string, tolerance, optimize=False):
     """Read a gcode file string and convert to dba job."""
-    # ngcReader = NGCReader(tolerance)
-    # res = ngcReader.parse(ngc_string)
-    # # create an dba job from res
-    # # TODO: reader should generate an dba job to begin with
-    # job = {}
-    # if 'boundarys' in res:
-    #     job['vector'] = {}
-    #     vec = job['vector']
-    #     # format: {'#ff0000': [[[x,y], [x,y], ...], [], ..], '#0000ff':[]}
-    #     # colors = []
-    #     paths = []
-    #     for k,v in res['boundarys']:
-    #         # colors.append(k)
-    #         paths.append(v)
-    #     if optimize:
-    #         pathoptimizer.optimize(paths, tolerance)
-    #     vec['paths'] = paths
-    #     # vec['colors'] = colors
-    #     if optimize:
-    #         vec['optimized'] = tolerance
-    # return job
-    print "GCODE reader not implemented."
-    return {}
+    reader = GcodeReader()
+    job = reader.parse(gcode_string)
+    if optimize:
+        pass
+    return job
 
 
 def get_type(job):
@@ -164,7 +146,7 @@ def get_type(job):
     if type(job) is dict:
         type_ = 'dba'
     elif type(job) is str or type(job) is unicode:
-        jobheader = job[:256].lstrip()
+        jobheader = job[:1024].lstrip()
         if jobheader and jobheader[0] == '{':
             type_ = 'dba'
         elif '<?xml' in jobheader and '<svg' in jobheader:
@@ -175,7 +157,7 @@ def get_type(job):
              'G00' in jobheader or 'G01' in jobheader or \
              'g0' in jobheader or 'g1' in jobheader or \
              'g00' in jobheader or 'g01' in jobheader:
-            type_ = 'ngc'
+            type_ = 'gcode'
         else:
             print "ERROR: Cannot figure out file type 1."
             raise TypeError
