@@ -186,12 +186,64 @@ def absolute():
     driveboard.absolute()
     return '{}'
 
+
 @bottle.route('/move/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def move(x, y, z):
     driveboard.move(x, y, z)
     return '{}'
+
+@bottle.route('/movex/<x:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def movex(x):
+    driveboard.move(x, None, None)
+    return '{}'
+
+@bottle.route('/movey/<y:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def movey(y):
+    driveboard.move(None, y, None)
+    return '{}'
+
+@bottle.route('/movez/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def movez(z):
+    driveboard.move(None, None, z)
+    return '{}'
+
+
+@bottle.route('/basemove/<x:float>/<y:float>/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def basemove(x, y, z):
+    driveboard.basemove(x, y, z)
+    return '{}'
+
+@bottle.route('/basemovex/<x:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def basemovex(x):
+    driveboard.basemove(x, None, None)
+    return '{}'
+
+@bottle.route('/basemovey/<y:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def basemovey(y):
+    driveboard.basemove(None, y, None)
+    return '{}'
+
+@bottle.route('/basemovez/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def basemovez(z):
+    driveboard.basemove(None, None, z)
+    return '{}'
+
 
 @bottle.route('/air_on')
 @bottle.auth_basic(checkuser)

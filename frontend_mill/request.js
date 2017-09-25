@@ -161,6 +161,36 @@ function request_absolute_move(x, y, z, seekrate, success_msg) {
 }
 
 
+function request_retract(x, y, z, seekrate, success_msg) {
+  request_post({
+    url:'/feedrate/'+seekrate,
+    data: load_request,
+    success: function (jobname) {
+      // retract
+      request_post({
+        url:'/basemovex/'+z,
+        data: load_request,
+        success: function (jobname) {
+          // park
+          request_post({
+            url:'/basemove/'+x+'/'+y+'/'+z,
+            data: load_request,
+            success: function (jobname) {
+              $().uxmessage('notice', success_msg)
+            },
+            error: function (data) {},
+            complete: function (data) {}
+          })
+        },
+        error: function (data) {},
+        complete: function (data) {}
+      })
+    },
+    error: function (data) {},
+    complete: function (data) {}
+  })
+}
+
 
 function request_path_job(path, seekrate, feedrate, air_assist, success_msg) {
   // Args:

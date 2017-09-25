@@ -232,7 +232,7 @@ function controls_ready() {
           request_get({
             url:'/unstop',
             success: function (data) {
-              request_absolute_move(0, 0, 0, app_config_main.seekrate, "Moving to Origin.")
+              request_retract(0, 0, 0, app_config_main.seekrate, "Retracting...")
             }
           })
         }, 1500)

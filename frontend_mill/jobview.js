@@ -5,6 +5,8 @@ var jobview_controls = undefined
 var jobview_path_geometry = undefined
 var jobview_path_material = undefined
 
+var jobview_tool = undefined
+
 
 var jobview_width = 0
 var jobview_height = 0
@@ -203,6 +205,15 @@ function jobview_ready() {
     jobview_controls.addEventListener('start', function() {});
     jobview_controls.addEventListener('end', function() {});
 
+
+    // tool cone
+    var cone_geometry = new THREE.ConeGeometry( 6, 20, 32 );
+    cone_geometry.translate(0,-10,0)
+    var cone_material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    jobview_tool = new THREE.Mesh( cone_geometry, cone_material );
+    jobview_tool.rotateX(-Math.PI/2)
+    jobview_scene.add( jobview_tool );
+
     // jobview_testpath()
 
     jobview_render()
@@ -305,10 +316,12 @@ function jobview_head(){
 }
 
 function jobview_head_move(pos, offset) {
-  var x = (pos[0]+offset[0])*jobview_mm2px
-  var y = (pos[1]+offset[1])*jobview_mm2px
-  jobview_headLayer.position = new paper.Point(x, y)
-  paper.view.draw()
+  jobview_tool.position.set(pos[0], pos[1], pos[2])
+  jobview_render()
+  // var x = (pos[0]+offset[0])*jobview_mm2px
+  // var y = (pos[1]+offset[1])*jobview_mm2px
+  // jobview_headLayer.position = new paper.Point(x, y)
+  // paper.view.draw()
 }
 
 

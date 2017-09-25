@@ -264,11 +264,11 @@ var status_handlers = {
     }
   },
   'pos':function (status) {
-    // jobview_head_move(status.pos, status.offset)
-    $("#head_position").animate({
-      left: Math.round((status.pos[0]+status.offset[0])*jobview_mm2px-10),
-      top: Math.round((status.pos[1]+status.offset[1])*jobview_mm2px-10),
-    }, status_every, 'linear' )
+    jobview_head_move(status.pos, status.offset)
+    // $("#head_position").animate({
+    //   left: Math.round((status.pos[0]+status.offset[0])*jobview_mm2px-10),
+    //   top: Math.round((status.pos[1]+status.offset[1])*jobview_mm2px-10),
+    // }, status_every, 'linear' )
   },
   'underruns': function (status) {},
   'stackclear': function (status) {
