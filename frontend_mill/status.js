@@ -276,11 +276,14 @@ var status_handlers = {
   'underruns': function (status) {},
   'stackclear': function (status) {
     if (typeof(status.stackclear) == 'number') {
-      if (status.stackclear < 200) {
+      console.log("stackclear: " + status.stackclear)
+      if (status.stackclear < 100) {
+        // console.log("stackclear none: " + status.stackclear)
+        $().uxmessage('error', "Drive hardware low on memory ("+status.stackclear+").")
+        // $('#stop_btn').trigger('click')
+      } else if (status.stackclear < 200) {
+        // console.log("stackclear low: " + status.stackclear)
         $().uxmessage('warn', "Drive hardware low on memory.")
-      } else if (status.stackclear < 100) {
-        $().uxmessage('error', "Drive hardware low on memory. Stopping!")
-        $('#stop_btn').trigger('click')
       }
     }
   },
@@ -336,25 +339,14 @@ var status_handlers = {
   },
   //// only when hardware idle
   'offset': function (status) {
-    if (status.offset.length == 3) {
-      var x_mm = status.offset[0]
-      var y_mm = status.offset[1]
-      if (x_mm != 0 || y_mm != 0) {
-        jobview_offsetLayer.visible = true
-      } else {
-        jobview_offsetLayer.visible = false
-      }
-      var x = Math.floor(x_mm*jobview_mm2px)
-      var y = Math.floor(y_mm*jobview_mm2px)
-      jobview_offsetLayer.position = new paper.Point(x, y)
-      jobview_boundsLayer.position = new paper.Point(x, y)
-      jobview_seekLayer.position = new paper.Point(x, y)
-      jobview_feedLayer.position = new paper.Point(x, y)
-      // redraw
-      paper.view.draw()
-    }
+    // if (status.offset.length == 3) {
+    //   var x_mm = status.offset[0]
+    //   var y_mm = status.offset[1]
+    // }
   },
-  'feedrate': function (status) {},
+  'feedrate': function (status) {
+    // console.log("feedrate: " + status.feedrate)
+  },
   'intensity': function (status) {},
   'duration': function (status) {},
   'pixelwidth': function (status) {}

@@ -108,7 +108,7 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
 
   // compute path vector in terms of absolute step target and current positions
   double delta_mm[3];
-  delta_mm[X_AXIS] = (target[X_AXIS]-position[X_AXIS])/CONFIG_X_STEPS_PER_MM;
+  delta_mm[X_AXIS] = (target[X_AXIS]-position[X_AXIS])/(CONFIG_X_STEPS_PER_MM-10);    // BUG: by reducing this from 470 to 470 stack blow vanishes
   delta_mm[Y_AXIS] = (target[Y_AXIS]-position[Y_AXIS])/CONFIG_Y_STEPS_PER_MM;
   delta_mm[Z_AXIS] = (target[Z_AXIS]-position[Z_AXIS])/CONFIG_Z_STEPS_PER_MM;
   block->millimeters = sqrt( (delta_mm[X_AXIS]*delta_mm[X_AXIS]) +
