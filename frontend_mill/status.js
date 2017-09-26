@@ -265,6 +265,9 @@ var status_handlers = {
   },
   'pos':function (status) {
     jobview_head_move(status.pos, status.offset)
+    $('#x_ro').val(status.pos[0])
+    $('#y_ro').val(status.pos[1])
+    $('#z_ro').val(status.pos[2])
     // $("#head_position").animate({
     //   left: Math.round((status.pos[0]+status.offset[0])*jobview_mm2px-10),
     //   top: Math.round((status.pos[1]+status.offset[1])*jobview_mm2px-10),

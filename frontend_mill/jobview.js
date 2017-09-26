@@ -152,7 +152,7 @@ function jobview_ready() {
     jobview_scene = scene = new THREE.Scene();
     jobview_scene.background = new THREE.Color(0xf0f0f0);
 
-    jobview_camera = new THREE.PerspectiveCamera(70, width / height, 1, 10000);
+    jobview_camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 1, 10000);
     jobview_camera.position.set(0, 250, 1000);
     // jobview_camera.up.set( 0, 0, 1);
     jobview_scene.add(jobview_camera);
@@ -193,8 +193,8 @@ function jobview_ready() {
       antialias: true
     });
     jobview_renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.setSize(window.innerWidth-400, window.innerHeight-150);
-    jobview_renderer.setSize(width, height);
+    jobview_renderer.setSize(window.innerWidth, window.innerHeight);
+    // jobview_renderer.setSize(width, height);
     // renderer.shadowMap.enabled = true;
     container.appendChild(jobview_renderer.domElement);
 

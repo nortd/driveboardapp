@@ -22,15 +22,47 @@ a, a:active, a:focus {
   /*background-color: #f0f0f0;*/
 }
 
+.noptr {
+  pointer-events : none;
+}
+
 
 /* Custom page CSS
 -------------------------------------------------- */
 /* Not required for template or sticky footer method. */
 
 #main_navbar {
+    position:absolute;
     margin:0;
     border:0;
     background-color: transparent;
+    z-index:10;
+    width:100%;
+}
+
+#main_footer {
+    position:absolute;
+    margin:0;
+    border:0;
+    background-color: transparent;
+    z-index:10;
+    width:100%;
+    bottom:400px;
+}
+
+#info_panel {
+    position:absolute;
+    margin:0;
+    border:0;
+    background-color: transparent;
+    z-index:10;
+    width:240px;
+    top:100px;
+    right:0px;
+}
+
+.row {
+  margin-bottom: 12px;
 }
 
 .menu_btn {
@@ -39,6 +71,33 @@ a, a:active, a:focus {
 
 .footer_btn {
   padding: 12px;
+}
+
+.enlarge {
+  height: 100px;
+  padding: 18px 18px;
+  font-size: 22px;
+  border-radius: 8px;
+}
+
+.enlarge2 {
+  height: 100px;
+  width: 100px;
+  padding: 18px 18px;
+  font-size: 22px;
+  border-radius: 8px;
+}
+
+.venlarge2 {
+  width: 100px;
+}
+
+.input-enlarge {
+  height: 100px;
+  padding: 10px 24px;
+  font-size: 24px;
+  line-height: 1.3333333;
+  border-radius: 6px;
 }
 
 #main_container {

@@ -244,6 +244,14 @@ def basemovez(z):
     driveboard.basemove(None, None, z)
     return '{}'
 
+@bottle.route('/retract')
+@bottle.auth_basic(checkuser)
+@checkserial
+def retract():
+    driveboard.feedrate(conf['seekrate'])
+    driveboard.basemove(None, None, z)
+    driveboard.basemove(0, 0, 0)
+    return '{}'
 
 @bottle.route('/air_on')
 @bottle.auth_basic(checkuser)

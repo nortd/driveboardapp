@@ -46,15 +46,21 @@ CMD_SET_OFFSET_TABLE = "H"
 CMD_SET_OFFSET_CUSTOM = "I"
 CMD_SEL_OFFSET_TABLE = "J"
 CMD_SEL_OFFSET_CUSTOM = "K"
-CMD_SEL_OFFSET_STORE = 'L'
-CMD_SEL_OFFSET_RESTORE = 'M'
-
-CMD_AIR_ENABLE = "N"
-CMD_AIR_DISABLE = "O"
-CMD_AUX_ENABLE = "P"
-CMD_AUX_DISABLE = "Q"
-# CMD_AUX2_ENABLE = "R"
-# CMD_AUX2_DISABLE = "S"
+# CMD_SEL_OFFSET_STORE = 'L'
+# CMD_SEL_OFFSET_RESTORE = 'M'
+#
+# CMD_AIR_ENABLE = "N"
+# CMD_AIR_DISABLE = "O"
+# CMD_AUX_ENABLE = "P"
+# CMD_AUX_DISABLE = "Q"
+# # CMD_AUX2_ENABLE = "R"
+# # CMD_AUX2_DISABLE = "S"
+CMD_AIR_ENABLE = "L"
+CMD_AIR_DISABLE = "M"
+CMD_AUX_ENABLE = "N"
+CMD_AUX_DISABLE = "O"
+# CMD_AUX2_ENABLE = "P"
+# CMD_AUX2_DISABLE = "Q"
 
 
 PARAM_TARGET_X = "x"
@@ -148,7 +154,15 @@ markers_tx = {
     "I": "CMD_SET_OFFSET_CUSTOM",
     "J": "CMD_SEL_OFFSET_TABLE",
     "K": "CMD_SEL_OFFSET_CUSTOM",
-
+    # "L": "CMD_SEL_OFFSET_STORE",
+    # "M": "CMD_SEL_OFFSET_RESTORE",
+    #
+    # "N": "CMD_AIR_ENABLE",
+    # "O": "CMD_AIR_DISABLE",
+    # "P": "CMD_AUX_ENABLE",
+    # "Q": "CMD_AUX_DISABLE",
+    # # "R": "CMD_AUX2_ENABLE",
+    # # "S": "CMD_AUX2_DISABLE",
     "L": "CMD_AIR_ENABLE",
     "M": "CMD_AIR_DISABLE",
     "N": "CMD_AUX_ENABLE",
@@ -872,28 +886,31 @@ def absolute():
 def move(x, y, z=0.0):
     global SerialLoop
     with SerialLoop.lock:
-        if x is not None:
-            SerialLoop.send_param(PARAM_TARGET_X, x)
-        if y is not None:
-            SerialLoop.send_param(PARAM_TARGET_Y, y)
-        if z is not None:
-            SerialLoop.send_param(PARAM_TARGET_Z, z)
+        SerialLoop.send_param(PARAM_TARGET_X, x)
+        SerialLoop.send_param(PARAM_TARGET_Y, y)
+        SerialLoop.send_param(PARAM_TARGET_Z, z)
+        # if x is not None:
+        #     SerialLoop.send_param(PARAM_TARGET_X, x)
+        # if y is not None:
+        #     SerialLoop.send_param(PARAM_TARGET_Y, y)
+        # if z is not None:
+        #     SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_LINE)
 
 def basemove(x, y, z=0.0):
     """A move in table coordinates."""
     global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_STORE)
-        SerialLoop.send_command(CMD_SET_OFFSET_TABLE)
-        if x is not None:
-            SerialLoop.send_param(PARAM_TARGET_X, x)
-        if y is not None:
-            SerialLoop.send_param(PARAM_TARGET_Y, y)
-        if z is not None:
-            SerialLoop.send_param(PARAM_TARGET_Z, z)
-        SerialLoop.send_command(CMD_SEL_OFFSET_RESTORE)
-        SerialLoop.send_command(CMD_LINE)
+    # with SerialLoop.lock:
+    #     SerialLoop.send_command(CMD_SEL_OFFSET_STORE)
+    #     SerialLoop.send_command(CMD_SET_OFFSET_TABLE)
+    #     if x is not None:
+    #         SerialLoop.send_param(PARAM_TARGET_X, x)
+    #     if y is not None:
+    #         SerialLoop.send_param(PARAM_TARGET_Y, y)
+    #     if z is not None:
+    #         SerialLoop.send_param(PARAM_TARGET_Z, z)
+    #     SerialLoop.send_command(CMD_SEL_OFFSET_RESTORE)
+    #     SerialLoop.send_command(CMD_LINE)
 
 def rastermove(x, y, z=0.0):
     global SerialLoop

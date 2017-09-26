@@ -232,7 +232,14 @@ function controls_ready() {
           request_get({
             url:'/unstop',
             success: function (data) {
-              request_retract(0, 0, 0, app_config_main.seekrate, "Retracting...")
+              request_get({
+                url:'/retract',
+                success: function (jobname) {
+                  $().uxmessage('notice', "Retracting...")
+                },
+                error: function (data) {},
+                complete: function (data) {}
+              })
             }
           })
         }, 1500)

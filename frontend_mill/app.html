@@ -277,99 +277,130 @@
     <footer id="main_footer" class="footer">
       <div class="container" style="width:100%">
 
-        <a class="navbar-brand" href="/">
-          <img src="img/lasersaur-dino-driveboardapp.png" style="margin-right:6px">
-        </a>
-
-        <!-- status indicator -->
-        <div id="status_btn_div" class="btn-group dropup">
-          <button id="status_btn" class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Status <span id="status_glyph" class="glyphicon glyphicon-transfer" style="opacity:0.2; margin-left:6px"></span>
-          </button>
-          <ul class="dropdown-menu" style="padding:10px">
-            <li class="dropdown-header">Connections</li>
-            <li>
-              <span id="status_server" class="label label-danger">Server</span>
-              <span id="status_serial" class="label label-default">Serial</span>
-            </li>
-            <li class="dropdown-header">Errors</li>
-            <li>
-              <span id="status_limit_x1" class="label label-default status_hw">Limit x1</span>
-              <span id="status_limit_x2" class="label label-default status_hw">Limit x2</span>
-            </li><li>
-              <span id="status_limit_y1" class="label label-default status_hw">Limit y1</span>
-              <span id="status_limit_y2" class="label label-default status_hw">Limit y2</span>
-            </li><li>
-              <span id="status_limit_z1" class="label label-default status_hw">Limit z1</span>
-              <span id="status_limit_z2" class="label label-default status_hw">Limit z2</span>
-            </li><li>
-              <span id="status_requested" class="label label-default status_hw">Requested</span>
-              <span id="status_buffer" class="label label-default status_hw">Buffer</span>
-            </li><li>
-              <span id="status_marker" class="label label-default status_hw">Marker</span>
-              <span id="status_data" class="label label-default status_hw">Data</span>
-            </li><li>
-              <span id="status_command" class="label label-default status_hw">Command</span>
-              <span id="status_parameter" class="label label-default status_hw">Parameter</span>
-            </li><li>
-              <span id="status_transmission" class="label label-default status_hw">Transmission</span>
-            </li>
-            <!-- <li role="separator" class="divider"></li> -->
-            <li class="dropdown-header">Warnings</li>
-            <li>
-              <span id="status_door" class="label label-default status_hw">Door</span>
-              <span id="status_chiller" class="label label-default status_hw">Chiller</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="btn-group footer_btn">
-          <!-- origin button -->
-          <button id="origin_btn" class="btn btn-default" type="submit" title="move to origin [0]">
-            (0,0,0)
-          </button>
-          <!-- homing button -->
-          <button id="homing_btn" class="btn btn-default" type="submit" title="run homing cycle, find table origin [H]">
-            <span class="glyphicon glyphicon-home"></span>
-          </button>
-        </div>
-
-        <div class="btn-group footer_btn" data-toggle="buttons">
-          <label id="select_btn" class="btn btn-default active">
-            <input type="radio" name="options" autocomplete="off" checked> Select
-          </label>
-          <label id="offset_btn" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off"> Offset
-          </label>
-          <label id="motion_btn" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off"> Move
-          </label>
-          <label id="jog_btn" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off"> Jog
-          </label>
-        </div>
-
-        <div class="btn-group footer_btn">
-          <!-- add fill button -->
-          <div id="addfill_wgt" class="dropdown input-group dropup tool_extra_btn">
-            <button id="addfill_btn" class="btn btn-default dropdown-toggle ladda-button"
-              data-style="expand-right" data-spinner-color="#000000" type="button"
-              data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="add fill to paths">
-              <span class="glyphicon glyphicon-plus"></span> Fill
+        <!-- 4th row -->
+        <div class="row">
+          <div class="col-md-3" style="text-align:right">
+            <!-- status indicator -->
+            <div id="status_btn_div" class="btn-group dropup">
+              <button id="status_btn" class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Status <span id="status_glyph" class="glyphicon glyphicon-transfer" style="opacity:0.2; margin-left:6px"></span>
+              </button>
+              <ul class="dropdown-menu" style="padding:10px">
+                <li class="dropdown-header">Connections</li>
+                <li>
+                  <span id="status_server" class="label label-danger">Server</span>
+                  <span id="status_serial" class="label label-default">Serial</span>
+                </li>
+                <li class="dropdown-header">Errors</li>
+                <li>
+                  <span id="status_limit_x1" class="label label-default status_hw">Limit x1</span>
+                  <span id="status_limit_x2" class="label label-default status_hw">Limit x2</span>
+                </li><li>
+                  <span id="status_limit_y1" class="label label-default status_hw">Limit y1</span>
+                  <span id="status_limit_y2" class="label label-default status_hw">Limit y2</span>
+                </li><li>
+                  <span id="status_limit_z1" class="label label-default status_hw">Limit z1</span>
+                  <span id="status_limit_z2" class="label label-default status_hw">Limit z2</span>
+                </li><li>
+                  <span id="status_requested" class="label label-default status_hw">Requested</span>
+                  <span id="status_buffer" class="label label-default status_hw">Buffer</span>
+                </li><li>
+                  <span id="status_marker" class="label label-default status_hw">Marker</span>
+                  <span id="status_data" class="label label-default status_hw">Data</span>
+                </li><li>
+                  <span id="status_command" class="label label-default status_hw">Command</span>
+                  <span id="status_parameter" class="label label-default status_hw">Parameter</span>
+                </li><li>
+                  <span id="status_transmission" class="label label-default status_hw">Transmission</span>
+                </li>
+                <!-- <li role="separator" class="divider"></li> -->
+                <li class="dropdown-header">Warnings</li>
+                <li>
+                  <span id="status_door" class="label label-default status_hw">Door</span>
+                  <span id="status_chiller" class="label label-default status_hw">Chiller</span>
+                </li>
+              </ul>
+            </div>
+            <!-- homing button -->
+            <button id="homing_btn" class="btn btn-default" type="submit" title="run homing cycle, find table origin [H]">
+              <span class="glyphicon glyphicon-home"></span>
             </button>
-            <ul id="addfill_colors" class="dropdown-menu dropdown-menu-right pass_color_dropdown" aria-labelledby="addfill_btn">
-              No job loaded.
-            </ul>
           </div>
-          <!-- offset reset button -->
-          <button id="offset_reset_btn" class="btn btn-default tool_extra_btn" type="submit" style="display:none" title="reset offset [SHIFT-O]">
-            Reset Offset
-          </button>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-default venlarge2">Clear Zero</button>
+            <!-- origin button -->
+            <button id="origin_btn" class="btn btn-default venlarge2" type="submit" title="move to origin [0]">
+              (0,0,0)
+            </button>
+            <div class="btn-group" role="group" style="margin-left:24px">
+              <button type="button" class="btn btn-default">10</button>
+              <button type="button" class="btn btn-default">1</button>
+              <button type="button" class="btn btn-default">0.1</button>
+              <button type="button" class="btn btn-default">0.01</button>
+            </div>
+          </div>
+          <div class="col-md-3 noptr"></div>
         </div>
 
-        <span id="jog_hotkey_hint" class="tool_extra_btn" style="display:none">Also arrow and shift-arrow keys.</span>
-
-        <!-- <button id="jog_btn" class="btn btn-default" type="submit" title="[J]">Jog</button> -->
+        <!-- x row -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="input-group">
+              <div class="input-group-addon enlarge">X</div>
+              <input type="text" id="x_ro" class="form-control enlarge">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button type="button" class="btn btn-default enlarge2">Goto</button>
+            <div class="btn-group" role="group" style="margin-left:24px">
+              <button type="button" class="btn btn-default enlarge2">-</button>
+              <button type="button" class="btn btn-default enlarge2">+</button>
+            </div>
+          </div>
+          <div class="col-md-3 noptr"></div>
+        </div>
+        <!-- y row -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="input-group">
+              <div class="input-group-addon enlarge">Y</div>
+              <input type="text" id="y_ro" class="form-control enlarge">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button type="button" class="btn btn-default enlarge2">Goto</button>
+            <div class="btn-group" role="group" style="margin-left:24px">
+              <button type="button" class="btn btn-default enlarge2">-</button>
+              <button type="button" class="btn btn-default enlarge2">+</button>
+            </div>
+          </div>
+          <div class="col-md-3 noptr"></div>
+        </div>
+        <!-- z row -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="input-group">
+              <div class="input-group-addon enlarge">Z</div>
+              <input type="text" id="z_ro" class="form-control enlarge">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button type="button" class="btn btn-default enlarge2">Goto</button>
+            <div class="btn-group" role="group" style="margin-left:24px">
+              <button type="button" class="btn btn-default enlarge2">-</button>
+              <button type="button" class="btn btn-default enlarge2">+</button>
+            </div>
+          </div>
+          <div class="col-md-1 noptr"></div>
+          <div class="col-md-2" style="vertical-align:bottom">
+            <a class="navbar-brand" href="/">
+              <img src="img/lasersaur-dino-driveboardapp.png" style="margin-right:6px; margin-top:55px">
+            </a>
+          </div>
+        </div>
 
       </div>
     </footer>
