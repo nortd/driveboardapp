@@ -249,7 +249,7 @@ def basemovez(z):
 @checkserial
 def retract():
     driveboard.feedrate(conf['seekrate'])
-    driveboard.basemove(None, None, z)
+    driveboard.basemove(None, None, 0)
     driveboard.basemove(0, 0, 0)
     return '{}'
 

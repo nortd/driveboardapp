@@ -100,7 +100,7 @@ typedef struct {
   double duration;                 // pierce duration
   double pixel_width;              // raster pixel width in mm
   uint8_t offselect;               // {OFFSET_TABLE, OFFSET_CUSTOM}
-  // uint8_t offselect_store;         // store previous selection
+  uint8_t offselect_store;         // store previous selection
   double target[3];                // X,Y,Z params accumulated
   double offsets[6];               // coord system offsets [table_X,table_Y,table_Z, custom_X,custom_Y,custom_Z]
 } state_t;
@@ -131,7 +131,7 @@ void protocol_init() {
   st.duration = 0.0;
   st.pixel_width = 0.0;
   st.offselect = OFFSET_TABLE;
-  // st.offselect_store = st.offselect;
+  st.offselect_store = st.offselect;
   // table offset, absolute
   st.offsets[X_AXIS] = CONFIG_X_ORIGIN_OFFSET;
   st.offsets[Y_AXIS] = CONFIG_Y_ORIGIN_OFFSET;
@@ -244,12 +244,12 @@ inline void on_cmd(uint8_t command) {
     case CMD_SEL_OFFSET_CUSTOM:
       st.offselect = OFFSET_CUSTOM;
       break;
-    // case CMD_SEL_OFFSET_STORE:
-    //   st.offselect_store = st.offselect;
-    //   break;
-    // case CMD_SEL_OFFSET_RESTORE:
-    //   st.offselect = st.offselect_store;
-    //   break;
+    case CMD_SEL_OFFSET_STORE:
+      st.offselect_store = st.offselect;
+      break;
+    case CMD_SEL_OFFSET_RESTORE:
+      st.offselect = st.offselect_store;
+      break;
     case CMD_AIR_ENABLE:
       planner_control_air_assist_enable();
       break;
