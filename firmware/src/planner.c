@@ -108,7 +108,7 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
 
   // compute path vector in terms of absolute step target and current positions
   double delta_mm[3];
-  delta_mm[X_AXIS] = (target[X_AXIS]-position[X_AXIS])/(CONFIG_X_STEPS_PER_MM-10);    // BUG: by reducing this from 470 to 470 stack blow vanishes
+  delta_mm[X_AXIS] = (target[X_AXIS]-position[X_AXIS])/(CONFIG_X_STEPS_PER_MM);    // BUG: by reducing this from 470 to 470 stack blow vanishes
   delta_mm[Y_AXIS] = (target[Y_AXIS]-position[Y_AXIS])/CONFIG_Y_STEPS_PER_MM;
   delta_mm[Z_AXIS] = (target[Z_AXIS]-position[Z_AXIS])/CONFIG_Z_STEPS_PER_MM;
   block->millimeters = sqrt( (delta_mm[X_AXIS]*delta_mm[X_AXIS]) +
@@ -125,7 +125,14 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
   // compute the acceleration rate for this block. (step/min/acceleration_tick)
   block->rate_delta = ceil( block->step_event_count * inverse_millimeters
                             * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) );
-
+  // block->rate_delta = min(1500L, ceil( block->step_event_count * inverse_millimeters
+  //                           * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) ) );
+  // block->rate_delta = lround((inverse_millimeters * CONFIG_ACCELERATION) *
+  //                           ((double)block->step_event_count/(60.0*(double)ACCELERATION_TICKS_PER_SECOND)) );
+  // block->rate_delta = ceil( block->step_event_count * inverse_millimeters
+  //                           * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) );
+// block->rate_delta = 4000L;
+// block->rate_delta = 1500L;
 
   //// acceleeration manager calculations
   // Compute path unit vector

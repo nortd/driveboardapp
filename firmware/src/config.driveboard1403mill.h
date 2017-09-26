@@ -46,8 +46,8 @@
 // Y: 1290 ok,
 // in file x_max=173.5, y_max = 66.775
 // error: blows stack, even when we reduce buffers to have 2x sram
-#define CONFIG_X_STEPS_PER_MM 470.0 //microsteps/mm
-// #define CONFIG_X_STEPS_PER_MM 623.684 //microsteps/mm
+// #define CONFIG_X_STEPS_PER_MM 470.0 //microsteps/mm
+#define CONFIG_X_STEPS_PER_MM 623.684 //microsteps/mm
 #define CONFIG_Y_STEPS_PER_MM 623.684 //microsteps/mm
 #define CONFIG_Z_STEPS_PER_MM 797.812 //microsteps/mm
 #define CONFIG_PULSE_MICROSECONDS 5
