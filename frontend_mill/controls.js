@@ -255,12 +255,13 @@ function controls_ready() {
 
   $("#origin_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#origin_btn").click(function(e){
-    var gcode;
-    if(e.shiftKey) {
-      // also reset offset
-      alert("TODO: reset offset")
-      reset_offset____();  // TODO
-    }
+    request_get({
+      url:'/retract',
+      success: function (data) {
+        $().uxmessage('notice', "Retracting to machine zero ...")
+      }
+    })
+
     request_absolute_move(0, 0, 0, app_config_main.seekrate, "Moving to Origin.")
     return false
   })
@@ -309,17 +310,13 @@ function controls_ready() {
 
   $("#offset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_btn").click(function(e){
-    if (!$(this).hasClass('disabled')) {
-      jobview_jogLayer.visible = false
-      $(".tool_extra_btn").hide()
-      tools_toffset.activate()
-      $("#offset_reset_btn").show()
-      jobview_moveLayer.visible = false
-    } else {
-      setTimeout(function(){
-        $('#select_btn').trigger('click')
-      },500)
-    }
+
+    request_get({
+      url:'/offset',
+      success: function (data) {
+        $().uxmessage('notice', "X,Y,Z zero'd.")
+      }
+    })
     return true
   })
 
@@ -434,7 +431,7 @@ function controls_ready() {
   })
 
 
-  Mousetrap.bind(['0'], function(e) {
+  Mousetrap.bind(['r'], function(e) {
       $('#origin_btn').trigger('click')
       return false;
   })
@@ -454,7 +451,7 @@ function controls_ready() {
       return false;
   })
 
-  Mousetrap.bind(['o'], function(e) {
+  Mousetrap.bind(['0'], function(e) {
       $('#offset_btn').trigger('click')
       return false;
   })
@@ -464,22 +461,24 @@ function controls_ready() {
       return false;
   })
 
+  // X
   Mousetrap.bind(['up'], function(e) {
-      request_relative_move(0, -10, 0, app_config_main.seekrate, "jogging up 10mm")
+      request_relative_move(0, -10, 0, app_config_main.seekrate, "jogging back 10mm")
       return false;
   })
   Mousetrap.bind(['shift+up'], function(e) {
-      request_relative_move(0, -50, 0, app_config_main.seekrate, "jogging up 50mm")
+      request_relative_move(0, -50, 0, app_config_main.seekrate, "jogging back 50mm")
       return false;
   })
   Mousetrap.bind(['down'], function(e) {
-      request_relative_move(0, 10, 0, app_config_main.seekrate, "jogging down 10mm")
+      request_relative_move(0, 10, 0, app_config_main.seekrate, "jogging fwd 10mm")
       return false;
   })
   Mousetrap.bind(['shift+down'], function(e) {
-      request_relative_move(0, 50, 0, app_config_main.seekrate, "jogging down 50mm")
+      request_relative_move(0, 50, 0, app_config_main.seekrate, "jogging fwd 50mm")
       return false;
   })
+  // Y
   Mousetrap.bind(['left'], function(e) {
       request_relative_move(-10, 0, 0, app_config_main.seekrate, "jogging left 10mm")
       return false;
@@ -494,6 +493,23 @@ function controls_ready() {
   })
   Mousetrap.bind(['shift+right'], function(e) {
       request_relative_move(50, 0, 0, app_config_main.seekrate, "jogging right 50mm")
+      return false;
+  })
+  // Z
+  Mousetrap.bind(['pageup'], function(e) {
+      request_relative_move(0, 0, 10, app_config_main.seekrate, "jogging up 10mm")
+      return false;
+  })
+  Mousetrap.bind(['shift+pageup'], function(e) {
+      request_relative_move(0, 0, 50, app_config_main.seekrate, "jogging up 50mm")
+      return false;
+  })
+  Mousetrap.bind(['pagedown'], function(e) {
+      request_relative_move(0, 0, -10, app_config_main.seekrate, "jogging down 10mm")
+      return false;
+  })
+  Mousetrap.bind(['shift+pagedown'], function(e) {
+      request_relative_move(0, 0, -50, app_config_main.seekrate, "jogging down 50mm")
       return false;
   })
 

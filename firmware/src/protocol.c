@@ -244,10 +244,10 @@ inline void on_cmd(uint8_t command) {
     case CMD_SEL_OFFSET_CUSTOM:
       st.offselect = OFFSET_CUSTOM;
       break;
-    case CMD_SEL_OFFSET_STORE:
+    case CMD_OFFSET_STORE:
       st.offselect_store = st.offselect;
       break;
-    case CMD_SEL_OFFSET_RESTORE:
+    case CMD_OFFSET_RESTORE:
       st.offselect = st.offselect_store;
       break;
     case CMD_AIR_ENABLE:

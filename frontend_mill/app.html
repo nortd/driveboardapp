@@ -40,7 +40,6 @@
     <script src="tools.js"></script>
     <script src="app.js"></script>
     <script src="jobhandler.js"></script>
-    <script src="gcodehandler.js"></script>
     <script src="import.js"></script>
     <script src="controls.js"></script>
     <script src="passes.js"></script>
@@ -71,10 +70,8 @@
                 <li class="divider"></li>
                 <li><a id="queue_btn" href="#" data-toggle="modal" data-target="#queue_modal" title="[Q]">Job Queue</a></li>
                 <li><a id="library_btn" href="#" data-toggle="modal" data-target="#library_modal" title="[L]">Library</a></li>
-                <li><a id="gcode_btn" href="#" data-toggle="modal" data-target="#gcode_modal" title="[G]">GCode Edior</a></li>
                 <li class="divider"></li>
                 <li><a href="#" data-toggle="modal" data-target="#about_modal">About</a></li>
-                <li><a href="https://github.com/nortd/lasersaur/wiki">Manual</a></li>
                 <li class="divider"></li>
                 <li class="dropdown-header">Admin</li>
                 <li><a id="flash_btn" href="#">Flash Firmware</a></li>
@@ -279,7 +276,7 @@
 
         <!-- 4th row -->
         <div class="row">
-          <div class="col-md-3" style="text-align:right">
+          <div class="col-md-3">
             <!-- status indicator -->
             <div id="status_btn_div" class="btn-group dropup">
               <button id="status_btn" class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -322,19 +319,21 @@
               </ul>
             </div>
             <!-- homing button -->
-            <button id="homing_btn" class="btn btn-default" type="submit" title="run homing cycle, find table origin [H]">
-              <span class="glyphicon glyphicon-home"></span>
+            <button id="homing_btn" class="btn btn-default" type="submit" title="find machine origin [H]" style="margin-left:12px">
+              <span class="glyphicon glyphicon-home"></span> Homing
             </button>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-default venlarge2">Clear Zero</button>
+            <!-- zero all button -->
+            <button id="offset_btn" type="button" class="btn btn-default venlarge2" title="zero out at resent position [0]">Zero All</button>
             <!-- origin button -->
-            <button id="origin_btn" class="btn btn-default venlarge2" type="submit" title="move to origin [0]">
-              (0,0,0)
+            <button id="origin_btn" class="btn btn-default venlarge2" type="submit" title="retract to machine origin [R]">
+              Retract
             </button>
+            <!-- jog delta -->
             <div class="btn-group" role="group" style="margin-left:24px">
               <button type="button" class="btn btn-default">10</button>
-              <button type="button" class="btn btn-default">1</button>
+              <button type="button" class="btn btn-default">1mm</button>
               <button type="button" class="btn btn-default">0.1</button>
               <button type="button" class="btn btn-default">0.01</button>
             </div>

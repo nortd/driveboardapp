@@ -215,42 +215,13 @@ def movez(z):
     driveboard.move(None, None, z)
     return '{}'
 
-
-@bottle.route('/basemove/<x:float>/<y:float>/<z:float>')
-@bottle.auth_basic(checkuser)
-@checkserial
-def basemove(x, y, z):
-    driveboard.basemove(x, y, z)
-    return '{}'
-
-@bottle.route('/basemovex/<x:float>')
-@bottle.auth_basic(checkuser)
-@checkserial
-def basemovex(x):
-    driveboard.basemove(x, None, None)
-    return '{}'
-
-@bottle.route('/basemovey/<y:float>')
-@bottle.auth_basic(checkuser)
-@checkserial
-def basemovey(y):
-    driveboard.basemove(None, y, None)
-    return '{}'
-
-@bottle.route('/basemovez/<z:float>')
-@bottle.auth_basic(checkuser)
-@checkserial
-def basemovez(z):
-    driveboard.basemove(None, None, z)
-    return '{}'
-
 @bottle.route('/retract')
+@bottle.route('/retract/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def retract():
+def retract(x=0.0, y=0.0, z=0.0):
     driveboard.feedrate(conf['seekrate'])
-    driveboard.basemove(None, None, 0)
-    driveboard.basemove(0, 0, 0)
+    driveboard.retract(x, y, z)
     return '{}'
 
 @bottle.route('/air_on')
@@ -281,14 +252,19 @@ def aux_off():
     driveboard.aux_off()
     return '{}'
 
+@bottle.route('/offset')
 @bottle.route('/offset/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offset(x, y, z):
+def offset(x=None, y=None, z=None):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.def_offset_custom(x, y, z)
-    driveboard.sel_offset_custom()
+    if None in (x,y,z):
+        driveboard.set_offset_custom()
+        driveboard.sel_offset_custom()
+    else:
+        driveboard.def_offset_custom(x, y, z)
+        driveboard.sel_offset_custom()
     return '{}'
 
 @bottle.route('/clear_offset')

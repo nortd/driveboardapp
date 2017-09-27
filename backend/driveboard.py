@@ -46,8 +46,8 @@ CMD_SET_OFFSET_TABLE = "H"
 CMD_SET_OFFSET_CUSTOM = "I"
 CMD_SEL_OFFSET_TABLE = "J"
 CMD_SEL_OFFSET_CUSTOM = "K"
-CMD_SEL_OFFSET_STORE = 'L'
-CMD_SEL_OFFSET_RESTORE = 'M'
+CMD_OFFSET_STORE = 'L'
+CMD_OFFSET_RESTORE = 'M'
 
 CMD_AIR_ENABLE = "N"
 CMD_AIR_DISABLE = "O"
@@ -147,8 +147,8 @@ markers_tx = {
     "I": "CMD_SET_OFFSET_CUSTOM",
     "J": "CMD_SEL_OFFSET_TABLE",
     "K": "CMD_SEL_OFFSET_CUSTOM",
-    "L": "CMD_SEL_OFFSET_STORE",
-    "M": "CMD_SEL_OFFSET_RESTORE",
+    "L": "CMD_OFFSET_STORE",
+    "M": "CMD_OFFSET_RESTORE",
 
     "N": "CMD_AIR_ENABLE",
     "O": "CMD_AIR_DISABLE",
@@ -884,15 +884,33 @@ def basemove(x, y, z=0.0):
     """A move in table coordinates."""
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_STORE)
-        SerialLoop.send_command(CMD_SET_OFFSET_TABLE)
+        SerialLoop.send_command(CMD_OFFSET_STORE)
+        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
         if x is not None:
             SerialLoop.send_param(PARAM_TARGET_X, x)
         if y is not None:
             SerialLoop.send_param(PARAM_TARGET_Y, y)
         if z is not None:
             SerialLoop.send_param(PARAM_TARGET_Z, z)
-        SerialLoop.send_command(CMD_SEL_OFFSET_RESTORE)
+        SerialLoop.send_command(CMD_OFFSET_RESTORE)
+        SerialLoop.send_command(CMD_LINE)
+
+def retract(x=0.0, y=0.0, z=0.0):
+    """Retract is a move in table coordinates with the z-axis executed first."""
+    global SerialLoop
+    with SerialLoop.lock:
+        # move to z=0 in table cs
+        SerialLoop.send_command(CMD_OFFSET_STORE)
+        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
+        SerialLoop.send_param(PARAM_TARGET_Z, z)
+        SerialLoop.send_command(CMD_OFFSET_RESTORE)
+        SerialLoop.send_command(CMD_LINE)
+        # also move to x=0, y=0 in table cs
+        SerialLoop.send_command(CMD_OFFSET_STORE)
+        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
+        SerialLoop.send_param(PARAM_TARGET_X, x)
+        SerialLoop.send_param(PARAM_TARGET_Y, y)
+        SerialLoop.send_command(CMD_OFFSET_RESTORE)
         SerialLoop.send_command(CMD_LINE)
 
 def rastermove(x, y, z=0.0):
@@ -1169,9 +1187,7 @@ def job(jobdict):
         pass
     else:
         if conf['mill_mode']:
-            # retract z-axis before
-            basemove(None,None,0)
-            basemove(0,0,0)
+            retract()
         else:
             move(0, 0, 0)
 
