@@ -123,8 +123,8 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
   block->nominal_rate = ceil(block->step_event_count * inverse_minute); // always > 0
 
   // compute the acceleration rate for this block. (step/min/acceleration_tick)
-  // block->rate_delta = ceil( block->step_event_count * inverse_millimeters
-  //                           * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) );
+  block->rate_delta = ceil( block->step_event_count * inverse_millimeters
+                            * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) );
   // block->rate_delta = min(1500L, ceil( block->step_event_count * inverse_millimeters
   //                           * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) ) );
   // block->rate_delta = lround((inverse_millimeters * CONFIG_ACCELERATION) *
