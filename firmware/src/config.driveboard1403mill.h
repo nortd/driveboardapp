@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1707               // int or float
+#define VERSION 1708               // int or float
 #define BAUD_RATE 57600
 #define ENABLE_3AXES               // enable/disable 3-axis mode (vs 2-axis)
 #define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
@@ -42,6 +42,7 @@
 // #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
 // #define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
+// NOTE: max step freq: (STEPS_PER_MIN*SEEKRATE)/60 needs to be < 40kHz
 #define CONFIG_X_STEPS_PER_MM 623.684 //microsteps/mm
 #define CONFIG_Y_STEPS_PER_MM 623.684 //microsteps/mm
 #define CONFIG_Z_STEPS_PER_MM 797.812 //microsteps/mm

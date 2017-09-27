@@ -42,7 +42,7 @@
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
 #define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
-
+// NOTE: max step freq: (STEPS_PER_MIN*SEEKRATE)/60 needs to be < 40kHz
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
 #define CONFIG_Y_STEPS_PER_MM 90.90909090 //microsteps/mm
 #define CONFIG_Z_STEPS_PER_MM 33.33333333 //microsteps/mm
