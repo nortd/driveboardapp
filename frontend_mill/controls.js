@@ -1,4 +1,12 @@
 
+function control_visible_click(elem, class_) {
+  elem.trigger('click')
+  elem.addClass(class_)
+  setTimeout(function() {
+    elem.removeClass(class_)
+  }, 100)
+}
+
 
 function controls_ready() {
 
@@ -252,7 +260,6 @@ function controls_ready() {
 
   // footer buttons /////////////////////////////////////////////////////////
 
-
   $("#origin_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#origin_btn").click(function(e){
     request_get({
@@ -278,39 +285,10 @@ function controls_ready() {
   })
 
 
-  $("#select_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
-  $("#select_btn").click(function(e){
-    jobview_jogLayer.visible = false
-    $(".tool_extra_btn").hide()
-    tools_tselect.activate()
-    $("#addfill_wgt").show()
-    jobview_moveLayer.visible = false
-    return true
-  })
-
-  $("#addfill_btn").tooltip({placement:'right', delay: {show:1000, hide:100}})
-  $("#addfill_btn").click(function(e){
-    if (jobview_item_selected !== undefined) {
-      var kind = jobhandler.defs[jobhandler.items[jobview_item_selected].def].kind
-      if (kind != "path") {
-        $().uxmessage('notice', "Make sure a path is selected.")
-        return false
-      }
-      app_fill_btn.start()
-      fills_add_by_item(jobview_item_selected,
-        function() {
-          app_fill_btn.stop()
-      })
-      return false
-    } else {
-      return true
-    }
-  })
-
+  // offsets
 
   $("#offset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_btn").click(function(e){
-
     request_get({
       url:'/offset',
       success: function (data) {
@@ -319,51 +297,81 @@ function controls_ready() {
     })
     return true
   })
-
-  $("#offset_reset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
-  $("#offset_reset_btn").click(function(e){
+  // X
+  $("#offset_x_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#offset_x_btn").click(function(e){
     request_get({
-      url:'/clear_offset',
+      url:'/offset',
       success: function (data) {
-        $().uxmessage('notice', "Offset cleared.")
-        $("#offset_reset_btn").hide()
-        $('#select_btn').trigger('click')
+        $().uxmessage('notice', "X zero'd.")
+      }
+    })
+    return true
+  })
+  // Y
+  $("#offset_y_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#offset_y_btn").click(function(e){
+    request_get({
+      url:'/offset',
+      success: function (data) {
+        $().uxmessage('notice', "Y zero'd.")
+      }
+    })
+    return true
+  })
+  // Z
+  $("#offset_z_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#offset_z_btn").click(function(e){
+    request_get({
+      url:'/offset',
+      success: function (data) {
+        $().uxmessage('notice', "Z zero'd.")
       }
     })
     return true
   })
 
 
-  $("#motion_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
-  $("#motion_btn").click(function(e){
-    if (!$(this).hasClass('disabled')) {
-      jobview_jogLayer.visible = false
-      $(".tool_extra_btn").hide()
-      tools_tmove.activate()
-    } else {
-      setTimeout(function(){
-        $('#select_btn').trigger('click')
-      },500)
-    }
+  // Jog X
+  $("#jog_x_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_x_minus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(-djog, 0, 0, app_config_main.seekrate, "X-"+djog)
+    return true
+  })
+  $("#jog_x_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_x_plus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(djog, 0, 0, app_config_main.seekrate, "X"+djog)
+    return true
+  })
+  // Jog Y
+  $("#jog_y_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_y_minus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(0, -djog, 0, app_config_main.seekrate, "Y-"+djog)
+    return true
+  })
+  $("#jog_y_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_y_plus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(0, djog, 0, app_config_main.seekrate, "Y"+djog)
+    return true
+  })
+  // Jog Z
+  $("#jog_z_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_z_minus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(0, 0, -djog, app_config_main.seekrate, "Z-"+djog)
+    return true
+  })
+  $("#jog_z_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#jog_z_plus").click(function(e){
+    var djog = parseFloat($('#jog_delta input:radio:checked').val())
+    request_relative_move(0, 0, djog, app_config_main.seekrate, "Z"+djog)
     return true
   })
 
-
-  $("#jog_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
-  $("#jog_btn").click(function(e){
-    if (!$(this).hasClass('disabled')) {
-      $(".tool_extra_btn").hide()
-      $("#jog_hotkey_hint").show()
-      tools_tjog.activate()
-      jobview_moveLayer.visible = false
-      jobview_jogLayer.visible = true
-    } else {
-      setTimeout(function(){
-        $('#select_btn').trigger('click')
-      },500)
-    }
-    return true
-  })
 
 
 
@@ -371,145 +379,134 @@ function controls_ready() {
 
 
   Mousetrap.bind(['i'], function(e) {
-      $('#info_btn').trigger('click')
-      return false;
+    $('#info_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['e'], function(e) {
-      $('#export_btn').trigger('click')
-      return false;
+    $('#export_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['del', 'backspace'], function(e) {
-      $('#clear_btn').trigger('click')
-      return false;
+    $('#clear_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['q'], function(e) {
-      $('#queue_btn').trigger('click')
-      return false;
+    $('#queue_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['l'], function(e) {
-      $('#library_btn').trigger('click')
-      return false;
+    $('#library_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['c'], function(e) {
-      $('#config_btn').trigger('click')
-      return false;
+    $('#config_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['shift+l'], function(e) {
-      $('#log_btn').trigger('click')
-      return false;
+    $('#log_btn').trigger('click')
+    return false;
   })
 
   Mousetrap.bind(['enter'], function(e) {
-      $('#open_btn').trigger('click')
-      return false;
+    control_visible_click($('#open_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['command+enter', 'ctrl+enter'], function(e) {
-      $('#run_btn').trigger('click')
-      return false;
+    control_visible_click($('#run_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['command+shift+enter', 'ctrl+shift+enter'], function(e) {
-      $('#boundary_btn').trigger('click')
-      return false;
+    control_visible_click($('#boundary_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['space'], function(e) {
-      $('#pause_btn').trigger('click')
-      return false;
+    control_visible_click($('#pause_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['ctrl+esc', 'command+esc'], function(e) {
-      $('#stop_btn').trigger('click')
-      return false;
+    control_visible_click($('#stop_btn'), 'btn-info')
+    return false;
   })
 
 
+  Mousetrap.bind(['s'], function(e) {
+    $('#status_btn').trigger('click')
+    return false;
+  })
+
   Mousetrap.bind(['r'], function(e) {
-      $('#origin_btn').trigger('click')
-      return false;
+    control_visible_click($('#origin_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['h'], function(e) {
-      $('#homing_btn').trigger('click')
-      return false;
-  })
-
-  Mousetrap.bind(['s'], function(e) {
-      $('#select_btn').trigger('click')
-      return false;
-  })
-
-  Mousetrap.bind(['m'], function(e) {
-      $('#motion_btn').trigger('click')
-      return false;
+    control_visible_click($('#homing_btn'), 'btn-info')
+    return false;
   })
 
   Mousetrap.bind(['0'], function(e) {
-      $('#offset_btn').trigger('click')
-      return false;
+    control_visible_click($('#offset_btn'), 'btn-info')
+    return false;
   })
-
-  Mousetrap.bind(['j'], function(e) {
-      $('#jog_btn').trigger('click')
-      return false;
+  Mousetrap.bind(['7'], function(e) {
+    control_visible_click($('#offset_x_btn'), 'btn-info')
+    return false;
+  })
+  Mousetrap.bind(['8'], function(e) {
+    control_visible_click($('#offset_y_btn'), 'btn-info')
+    return false;
+  })
+  Mousetrap.bind(['9'], function(e) {
+    control_visible_click($('#offset_z_btn'), 'btn-info')
+    return false;
   })
 
   // X
-  Mousetrap.bind(['up'], function(e) {
-      request_relative_move(0, -10, 0, app_config_main.seekrate, "jogging back 10mm")
-      return false;
-  })
-  Mousetrap.bind(['shift+up'], function(e) {
-      request_relative_move(0, -50, 0, app_config_main.seekrate, "jogging back 50mm")
-      return false;
-  })
-  Mousetrap.bind(['down'], function(e) {
-      request_relative_move(0, 10, 0, app_config_main.seekrate, "jogging fwd 10mm")
-      return false;
-  })
-  Mousetrap.bind(['shift+down'], function(e) {
-      request_relative_move(0, 50, 0, app_config_main.seekrate, "jogging fwd 50mm")
-      return false;
-  })
-  // Y
   Mousetrap.bind(['left'], function(e) {
-      request_relative_move(-10, 0, 0, app_config_main.seekrate, "jogging left 10mm")
-      return false;
-  })
-  Mousetrap.bind(['shift+left'], function(e) {
-      request_relative_move(-50, 0, 0, app_config_main.seekrate, "jogging left 50mm")
-      return false;
+    control_visible_click($('#jog_x_minus'), 'btn-info')
+    return false;
   })
   Mousetrap.bind(['right'], function(e) {
-      request_relative_move(10, 0, 0, app_config_main.seekrate, "jogging right 10mm")
-      return false;
+    control_visible_click($('#jog_x_plus'), 'btn-info')
+    return false;
   })
-  Mousetrap.bind(['shift+right'], function(e) {
-      request_relative_move(50, 0, 0, app_config_main.seekrate, "jogging right 50mm")
-      return false;
+  // Y
+  Mousetrap.bind(['up'], function(e) {
+    control_visible_click($('#jog_y_plus'), 'btn-info')
+    return false;
+  })
+  Mousetrap.bind(['down'], function(e) {
+    control_visible_click($('#jog_y_minus'), 'btn-info')
+    return false;
   })
   // Z
   Mousetrap.bind(['pageup'], function(e) {
-      request_relative_move(0, 0, 10, app_config_main.seekrate, "jogging up 10mm")
-      return false;
-  })
-  Mousetrap.bind(['shift+pageup'], function(e) {
-      request_relative_move(0, 0, 50, app_config_main.seekrate, "jogging up 50mm")
-      return false;
+    control_visible_click($('#jog_z_plus'), 'btn-info')
+    return false;
   })
   Mousetrap.bind(['pagedown'], function(e) {
-      request_relative_move(0, 0, -10, app_config_main.seekrate, "jogging down 10mm")
+    control_visible_click($('#jog_z_minus'), 'btn-info')
+    return false;
+  })
+
+
+  // jog distance
+  Mousetrap.bind(['['], function(e) {
+      $('#jog_delta input:radio:checked').parent().prev().children('input').trigger('click')
       return false;
   })
-  Mousetrap.bind(['shift+pagedown'], function(e) {
-      request_relative_move(0, 0, -50, app_config_main.seekrate, "jogging down 50mm")
+  Mousetrap.bind([']'], function(e) {
+      $('#jog_delta input:radio:checked').parent().next().children('input').trigger('click')
       return false;
   })
 

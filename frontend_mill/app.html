@@ -331,11 +331,19 @@
               Retract
             </button>
             <!-- jog delta -->
-            <div class="btn-group" role="group" style="margin-left:24px">
-              <button type="button" class="btn btn-default">10</button>
-              <button type="button" class="btn btn-default">1mm</button>
-              <button type="button" class="btn btn-default">0.1</button>
-              <button type="button" class="btn btn-default">0.01</button>
+            <div id="jog_delta" class="btn-group" data-toggle="buttons" style="margin-left:24px">
+              <label class="btn btn-default">
+                <input type="radio" name="options" id="option2" autocomplete="off" value="0.01">0.01
+              </label>
+              <label class="btn btn-default">
+                <input type="radio" name="options" id="option3" autocomplete="off" value="0.1">0.1
+              </label>
+              <label class="btn btn-default">
+                <input type="radio" name="options" id="option3" autocomplete="off" value="1">1
+              </label>
+              <label class="btn btn-default active">
+                <input type="radio" name="options" id="option1" autocomplete="off" value="10" checked>10mm
+              </label>
             </div>
           </div>
           <div class="col-md-3 noptr"></div>
@@ -350,11 +358,15 @@
             </div>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button id="offset_x_btn" type="button" class="btn btn-default enlarge2">Zero</button>
             <button type="button" class="btn btn-default enlarge2">Goto</button>
             <div class="btn-group" role="group" style="margin-left:24px">
-              <button type="button" class="btn btn-default enlarge2">-</button>
-              <button type="button" class="btn btn-default enlarge2">+</button>
+              <button id="jog_x_minus" type="button" class="btn btn-default enlarge2" title="left-jog X [ARROW-LEFT]">
+                <span class="glyphicon glyphicon-minus-sign"></span>
+              </button>
+              <button id="jog_x_plus" type="button" class="btn btn-default enlarge2" title="right-jog X [ARROW-RIGHT]">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+              </button>
             </div>
           </div>
           <div class="col-md-3 noptr"></div>
@@ -368,11 +380,15 @@
             </div>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button id="offset_y_btn" type="button" class="btn btn-default enlarge2">Zero</button>
             <button type="button" class="btn btn-default enlarge2">Goto</button>
             <div class="btn-group" role="group" style="margin-left:24px">
-              <button type="button" class="btn btn-default enlarge2">-</button>
-              <button type="button" class="btn btn-default enlarge2">+</button>
+              <button id="jog_y_minus" type="button" class="btn btn-default enlarge2" title="rear-jog Y [ARROW-UP]">
+                <span class="glyphicon glyphicon-minus-sign"></span>
+              </button>
+              <button id="jog_y_plus" type="button" class="btn btn-default enlarge2" title="front-jog Y [ARROW-DOWN]">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+              </button>
             </div>
           </div>
           <div class="col-md-3 noptr"></div>
@@ -386,11 +402,15 @@
             </div>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-default enlarge2">Zero</button>
+            <button id="offset_z_btn" type="button" class="btn btn-default enlarge2">Zero</button>
             <button type="button" class="btn btn-default enlarge2">Goto</button>
             <div class="btn-group" role="group" style="margin-left:24px">
-              <button type="button" class="btn btn-default enlarge2">-</button>
-              <button type="button" class="btn btn-default enlarge2">+</button>
+              <button id="jog_z_minus" type="button" class="btn btn-default enlarge2" title="down-jog Z [PAGE-DOWN]">
+                <span class="glyphicon glyphicon-minus-sign"></span>
+              </button>
+              <button id="jog_z_plus" type="button" class="btn btn-default enlarge2" title="up-jog Z [PAGE-UP]">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+              </button>
             </div>
           </div>
           <div class="col-md-1 noptr"></div>

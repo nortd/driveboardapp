@@ -267,6 +267,16 @@ def offset(x=None, y=None, z=None):
         driveboard.sel_offset_custom()
     return '{}'
 
+@bottle.route('/offsetx/<x:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def offsetx(x):
+    if not driveboard.status()['ready']:
+        bottle.abort(400, "Machine not ready.")
+    driveboard.set_offset_custom_x(x)
+    driveboard.sel_offset_custom()
+    return '{}'
+
 @bottle.route('/clear_offset')
 @bottle.auth_basic(checkuser)
 @checkserial

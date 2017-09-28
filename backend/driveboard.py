@@ -44,17 +44,18 @@ CMD_HOMING = "G"
 
 CMD_SET_OFFSET_TABLE = "H"
 CMD_SET_OFFSET_CUSTOM = "I"
-CMD_SEL_OFFSET_TABLE = "J"
-CMD_SEL_OFFSET_CUSTOM = "K"
-CMD_OFFSET_STORE = 'L'
-CMD_OFFSET_RESTORE = 'M'
+CMD_SET_OFFSET_CUSTOM_X = "J"
+CMD_SET_OFFSET_CUSTOM_Y = "K"
+CMD_SET_OFFSET_CUSTOM_Z = "L"
+CMD_SEL_OFFSET_TABLE = "M"
+CMD_SEL_OFFSET_CUSTOM = "N"
+CMD_OFFSET_STORE = 'O'
+CMD_OFFSET_RESTORE = 'P'
 
-CMD_AIR_ENABLE = "N"
-CMD_AIR_DISABLE = "O"
-CMD_AUX_ENABLE = "P"
-CMD_AUX_DISABLE = "Q"
-# CMD_AUX2_ENABLE = "R"
-# CMD_AUX2_DISABLE = "S"
+CMD_AIR_ENABLE = "Q"
+CMD_AIR_DISABLE = "R"
+CMD_AUX_ENABLE = "S"
+CMD_AUX_DISABLE = "T"
 
 PARAM_TARGET_X = "x"
 PARAM_TARGET_Y = "y"
@@ -145,17 +146,18 @@ markers_tx = {
 
     "H": "CMD_SET_OFFSET_TABLE",
     "I": "CMD_SET_OFFSET_CUSTOM",
-    "J": "CMD_SEL_OFFSET_TABLE",
-    "K": "CMD_SEL_OFFSET_CUSTOM",
-    "L": "CMD_OFFSET_STORE",
-    "M": "CMD_OFFSET_RESTORE",
+    "J": "CMD_SET_OFFSET_CUSTOM_X",
+    "K": "CMD_SET_OFFSET_CUSTOM_Y",
+    "L": "CMD_SET_OFFSET_CUSTOM_Z",
+    "M": "CMD_SEL_OFFSET_TABLE",
+    "N": "CMD_SEL_OFFSET_CUSTOM",
+    "O": "CMD_OFFSET_STORE",
+    "P": "CMD_OFFSET_RESTORE",
 
-    "N": "CMD_AIR_ENABLE",
-    "O": "CMD_AIR_DISABLE",
-    "P": "CMD_AUX_ENABLE",
-    "Q": "CMD_AUX_DISABLE",
-    # "R": "CMD_AUX2_ENABLE",
-    # "S": "CMD_AUX2_DISABLE",
+    "Q": "CMD_AIR_ENABLE",
+    "R": "CMD_AIR_DISABLE",
+    "S": "CMD_AUX_ENABLE",
+    "T": "CMD_AUX_DISABLE",
 
     "x": "PARAM_TARGET_X",
     "y": "PARAM_TARGET_Y",
@@ -1255,6 +1257,18 @@ def set_offset_custom():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM)
+def set_offset_custom_x():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_X)
+def set_offset_custom_y():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_Y)
+def set_offset_custom_z():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_Z)
 
 def def_offset_table(x, y, z):
     global SerialLoop

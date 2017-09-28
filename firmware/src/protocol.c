@@ -223,20 +223,29 @@ inline void on_cmd(uint8_t command) {
       planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
                     st.feedrate, 0, 0.0 );
       break;
-    case CMD_SET_OFFSET_TABLE: case CMD_SET_OFFSET_CUSTOM:
-      while(stepper_processing()) {
-        // sleep_mode();
-        protocol_idle();
-      }
-      // set offset to current position
-      if(command == CMD_SET_OFFSET_CUSTOM) {
-        cs = OFFSET_CUSTOM;
-      } else {
-        cs = OFFSET_TABLE;
-      }
-      st.offsets[3*cs+X_AXIS] = stepper_get_position_x();
-      st.offsets[3*cs+Y_AXIS] = stepper_get_position_y();
-      st.offsets[3*cs+Z_AXIS] = stepper_get_position_z();
+    case CMD_SET_OFFSET_TABLE:
+      while(stepper_processing()) { protocol_idle(); }
+      st.offsets[3*OFFSET_TABLE+X_AXIS] = stepper_get_position_x();
+      st.offsets[3*OFFSET_TABLE+Y_AXIS] = stepper_get_position_y();
+      st.offsets[3*OFFSET_TABLE+Z_AXIS] = stepper_get_position_z();
+      break;
+    case CMD_SET_OFFSET_CUSTOM:
+      while(stepper_processing()) { protocol_idle(); }
+      st.offsets[3*OFFSET_CUSTOM+X_AXIS] = stepper_get_position_x();
+      st.offsets[3*OFFSET_CUSTOM+Y_AXIS] = stepper_get_position_y();
+      st.offsets[3*OFFSET_CUSTOM+Z_AXIS] = stepper_get_position_z();
+      break;
+    case CMD_SET_OFFSET_CUSTOM_X:
+      while(stepper_processing()) { protocol_idle(); }
+      st.offsets[3*OFFSET_CUSTOM+X_AXIS] = stepper_get_position_x();
+      break;
+    case CMD_SET_OFFSET_CUSTOM_Y:
+      while(stepper_processing()) { protocol_idle(); }
+      st.offsets[3*OFFSET_CUSTOM+Y_AXIS] = stepper_get_position_y();
+      break;
+    case CMD_SET_OFFSET_CUSTOM_Z:
+      while(stepper_processing()) { protocol_idle(); }
+      st.offsets[3*OFFSET_CUSTOM+Z_AXIS] = stepper_get_position_z();
       break;
     case CMD_SEL_OFFSET_TABLE:
       st.offselect = OFFSET_TABLE;
