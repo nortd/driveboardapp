@@ -42,20 +42,19 @@ CMD_REF_ABSOLUTE = "F"
 
 CMD_HOMING = "G"
 
-CMD_SET_OFFSET_TABLE = "H"
-CMD_SET_OFFSET_CUSTOM = "I"
-CMD_SET_OFFSET_CUSTOM_X = "J"
-CMD_SET_OFFSET_CUSTOM_Y = "K"
-CMD_SET_OFFSET_CUSTOM_Z = "L"
-CMD_SEL_OFFSET_TABLE = "M"
-CMD_SEL_OFFSET_CUSTOM = "N"
-CMD_OFFSET_STORE = 'O'
-CMD_OFFSET_RESTORE = 'P'
+CMD_SET_OFFSET = "H"
+CMD_SET_OFFSET_X = "I"
+CMD_SET_OFFSET_Y = "J"
+CMD_SET_OFFSET_Z = "K"
+CMD_SEL_OFFSET_TABLE = "L"
+CMD_SEL_OFFSET_CUSTOM = "M"
+CMD_OFFSET_STORE = 'N'
+CMD_OFFSET_RESTORE = 'O'
 
-CMD_AIR_ENABLE = "Q"
-CMD_AIR_DISABLE = "R"
-CMD_AUX_ENABLE = "S"
-CMD_AUX_DISABLE = "T"
+CMD_AIR_ENABLE = "P"
+CMD_AIR_DISABLE = "Q"
+CMD_AUX_ENABLE = "R"
+CMD_AUX_DISABLE = "S"
 
 PARAM_TARGET_X = "x"
 PARAM_TARGET_Y = "y"
@@ -144,20 +143,19 @@ markers_tx = {
 
     "G": "CMD_HOMING",
 
-    "H": "CMD_SET_OFFSET_TABLE",
-    "I": "CMD_SET_OFFSET_CUSTOM",
-    "J": "CMD_SET_OFFSET_CUSTOM_X",
-    "K": "CMD_SET_OFFSET_CUSTOM_Y",
-    "L": "CMD_SET_OFFSET_CUSTOM_Z",
-    "M": "CMD_SEL_OFFSET_TABLE",
-    "N": "CMD_SEL_OFFSET_CUSTOM",
-    "O": "CMD_OFFSET_STORE",
-    "P": "CMD_OFFSET_RESTORE",
+    "H": "CMD_SET_OFFSET",
+    "I": "CMD_SET_OFFSET_X",
+    "J": "CMD_SET_OFFSET_Y",
+    "K": "CMD_SET_OFFSET_Z",
+    "L": "CMD_SEL_OFFSET_TABLE",
+    "M": "CMD_SEL_OFFSET_CUSTOM",
+    "N": "CMD_OFFSET_STORE",
+    "O": "CMD_OFFSET_RESTORE",
 
-    "Q": "CMD_AIR_ENABLE",
-    "R": "CMD_AIR_DISABLE",
-    "S": "CMD_AUX_ENABLE",
-    "T": "CMD_AUX_DISABLE",
+    "P": "CMD_AIR_ENABLE",
+    "Q": "CMD_AIR_DISABLE",
+    "R": "CMD_AUX_ENABLE",
+    "S": "CMD_AUX_DISABLE",
 
     "x": "PARAM_TARGET_X",
     "y": "PARAM_TARGET_Y",
@@ -1248,27 +1246,22 @@ def aux_off():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AUX_DISABLE)
 
-def set_offset_table():
+def set_offset():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_TABLE)
-
-def set_offset_custom():
+        SerialLoop.send_command(CMD_SET_OFFSET)
+def set_offset_x():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM)
-def set_offset_custom_x():
+        SerialLoop.send_command(CMD_SET_OFFSET_X)
+def set_offset_y():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_X)
-def set_offset_custom_y():
+        SerialLoop.send_command(CMD_SET_OFFSET_Y)
+def set_offset_z():
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_Y)
-def set_offset_custom_z():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM_Z)
+        SerialLoop.send_command(CMD_SET_OFFSET_Z)
 
 def def_offset_table(x, y, z):
     global SerialLoop

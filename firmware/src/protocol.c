@@ -184,7 +184,6 @@ inline void protocol_loop() {
 
 
 inline void on_cmd(uint8_t command) {
-  uint8_t cs;
   switch(command) {
     case CMD_NONE:
       break;
@@ -223,29 +222,23 @@ inline void on_cmd(uint8_t command) {
       planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
                     st.feedrate, 0, 0.0 );
       break;
-    case CMD_SET_OFFSET_TABLE:
+    case CMD_SET_OFFSET:
       while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*OFFSET_TABLE+X_AXIS] = stepper_get_position_x();
-      st.offsets[3*OFFSET_TABLE+Y_AXIS] = stepper_get_position_y();
-      st.offsets[3*OFFSET_TABLE+Z_AXIS] = stepper_get_position_z();
+      st.offsets[3*st.offselect+X_AXIS] = stepper_get_position_x();
+      st.offsets[3*st.offselect+Y_AXIS] = stepper_get_position_y();
+      st.offsets[3*st.offselect+Z_AXIS] = stepper_get_position_z();
       break;
-    case CMD_SET_OFFSET_CUSTOM:
+    case CMD_SET_OFFSET_X:
       while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*OFFSET_CUSTOM+X_AXIS] = stepper_get_position_x();
-      st.offsets[3*OFFSET_CUSTOM+Y_AXIS] = stepper_get_position_y();
-      st.offsets[3*OFFSET_CUSTOM+Z_AXIS] = stepper_get_position_z();
+      st.offsets[3*st.offselect+X_AXIS] = stepper_get_position_x();
       break;
-    case CMD_SET_OFFSET_CUSTOM_X:
+    case CMD_SET_OFFSET_Y:
       while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*OFFSET_CUSTOM+X_AXIS] = stepper_get_position_x();
+      st.offsets[3*st.offselect+Y_AXIS] = stepper_get_position_y();
       break;
-    case CMD_SET_OFFSET_CUSTOM_Y:
+    case CMD_SET_OFFSET_Z:
       while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*OFFSET_CUSTOM+Y_AXIS] = stepper_get_position_y();
-      break;
-    case CMD_SET_OFFSET_CUSTOM_Z:
-      while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*OFFSET_CUSTOM+Z_AXIS] = stepper_get_position_z();
+      st.offsets[3*st.offselect+Z_AXIS] = stepper_get_position_z();
       break;
     case CMD_SEL_OFFSET_TABLE:
       st.offselect = OFFSET_TABLE;
@@ -253,6 +246,12 @@ inline void on_cmd(uint8_t command) {
     case CMD_SEL_OFFSET_CUSTOM:
       st.offselect = OFFSET_CUSTOM;
       break;
+    // case CMD_CLEAR_OFFSET:
+    //   // copy table offset to custom offset
+    //   st.offsets[3+X_AXIS] = st.offsets[X_AXIS];
+    //   st.offsets[3+Y_AXIS] = st.offsets[Y_AXIS];
+    //   st.offsets[3+Z_AXIS] = st.offsets[Z_AXIS];
+    //   break;
     case CMD_OFFSET_STORE:
       st.offselect_store = st.offselect;
       break;

@@ -301,7 +301,7 @@ function controls_ready() {
   $("#offset_x_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_x_btn").click(function(e){
     request_get({
-      url:'/offset',
+      url:'/offsetx',
       success: function (data) {
         $().uxmessage('notice', "X zero'd.")
       }
@@ -312,7 +312,7 @@ function controls_ready() {
   $("#offset_y_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_y_btn").click(function(e){
     request_get({
-      url:'/offset',
+      url:'/offsety',
       success: function (data) {
         $().uxmessage('notice', "Y zero'd.")
       }
@@ -323,7 +323,7 @@ function controls_ready() {
   $("#offset_z_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_z_btn").click(function(e){
     request_get({
-      url:'/offset',
+      url:'/offsetz',
       success: function (data) {
         $().uxmessage('notice', "Z zero'd.")
       }

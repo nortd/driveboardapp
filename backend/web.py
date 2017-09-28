@@ -260,21 +260,38 @@ def offset(x=None, y=None, z=None):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
     if None in (x,y,z):
-        driveboard.set_offset_custom()
         driveboard.sel_offset_custom()
+        driveboard.set_offset()
     else:
         driveboard.def_offset_custom(x, y, z)
         driveboard.sel_offset_custom()
     return '{}'
 
-@bottle.route('/offsetx/<x:float>')
+@bottle.route('/offsetx')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offsetx(x):
+def offsetx():
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.set_offset_custom_x(x)
-    driveboard.sel_offset_custom()
+    driveboard.set_offset_x()
+    return '{}'
+
+@bottle.route('/offsety')
+@bottle.auth_basic(checkuser)
+@checkserial
+def offsety():
+    if not driveboard.status()['ready']:
+        bottle.abort(400, "Machine not ready.")
+    driveboard.set_offset_y()
+    return '{}'
+
+@bottle.route('/offsetz')
+@bottle.auth_basic(checkuser)
+@checkserial
+def offsetz():
+    if not driveboard.status()['ready']:
+        bottle.abort(400, "Machine not ready.")
+    driveboard.set_offset_z()
     return '{}'
 
 @bottle.route('/clear_offset')
