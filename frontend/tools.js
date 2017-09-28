@@ -87,7 +87,7 @@ function tools_toffset_init() {
     var x = Math.ceil(event.point.x/jobview_mm2px)
     var y = Math.ceil(event.point.y/jobview_mm2px)
     request_get({
-      url:'/offset/'+x+'/'+y+'/0',
+      url:'/absoffset/'+x+'/'+y+'/0',
       success: function (data) {
         $().uxmessage('notice', "Offset set to: "+x+","+y)
       },

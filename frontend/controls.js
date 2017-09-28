@@ -319,7 +319,7 @@ function controls_ready() {
   $("#offset_reset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_reset_btn").click(function(e){
     request_get({
-      url:'/clear_offset',
+      url:'/absoffset/0/0/0',
       success: function (data) {
         $().uxmessage('notice', "Offset cleared.")
         $("#offset_reset_btn").hide()

@@ -39,22 +39,17 @@
 
 #define CMD_REF_RELATIVE 'E'
 #define CMD_REF_ABSOLUTE 'F'
+#define CMD_REF_STORE 'G'
+#define CMD_REF_RESTORE 'H'
 
-#define CMD_HOMING 'G'
+#define CMD_HOMING 'I'
+#define CMD_OFFSET_STORE 'J'
+#define CMD_OFFSET_RESTORE 'K'
 
-#define CMD_SET_OFFSET 'H'
-#define CMD_SET_OFFSET_X 'I'
-#define CMD_SET_OFFSET_Y 'J'
-#define CMD_SET_OFFSET_Z 'K'
-#define CMD_SEL_OFFSET_TABLE 'L'
-#define CMD_SEL_OFFSET_CUSTOM 'M'
-#define CMD_OFFSET_STORE 'N'
-#define CMD_OFFSET_RESTORE 'O'
-
-#define CMD_AIR_ENABLE 'P'
-#define CMD_AIR_DISABLE 'Q'
-#define CMD_AUX_ENABLE 'R'
-#define CMD_AUX_DISABLE 'S'
+#define CMD_AIR_ENABLE 'L'
+#define CMD_AIR_DISABLE 'M'
+#define CMD_AUX_ENABLE 'N'
+#define CMD_AUX_DISABLE 'O'
 
 #define PARAM_TARGET_X 'x'
 #define PARAM_TARGET_Y 'y'
@@ -63,12 +58,9 @@
 #define PARAM_INTENSITY 's'
 #define PARAM_DURATION 'd'
 #define PARAM_PIXEL_WIDTH 'p'
-#define PARAM_OFFTABLE_X 'h'
-#define PARAM_OFFTABLE_Y 'i'
-#define PARAM_OFFTABLE_Z 'j'
-#define PARAM_OFFCUSTOM_X 'k'
-#define PARAM_OFFCUSTOM_Y 'l'
-#define PARAM_OFFCUSTOM_Z 'm'
+#define PARAM_OFFSET_X 'h'
+#define PARAM_OFFSET_Y 'i'
+#define PARAM_OFFSET_Z 'j'
 
 
 // status: error markers

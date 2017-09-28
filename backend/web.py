@@ -198,30 +198,57 @@ def move(x, y, z):
 @bottle.auth_basic(checkuser)
 @checkserial
 def movex(x):
-    driveboard.move(x, None, None)
+    driveboard.move(x=x)
     return '{}'
 
 @bottle.route('/movey/<y:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def movey(y):
-    driveboard.move(None, y, None)
+    driveboard.move(y=y)
     return '{}'
 
 @bottle.route('/movez/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def movez(z):
-    driveboard.move(None, None, z)
+    driveboard.move(z=z)
     return '{}'
 
 @bottle.route('/retract')
-@bottle.route('/retract/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def retract(x=0.0, y=0.0, z=0.0):
-    driveboard.feedrate(conf['seekrate'])
-    driveboard.retract(x, y, z)
+def retract():
+    driveboard.absmove(z=0)
+    driveboard.absmove(x=0, y=0)
+    return '{}'
+
+@bottle.route('/absmove/<x:float>/<y:float>/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def absmove(x, y, z):
+    driveboard.absmove(x, y, z)
+    return '{}'
+
+@bottle.route('/absmovex/<x:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def absmovex(x):
+    driveboard.absmove(x=x)
+    return '{}'
+
+@bottle.route('/absmovey/<y:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def absmovey(y):
+    driveboard.absmove(y=y)
+    return '{}'
+
+@bottle.route('/absmovez/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def absmovez(z):
+    driveboard.absmove(z=z)
     return '{}'
 
 @bottle.route('/air_on')
@@ -252,46 +279,46 @@ def aux_off():
     driveboard.aux_off()
     return '{}'
 
-@bottle.route('/offset')
 @bottle.route('/offset/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offset(x=None, y=None, z=None):
+def offset(x, y, z):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    if None in (x,y,z):
-        driveboard.sel_offset_custom()
-        driveboard.set_offset()
-    else:
-        driveboard.def_offset_custom(x, y, z)
-        driveboard.sel_offset_custom()
+    driveboard.offset(x, y, z)
     return '{}'
-
-@bottle.route('/offsetx')
+@bottle.route('/offsetx/<x:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offsetx():
+def offset(x):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.set_offset_x()
+    driveboard.offset(x=x)
     return '{}'
-
-@bottle.route('/offsety')
+@bottle.route('/offsety/<y:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offsety():
+def offsety(y):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.set_offset_y()
+    driveboard.offset(y=y)
     return '{}'
-
-@bottle.route('/offsetz')
+@bottle.route('/offsetz/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
-def offsetz():
+def offsetz(z):
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.set_offset_z()
+    driveboard.offset(z=z)
+    return '{}'
+
+@bottle.route('/absoffset/<x:float>/<y:float>/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def offset(x, y, z):
+    if not driveboard.status()['ready']:
+        bottle.abort(400, "Machine not ready.")
+    driveboard.absoffset(x, y, z)
     return '{}'
 
 @bottle.route('/clear_offset')
@@ -300,8 +327,7 @@ def offsetz():
 def clear_offset():
     if not driveboard.status()['ready']:
         bottle.abort(400, "Machine not ready.")
-    driveboard.def_offset_custom(0,0,0)
-    driveboard.sel_offset_table()
+    driveboard.clear_offset()
     return '{}'
 
 

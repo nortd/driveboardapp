@@ -80,29 +80,20 @@ have enough bandwidth. It beats checksums in our case.
 #define REF_RELATIVE 0
 #define REF_ABSOLUTE 1
 
-#define OFFSET_TABLE 0
-#define OFFSET_CUSTOM 1
-
-#define TABLEOFF_X 0
-#define TABLEOFF_Y 1
-#define TABLEOFF_Z 2
-#define CUSTOMOFF_X 3
-#define CUSTOMOFF_Y 4
-#define CUSTOMOFF_Z 5
-
 #define PARAM_MAX_DATA_LENGTH 4
 
 
 typedef struct {
   uint8_t ref_mode;                // {REF_RELATIVE, REF_ABSOLUTE}
+  uint8_t ref_mode_store;          // {REF_RELATIVE, REF_ABSOLUTE}
   double feedrate;                 // mm/min {F}
   uint8_t intensity;               // 0-255 percentage
   double duration;                 // pierce duration
   double pixel_width;              // raster pixel width in mm
-  uint8_t offselect;               // {OFFSET_TABLE, OFFSET_CUSTOM}
-  uint8_t offselect_store;         // store previous selection
   double target[3];                // X,Y,Z params accumulated
-  double offsets[6];               // coord system offsets [table_X,table_Y,table_Z, custom_X,custom_Y,custom_Z]
+  double tableoffset[3];           // table offset
+  double offset[3];                // custom offset
+  double offset_store[3];          // custom offset
 } state_t;
 static state_t st;
 
@@ -130,16 +121,9 @@ void protocol_init() {
   clear_vector(st.target);
   st.duration = 0.0;
   st.pixel_width = 0.0;
-  st.offselect = OFFSET_TABLE;
-  st.offselect_store = st.offselect;
-  // table offset, absolute
-  st.offsets[X_AXIS] = CONFIG_X_ORIGIN_OFFSET;
-  st.offsets[Y_AXIS] = CONFIG_Y_ORIGIN_OFFSET;
-  st.offsets[Z_AXIS] = CONFIG_Z_ORIGIN_OFFSET;
-  // custom offset, absolute
-  st.offsets[3+X_AXIS] = CONFIG_X_ORIGIN_OFFSET;
-  st.offsets[3+Y_AXIS] = CONFIG_Y_ORIGIN_OFFSET;
-  st.offsets[3+Z_AXIS] = CONFIG_Z_ORIGIN_OFFSET;
+  st.tableoffset[X_AXIS] = st.offset[X_AXIS] = st.offset_store[X_AXIS] = CONFIG_X_ORIGIN_OFFSET;
+  st.tableoffset[Y_AXIS] = st.offset[Y_AXIS] = st.offset_store[Y_AXIS] = CONFIG_Y_ORIGIN_OFFSET;
+  st.tableoffset[Z_AXIS] = st.offset[X_AXIS] = st.offset_store[Z_AXIS] = CONFIG_Z_ORIGIN_OFFSET;
   status_requested = true;
   superstatus_requested = true;
   rx_buffer_underruns = 0;
@@ -204,6 +188,12 @@ inline void on_cmd(uint8_t command) {
     case CMD_REF_ABSOLUTE:
       st.ref_mode = REF_ABSOLUTE;
       break;
+    case CMD_REF_STORE:
+      st.ref_mode_store = st.ref_mode;
+      break;
+    case CMD_REF_RESTORE:
+      st.ref_mode = st.ref_mode_store;
+      break;
     case CMD_HOMING:
       while(stepper_processing()) {
         // sleep_mode();
@@ -215,48 +205,21 @@ inline void on_cmd(uint8_t command) {
       // clear_vector(st.target);
       planner_set_position(0.0, 0.0, 0.0);
       // move head to table offset
-      st.offselect = OFFSET_TABLE;
-      st.target[X_AXIS] = st.offsets[TABLEOFF_X];
-      st.target[Y_AXIS] = st.offsets[TABLEOFF_Y];
-      st.target[Z_AXIS] = st.offsets[TABLEOFF_Z];
+      st.target[X_AXIS] = st.offset[X_AXIS] = st.tableoffset[X_AXIS];
+      st.target[Y_AXIS] = st.offset[Y_AXIS] = st.tableoffset[Y_AXIS];
+      st.target[Z_AXIS] = st.offset[Z_AXIS] = st.tableoffset[Z_AXIS];
       planner_line( st.target[X_AXIS], st.target[Y_AXIS], st.target[Z_AXIS],
                     st.feedrate, 0, 0.0 );
       break;
-    case CMD_SET_OFFSET:
-      while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*st.offselect+X_AXIS] = stepper_get_position_x();
-      st.offsets[3*st.offselect+Y_AXIS] = stepper_get_position_y();
-      st.offsets[3*st.offselect+Z_AXIS] = stepper_get_position_z();
-      break;
-    case CMD_SET_OFFSET_X:
-      while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*st.offselect+X_AXIS] = stepper_get_position_x();
-      break;
-    case CMD_SET_OFFSET_Y:
-      while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*st.offselect+Y_AXIS] = stepper_get_position_y();
-      break;
-    case CMD_SET_OFFSET_Z:
-      while(stepper_processing()) { protocol_idle(); }
-      st.offsets[3*st.offselect+Z_AXIS] = stepper_get_position_z();
-      break;
-    case CMD_SEL_OFFSET_TABLE:
-      st.offselect = OFFSET_TABLE;
-      break;
-    case CMD_SEL_OFFSET_CUSTOM:
-      st.offselect = OFFSET_CUSTOM;
-      break;
-    // case CMD_CLEAR_OFFSET:
-    //   // copy table offset to custom offset
-    //   st.offsets[3+X_AXIS] = st.offsets[X_AXIS];
-    //   st.offsets[3+Y_AXIS] = st.offsets[Y_AXIS];
-    //   st.offsets[3+Z_AXIS] = st.offsets[Z_AXIS];
-    //   break;
     case CMD_OFFSET_STORE:
-      st.offselect_store = st.offselect;
+      st.offset_store[X_AXIS] = st.offset[X_AXIS];
+      st.offset_store[Y_AXIS] = st.offset[Y_AXIS];
+      st.offset_store[Z_AXIS] = st.offset[Z_AXIS];
       break;
     case CMD_OFFSET_RESTORE:
-      st.offselect = st.offselect_store;
+      st.offset[X_AXIS] = st.offset_store[X_AXIS];
+      st.offset[Y_AXIS] = st.offset_store[Y_AXIS];
+      st.offset[Z_AXIS] = st.offset_store[Z_AXIS];
       break;
     case CMD_AIR_ENABLE:
       planner_control_air_assist_enable();
@@ -280,31 +243,31 @@ inline void on_cmd(uint8_t command) {
 
 inline void on_param(uint8_t parameter) {
   double val;
-  if(pdata.count == 4) {
+  if(pdata.count == PARAM_MAX_DATA_LENGTH) {
     switch(parameter) {
-      // def target in absolute coord, val is relative to current offset
+      // def target
       case PARAM_TARGET_X:
         if(st.ref_mode == REF_ABSOLUTE) {
-          st.target[X_AXIS] = get_curent_value()+st.offsets[3*st.offselect+X_AXIS];
+          st.target[X_AXIS] = get_curent_value()+st.offset[X_AXIS];
         } else {
           st.target[X_AXIS] += get_curent_value();
         }
         break;
       case PARAM_TARGET_Y:
         if(st.ref_mode == REF_ABSOLUTE) {
-          st.target[Y_AXIS] = get_curent_value()+st.offsets[3*st.offselect+Y_AXIS];
+          st.target[Y_AXIS] = get_curent_value()+st.offset[Y_AXIS];
         } else {
           st.target[Y_AXIS] += get_curent_value();
         }
         break;
       case PARAM_TARGET_Z:
         if(st.ref_mode == REF_ABSOLUTE) {
-          st.target[Z_AXIS] = get_curent_value()+st.offsets[3*st.offselect+Z_AXIS];
+          st.target[Z_AXIS] = get_curent_value()+st.offset[Z_AXIS];
         } else {
           st.target[Z_AXIS] += get_curent_value();
         }
         break;
-
+      // def motion params
       case PARAM_FEEDRATE:
         st.feedrate = get_curent_value();
         break;
@@ -317,35 +280,34 @@ inline void on_param(uint8_t parameter) {
       case PARAM_PIXEL_WIDTH:
         st.pixel_width = get_curent_value();
         break;
-
-      // def table offset, val is absolute
-      case PARAM_OFFTABLE_X:
+      // def offset
+      case PARAM_OFFSET_X:
         val = get_curent_value();
-        st.offsets[TABLEOFF_X] = val;
+        if(st.ref_mode == REF_ABSOLUTE) {
+          st.offset[X_AXIS] = val+st.tableoffset[X_AXIS];
+        } else {
+          while(stepper_processing()) { protocol_idle(); }
+          st.offset[X_AXIS] = stepper_get_position_x()+val;
+        }
         break;
-      case PARAM_OFFTABLE_Y:
+      case PARAM_OFFSET_Y:
         val = get_curent_value();
-        st.offsets[TABLEOFF_Y] = val;
+        if(st.ref_mode == REF_ABSOLUTE) {
+          st.offset[Y_AXIS] = val+st.tableoffset[Y_AXIS];
+        } else {
+          while(stepper_processing()) { protocol_idle(); }
+          st.offset[Y_AXIS] = stepper_get_position_y()+val;
+        }
         break;
-      case PARAM_OFFTABLE_Z:
+      case PARAM_OFFSET_Z:
         val = get_curent_value();
-        st.offsets[TABLEOFF_Z] = val;
+        if(st.ref_mode == REF_ABSOLUTE) {
+          st.offset[Z_AXIS] = val+st.tableoffset[Z_AXIS];
+        } else {
+          while(stepper_processing()) { protocol_idle(); }
+          st.offset[Z_AXIS] = stepper_get_position_z()+val;
+        }
         break;
-
-      // def custom offset, val is relative to table offset
-      case PARAM_OFFCUSTOM_X:
-        val = get_curent_value();
-        st.offsets[CUSTOMOFF_X] = val+st.offsets[TABLEOFF_X];
-        break;
-      case PARAM_OFFCUSTOM_Y:
-        val = get_curent_value();
-        st.offsets[CUSTOMOFF_Y] = val+st.offsets[TABLEOFF_Y];
-        break;
-      case PARAM_OFFCUSTOM_Z:
-        val = get_curent_value();
-        st.offsets[CUSTOMOFF_Z] = val+st.offsets[TABLEOFF_Z];
-        break;
-
       default:
         stepper_request_stop(STOPERROR_INVALID_PARAMETER);
     }
@@ -460,9 +422,9 @@ inline void protocol_idle() {
     #endif
 
     // position, an absolute coord, report relative to current offset
-    serial_write_param(INFO_POS_X, stepper_get_position_x()-st.offsets[3*st.offselect+X_AXIS]);
-    serial_write_param(INFO_POS_Y, stepper_get_position_y()-st.offsets[3*st.offselect+Y_AXIS]);
-    serial_write_param(INFO_POS_Z, stepper_get_position_z()-st.offsets[3*st.offselect+Z_AXIS]);
+    serial_write_param(INFO_POS_X, stepper_get_position_x()-st.offset[X_AXIS]);
+    serial_write_param(INFO_POS_Y, stepper_get_position_y()-st.offset[Y_AXIS]);
+    serial_write_param(INFO_POS_Z, stepper_get_position_z()-st.offset[Z_AXIS]);
 
     if (!rx_buffer_underruns_reported) {
       serial_write_param(INFO_BUFFER_UNDERRUN, rx_buffer_underruns);
@@ -477,9 +439,9 @@ inline void protocol_idle() {
       serial_write_param(INFO_VERSION, VERSION);
 
       // custom offset, an absolute coord, report relative to table offset
-      serial_write_param(INFO_OFFCUSTOM_X, st.offsets[CUSTOMOFF_X]-st.offsets[TABLEOFF_X]);
-      serial_write_param(INFO_OFFCUSTOM_Y, st.offsets[CUSTOMOFF_Y]-st.offsets[TABLEOFF_Y]);
-      serial_write_param(INFO_OFFCUSTOM_Z, st.offsets[CUSTOMOFF_Z]-st.offsets[TABLEOFF_Z]);
+      serial_write_param(INFO_OFFCUSTOM_X, st.offset[X_AXIS]-st.tableoffset[X_AXIS]);
+      serial_write_param(INFO_OFFCUSTOM_Y, st.offset[Y_AXIS]-st.tableoffset[Y_AXIS]);
+      serial_write_param(INFO_OFFCUSTOM_Z, st.offset[Z_AXIS]-st.tableoffset[Z_AXIS]);
 
       serial_write_param(INFO_FEEDRATE, st.feedrate);
       serial_write_param(INFO_INTENSITY, st.intensity);

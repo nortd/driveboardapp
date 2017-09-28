@@ -39,22 +39,17 @@ CMD_RASTER = "D"
 
 CMD_REF_RELATIVE = "E"
 CMD_REF_ABSOLUTE = "F"
+CMD_REF_STORE = "G"
+CMD_REF_RESTORE = "H"
 
-CMD_HOMING = "G"
+CMD_HOMING = "I"
+CMD_OFFSET_STORE = "J"
+CMD_OFFSET_RESTORE = "K"
 
-CMD_SET_OFFSET = "H"
-CMD_SET_OFFSET_X = "I"
-CMD_SET_OFFSET_Y = "J"
-CMD_SET_OFFSET_Z = "K"
-CMD_SEL_OFFSET_TABLE = "L"
-CMD_SEL_OFFSET_CUSTOM = "M"
-CMD_OFFSET_STORE = 'N'
-CMD_OFFSET_RESTORE = 'O'
-
-CMD_AIR_ENABLE = "P"
-CMD_AIR_DISABLE = "Q"
-CMD_AUX_ENABLE = "R"
-CMD_AUX_DISABLE = "S"
+CMD_AIR_ENABLE = "L"
+CMD_AIR_DISABLE = "M"
+CMD_AUX_ENABLE = "N"
+CMD_AUX_DISABLE = "O"
 
 PARAM_TARGET_X = "x"
 PARAM_TARGET_Y = "y"
@@ -63,12 +58,9 @@ PARAM_FEEDRATE = "f"
 PARAM_INTENSITY = "s"
 PARAM_DURATION = "d"
 PARAM_PIXEL_WIDTH = "p"
-PARAM_OFFTABLE_X = "h"
-PARAM_OFFTABLE_Y = "i"
-PARAM_OFFTABLE_Z = "j"
-PARAM_OFFCUSTOM_X = "k"
-PARAM_OFFCUSTOM_Y = "l"
-PARAM_OFFCUSTOM_Z = "m"
+PARAM_OFFSET_X = "h"
+PARAM_OFFSET_Y = "i"
+PARAM_OFFSET_Z = "j"
 
 ################
 
@@ -140,22 +132,17 @@ markers_tx = {
 
     "E": "CMD_REF_RELATIVE",
     "F": "CMD_REF_ABSOLUTE",
+    "G": "CMD_REF_STORE",
+    "H": "CMD_REF_RESTORE",
 
-    "G": "CMD_HOMING",
+    "I": "CMD_HOMING",
+    "J": "CMD_OFFSET_STORE",
+    "K": "CMD_OFFSET_RESTORE",
 
-    "H": "CMD_SET_OFFSET",
-    "I": "CMD_SET_OFFSET_X",
-    "J": "CMD_SET_OFFSET_Y",
-    "K": "CMD_SET_OFFSET_Z",
-    "L": "CMD_SEL_OFFSET_TABLE",
-    "M": "CMD_SEL_OFFSET_CUSTOM",
-    "N": "CMD_OFFSET_STORE",
-    "O": "CMD_OFFSET_RESTORE",
-
-    "P": "CMD_AIR_ENABLE",
-    "Q": "CMD_AIR_DISABLE",
-    "R": "CMD_AUX_ENABLE",
-    "S": "CMD_AUX_DISABLE",
+    "L": "CMD_AIR_ENABLE",
+    "M": "CMD_AIR_DISABLE",
+    "N": "CMD_AUX_ENABLE",
+    "O": "CMD_AUX_DISABLE",
 
     "x": "PARAM_TARGET_X",
     "y": "PARAM_TARGET_Y",
@@ -164,12 +151,9 @@ markers_tx = {
     "s": "PARAM_INTENSITY",
     "d": "PARAM_DURATION",
     "p": "PARAM_PIXEL_WIDTH",
-    "h": "PARAM_OFFTABLE_X",
-    "i": "PARAM_OFFTABLE_Y",
-    "j": "PARAM_OFFTABLE_Z",
-    "k": "PARAM_OFFCUSTOM_X",
-    "l": "PARAM_OFFCUSTOM_Y",
-    "m": "PARAM_OFFCUSTOM_Z",
+    "h": "PARAM_OFFSET_X",
+    "i": "PARAM_OFFSET_Y",
+    "j": "PARAM_OFFSET_Z",
 }
 
 markers_rx = {
@@ -863,13 +847,12 @@ def relative():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_RELATIVE)
 
-
 def absolute():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_ABSOLUTE)
 
-def move(x, y, z=0.0):
+def move(x=None, y=None, z=None):
     global SerialLoop
     with SerialLoop.lock:
         if x is not None:
@@ -880,36 +863,18 @@ def move(x, y, z=0.0):
             SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_LINE)
 
-def basemove(x, y, z=0.0):
-    """A move in table coordinates."""
+def absmove(x=None, y=None, z=None):
+    """Moves in machine coordinates bypassing any offsets."""
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_OFFSET_STORE)
-        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
+        SerialLoop.send_command(CMD_CLEAR_OFFSET)
         if x is not None:
             SerialLoop.send_param(PARAM_TARGET_X, x)
         if y is not None:
             SerialLoop.send_param(PARAM_TARGET_Y, y)
         if z is not None:
             SerialLoop.send_param(PARAM_TARGET_Z, z)
-        SerialLoop.send_command(CMD_OFFSET_RESTORE)
-        SerialLoop.send_command(CMD_LINE)
-
-def retract(x=0.0, y=0.0, z=0.0):
-    """Retract is a move in table coordinates with the z-axis executed first."""
-    global SerialLoop
-    with SerialLoop.lock:
-        # move to z=0 in table cs
-        SerialLoop.send_command(CMD_OFFSET_STORE)
-        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
-        SerialLoop.send_param(PARAM_TARGET_Z, z)
-        SerialLoop.send_command(CMD_OFFSET_RESTORE)
-        SerialLoop.send_command(CMD_LINE)
-        # also move to x=0, y=0 in table cs
-        SerialLoop.send_command(CMD_OFFSET_STORE)
-        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
-        SerialLoop.send_param(PARAM_TARGET_X, x)
-        SerialLoop.send_param(PARAM_TARGET_Y, y)
         SerialLoop.send_command(CMD_OFFSET_RESTORE)
         SerialLoop.send_command(CMD_LINE)
 
@@ -1187,7 +1152,8 @@ def job(jobdict):
         pass
     else:
         if conf['mill_mode']:
-            retract()
+            absmove(z=0)
+            absmove(0,0,0)
         else:
             move(0, 0, 0)
 
@@ -1246,46 +1212,35 @@ def aux_off():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AUX_DISABLE)
 
-def set_offset():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET)
-def set_offset_x():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_X)
-def set_offset_y():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_Y)
-def set_offset_z():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_Z)
 
-def def_offset_table(x, y, z):
+def offset(x=None, y=None, z=None):
+    """Sets an offset relative to present pos."""
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_param(PARAM_OFFTABLE_X, x)
-        SerialLoop.send_param(PARAM_OFFTABLE_Y, y)
-        SerialLoop.send_param(PARAM_OFFTABLE_Z, z)
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_RELATIVE)
+        if x is not None:
+            SerialLoop.send_command(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_command(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_command(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
 
-def def_offset_custom(x, y, z):
+def absoffset(x=None, y=None, z=None):
+    """Sets an offset in machine coordinates."""
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_param(PARAM_OFFCUSTOM_X, x)
-        SerialLoop.send_param(PARAM_OFFCUSTOM_Y, y)
-        SerialLoop.send_param(PARAM_OFFCUSTOM_Z, z)
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_ABSOLUTE)
+        if x is not None:
+            SerialLoop.send_command(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_command(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_command(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
 
-def sel_offset_table():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
-
-def sel_offset_custom():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_CUSTOM)
 
 
 
