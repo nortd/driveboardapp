@@ -47,8 +47,8 @@ void control_init() {
     // Setup Timer0 for  to granular freq
     // also see: http://arduino.cc/en/Tutorial/SecretsOfArduinoPWM
     // see: https://sites.google.com/site/qeewiki/books/avr-guide/pwm-on-the-atmega328
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);   // set as output pin
-    if (LASER_PWM_BIT == 5) {  // granular freq only works with PDS
+    ASSIST_DDR |= (1 << PWM_BIT);   // set as output pin
+    if (PWM_BIT == 5) {  // granular freq only works with PDS
       // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
       TCCR0B = _BV(WGM02);
       TCCR0A = _BV(WGM00);
@@ -67,7 +67,7 @@ void control_init() {
       // OCR0B in range 0-pwmTop sets the duty cycle
     }
   #elif PWM_MODE == STATIC_FREQ_PD6
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
+    ASSIST_DDR |= (1 << PWM_BIT);            // set as output pin
     OCR0A = 0;                               // set PWM to a 0% duty cycle
     TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
     // TCCR0A = _BV(COM0A1) | _BV(WGM01) | _BV(WGM00);  // fast PWM mode
@@ -80,7 +80,7 @@ void control_init() {
     // NOTES:
     // PPI = PWMfreq/(feedrate/25.4/60)
   #elif PWM_MODE == STEPPED_FREQ_PD5
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
+    ASSIST_DDR |= (1 << PWM_BIT);      // set as output pin
     // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
     TCCR0B = _BV(WGM02);
     TCCR0A = _BV(WGM00);
@@ -89,7 +89,7 @@ void control_init() {
     OCR0A = 0xFF;                            // set TOP
     OCR0B = 0;                               // set PWM to a 0% duty cycle
   #elif PWM_MODE == STEPPED_FREQ_PD6
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
+    ASSIST_DDR |= (1 << PWM_BIT);            // set as output pin
     OCR0A = 0;                               // set PWM to a 0% duty cycle
     TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
     // TCCR0A = _BV(COM0A1) | _BV(WGM01) | _BV(WGM00);  // fast PWM mode
@@ -102,7 +102,7 @@ void control_init() {
     // NOTES:
     // PPI = PWMfreq/(feedrate/25.4/60)
   #elif PWM_MODE == SYNCED_FREQ
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
+    ASSIST_DDR |= (1 << PWM_BIT);      // set as output pin
     // configure timer 0, pwm reset timer
     TCCR0A = 0; // Normal operation
     TCCR0B = 0; // Disable timer until needed.
@@ -121,7 +121,7 @@ void control_init() {
 inline void control_laser_intensity(uint8_t intensity) {
   #if PWM_MODE == STATIC_FREQ_PD5
     // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0B = 0;
       } else {
@@ -131,7 +131,7 @@ inline void control_laser_intensity(uint8_t intensity) {
       OCR0B = (intensity*pwmTop)/255;
     #endif
   #elif PWM_MODE == STATIC_FREQ_PD6
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0A = 0;
       } else {
@@ -141,7 +141,7 @@ inline void control_laser_intensity(uint8_t intensity) {
       OCR0A = intensity;
     #endif
   #elif PWM_MODE == STEPPED_FREQ_PD5
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0B = 0;
       } else {
@@ -163,7 +163,7 @@ inline void control_laser_intensity(uint8_t intensity) {
       TCCR0B = _BV(CS02);
     }
   #elif PWM_MODE == STEPPED_FREQ_PD6
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0A = 0;
       } else {
@@ -186,10 +186,10 @@ inline void control_laser_intensity(uint8_t intensity) {
     }
   #elif PWM_MODE == SYNCED_FREQ
     // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF || intensity == 0) {
         pwm_duty = 0;
-        ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+        ASSIST_PORT &= ~(1 << PWM_BIT); // off
       } else {
         pwm_duty = intensity;
       }

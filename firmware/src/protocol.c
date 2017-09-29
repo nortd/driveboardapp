@@ -359,7 +359,7 @@ inline void protocol_idle() {
   //   ASSIST_PORT &= ~(1 << AIR_ASSIST_BIT);
   // }
 
-  #ifdef ENABLE_LASER_INTERLOCKS
+  #ifdef ENABLE_INTERLOCKS
     if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
       control_laser_intensity(0);
     }
@@ -397,7 +397,7 @@ inline void protocol_idle() {
       serial_write(stop_code);
     }
 
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       // always report limits
       if (SENSE_X1_LIMIT && stop_code != STOPERROR_LIMIT_HIT_X1) {
         serial_write(STOPERROR_LIMIT_HIT_X1);

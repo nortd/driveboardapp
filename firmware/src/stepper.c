@@ -96,7 +96,7 @@ static uint32_t config_step_timer(uint32_t cycles);
 void stepper_init() {
   // Configure directions of interface pins
   STEPPING_DDR |= (STEPPING_MASK | DIRECTION_MASK);
-  STEPPING_PORT = (STEPPING_PORT & ~(STEPPING_MASK | DIRECTION_MASK)) | INVERT_MASK;
+  STEPPING_PORT = (STEPPING_PORT & ~(STEPPING_MASK | DIRECTION_MASK)) | INVERT_DIRECTION_MASK;
 
   // waveform generation = 0100 = CTC
   TCCR1B &= ~(1<<WGM13);
@@ -136,7 +136,7 @@ void stepper_start_processing() {
   if (!processing_flag) {
     processing_flag = true;
     // Initialize stepper output bits
-    out_bits = INVERT_MASK;
+    out_bits = INVERT_DIRECTION_MASK;
     // Enable stepper driver interrupt
     TIMSK1 |= (1<<OCIE1A);
   }
@@ -202,7 +202,7 @@ void stepper_set_position(double x, double y, double z) {
 // TIMER0 overflow interrupt service routine
 // called whenever TCNT0 overflows
 ISR(TIMER0_OVF_vect) {
-  ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+  ASSIST_PORT &= ~(1 << PWM_BIT); // off
   TCCR0B = 0;  // disable
 }
 
@@ -213,7 +213,7 @@ ISR(TIMER0_OVF_vect) {
 // they execute right before this interrupt. Not a big deal, but could use some TLC at some point.
 ISR(TIMER2_OVF_vect) {
   // reset step pins
-  STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | (INVERT_MASK & STEPPING_MASK);
+  STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | (INVERT_DIRECTION_MASK & STEPPING_MASK);
   TCCR2B = 0; // Disable Timer2 to prevent re-entering this interrupt when it's not needed.
 }
 
@@ -236,7 +236,7 @@ ISR(TIMER1_COMPA_vect) {
     return;
   }
 
-  #ifdef ENABLE_LASER_INTERLOCKS
+  #ifdef ENABLE_INTERLOCKS
     // honor interlocks
     // (for unlikely edge case the protocol loop stops)
     if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
@@ -281,10 +281,10 @@ ISR(TIMER1_COMPA_vect) {
     } else {
       // generate pulse
       if (duty == 0) {
-        ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+        ASSIST_PORT &= ~(1 << PWM_BIT); // off
       } else {
         TCCR0B = 0;
-        ASSIST_PORT |= (1 << LASER_PWM_BIT);  // on
+        ASSIST_PORT |= (1 << PWM_BIT);  // on
         // set timer0 for reset
         // maximum is 0.01632s (261120 cycles)
         // may limit pulse duration on very slow moves
@@ -389,7 +389,7 @@ ISR(TIMER1_COMPA_vect) {
       step_events_completed++;  // increment step count
 
       // apply stepper invert mask
-      out_bits ^= INVERT_MASK;
+      out_bits ^= INVERT_DIRECTION_MASK;
 
       ////////// SPEED ADJUSTMENT
       if (step_events_completed < current_block->step_event_count) {  // block not finished
@@ -593,53 +593,55 @@ inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
 
 
 inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reverse_direction, uint32_t microseconds_per_pulse) {
-
   uint32_t step_delay = microseconds_per_pulse - CONFIG_PULSE_MICROSECONDS;
   uint8_t out_bits = DIRECTION_MASK;
   uint8_t limit_bits;
+  uint8_t x_limit_bit;
+  uint8_t y_limit_bit;
+  uint8_t z_limit_bit;
   uint8_t x_overshoot_count = 6;
   uint8_t y_overshoot_count = 6;
   #ifdef ENABLE_3AXES
   uint8_t z_overshoot_count = 6;
   #endif
 
-  if (x_axis) { out_bits |= (1<<X_STEP_BIT); }
-  if (y_axis) { out_bits |= (1<<Y_STEP_BIT); }
-  if (z_axis) { out_bits |= (1<<Z_STEP_BIT); }
+  // prime axes
+  if (x_axis) { out_bits |= (1<<X_STEP_BIT);}
+  if (y_axis) { out_bits |= (1<<Y_STEP_BIT);}
+  if (z_axis) { out_bits |= (1<<Z_STEP_BIT);}
 
   // Invert direction bits if this is a reverse homing_cycle
   if (reverse_direction) {
     out_bits ^= DIRECTION_MASK;
   }
+  // aply axis direction inversion
+  out_bits ^= INVERT_DIRECTION_MASK;
+  // apply homing inversion
+  out_bits ^= INVERT_HOMING_MASK;
+  if (CONFIG_INVERT_X_HOMING) {x_limit_bit = X2_LIMIT_BIT;} else {x_limit_bit = X1_LIMIT_BIT;}
+  if (CONFIG_INVERT_Y_HOMING) {y_limit_bit = Y2_LIMIT_BIT;} else {y_limit_bit = Y1_LIMIT_BIT;}
+  if (CONFIG_INVERT_Z_HOMING) {z_limit_bit = Z2_LIMIT_BIT;} else {z_limit_bit = Z1_LIMIT_BIT;}
 
-  // Apply the global invert mask
-  out_bits ^= INVERT_MASK;
-
-  // Set direction pins
-  STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
 
   for(;;) {
     limit_bits = LIMIT_PIN;
-    if (reverse_direction) {
-      // Invert limit_bits if this is a reverse homing_cycle
-      limit_bits ^= LIMIT_MASK;
-    }
+    if (reverse_direction) {limit_bits ^= LIMIT_MASK;}
 
     #ifdef SENSE_INVERT
-      bool sense_x1_limit = (limit_bits & (1<<X1_LIMIT_BIT));
-      bool sense_y1_limit = (limit_bits & (1<<Y1_LIMIT_BIT));
+      bool sense_x_limit = (limit_bits & (1<<x_limit_bit));
+      bool sense_y_limit = (limit_bits & (1<<y_limit_bit));
       #ifdef ENABLE_3AXES
-      bool sense_z1_limit = (limit_bits & (1<<Z1_LIMIT_BIT));
+      bool sense_z_limit = (limit_bits & (1<<z_limit_bit));
       #endif
     #else
-      bool sense_x1_limit = !(limit_bits & (1<<X1_LIMIT_BIT));
-      bool sense_y1_limit = !(limit_bits & (1<<Y1_LIMIT_BIT));
+      bool sense_x_limit = !(limit_bits & (1<<x_limit_bit));
+      bool sense_y_limit = !(limit_bits & (1<<y_limit_bit));
       #ifdef ENABLE_3AXES
-      bool sense_z1_limit = !(limit_bits & (1<<Z1_LIMIT_BIT));
+      bool sense_z_limit = !(limit_bits & (1<<z_limit_bit));
       #endif
     #endif
 
-    if (x_axis && sense_x1_limit) {
+    if (x_axis && sense_x_limit) {
       if(x_overshoot_count == 0) {
         x_axis = false;
         out_bits ^= (1<<X_STEP_BIT);
@@ -647,7 +649,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
         x_overshoot_count--;
       }
     }
-    if (y_axis && sense_y1_limit) {
+    if (y_axis && sense_y_limit) {
       if(y_overshoot_count == 0) {
         y_axis = false;
         out_bits ^= (1<<Y_STEP_BIT);
@@ -656,7 +658,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       }
     }
     #ifdef ENABLE_3AXES
-    if (z_axis && sense_z1_limit) {
+    if (z_axis && sense_z_limit) {
       if(z_overshoot_count == 0) {
         z_axis = false;
         out_bits ^= (1<<Z_STEP_BIT);
@@ -665,6 +667,7 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
       }
     }
     #endif
+
     if(x_axis || y_axis || z_axis) {
         // step all axes still in out_bits
         STEPPING_PORT |= out_bits & STEPPING_MASK;
@@ -675,7 +678,6 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
         break;
     }
   }
-  clear_vector(stepper_position);
   return;
 }
 
@@ -684,13 +686,13 @@ inline void stepper_homing_cycle() {
   // home the x and y axis
   #ifdef ENABLE_3AXES
   // approach limit
-  homing_cycle(true, true, true, false, CONFIG_HOMINGRATE);
-  // leave limit
-  homing_cycle(true, true, true, true, CONFIG_HOMINGRATE);
+  homing_cycle(false, false, true, false, CONFIG_HOMINGRATE);  //approach z-limit
+  homing_cycle(false, false, true, true, CONFIG_HOMINGRATE);   //leave z-limit
+  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);   //approach x/y-limits
+  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);    //leave x/y-limits
   #else
-  // approach limit
-  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);
-  // leave limit
-  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);
+  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);   //approach x/y-limits
+  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);    //leave x/y-limits
   #endif
+  clear_vector(stepper_position);
 }
