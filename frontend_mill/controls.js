@@ -268,8 +268,6 @@ function controls_ready() {
         $().uxmessage('notice', "Retracting to machine zero ...")
       }
     })
-
-    request_absolute_move(0, 0, 0, app_config_main.seekrate, "Moving to Origin.")
     return false
   })
 
@@ -508,6 +506,30 @@ function controls_ready() {
   Mousetrap.bind([']'], function(e) {
       $('#jog_delta input:radio:checked').parent().next().children('input').trigger('click')
       return false;
+  })
+
+
+  // debug
+  Mousetrap.bind(['b'], function(e) {
+    request_get({
+      url:'/build',
+      success: function (data) {
+        status_cache.firmver = undefined
+        $().uxmessage('success', "Building successful.")
+      }
+    })
+    return false;
+  })
+
+  Mousetrap.bind(['f'], function(e) {
+    request_get({
+      url:'/flash',
+      success: function (data) {
+        status_cache.firmver = undefined
+        $().uxmessage('success', "Flashing successful.")
+      }
+    })
+    return false;
   })
 
 }

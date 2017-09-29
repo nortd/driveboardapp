@@ -99,9 +99,9 @@
 #define INFO_HELLO '~'
 
 // super status:
-#define INFO_OFFCUSTOM_X 'a'
-#define INFO_OFFCUSTOM_Y 'b'
-#define INFO_OFFCUSTOM_Z 'c'
+#define INFO_OFFSET_X 'a'
+#define INFO_OFFSET_Y 'b'
+#define INFO_OFFSET_Z 'c'
 #define INFO_FEEDRATE 'g'
 #define INFO_INTENSITY 'h'
 #define INFO_DURATION 'i'

@@ -598,11 +598,11 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
   uint8_t limit_bits;
   uint8_t x_limit_bit;
   uint8_t y_limit_bit;
-  uint8_t z_limit_bit;
   uint8_t x_overshoot_count = 6;
   uint8_t y_overshoot_count = 6;
   #ifdef ENABLE_3AXES
   uint8_t z_overshoot_count = 6;
+  uint8_t z_limit_bit;
   #endif
 
   // prime axes
@@ -620,8 +620,9 @@ inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reve
   out_bits ^= INVERT_HOMING_MASK;
   if (CONFIG_INVERT_X_HOMING) {x_limit_bit = X2_LIMIT_BIT;} else {x_limit_bit = X1_LIMIT_BIT;}
   if (CONFIG_INVERT_Y_HOMING) {y_limit_bit = Y2_LIMIT_BIT;} else {y_limit_bit = Y1_LIMIT_BIT;}
+  #ifdef ENABLE_3AXES
   if (CONFIG_INVERT_Z_HOMING) {z_limit_bit = Z2_LIMIT_BIT;} else {z_limit_bit = Z1_LIMIT_BIT;}
-
+  #endif
 
   for(;;) {
     limit_bits = LIMIT_PIN;

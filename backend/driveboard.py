@@ -99,9 +99,9 @@ INFO_STACK_CLEARANCE = 'u'
 
 INFO_HELLO = '~'
 
-INFO_OFFCUSTOM_X = 'a'
-INFO_OFFCUSTOM_Y = 'b'
-INFO_OFFCUSTOM_Z = 'c'
+INFO_OFFSET_X = 'a'
+INFO_OFFSET_Y = 'b'
+INFO_OFFSET_Z = 'c'
 # INFO_TARGET_X = 'd'
 # INFO_TARGET_Y = 'e'
 # INFO_TARGET_Z = 'f'
@@ -189,9 +189,9 @@ markers_rx = {
 
     '~': "INFO_HELLO",
 
-    'a': "INFO_OFFCUSTOM_X",
-    'b': "INFO_OFFCUSTOM_Y",
-    'c': "INFO_OFFCUSTOM_Z",
+    'a': "INFO_OFFSET_X",
+    'b': "INFO_OFFSET_Y",
+    'c': "INFO_OFFSET_Z",
     # 'd': "INFO_TARGET_X",
     # 'e': "INFO_TARGET_Y",
     # 'f': "INFO_TARGET_Z",
@@ -480,11 +480,11 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_BUFFER_UNDERRUN:
                     self._s['underruns'] = num
                 # super status
-                elif char == INFO_OFFCUSTOM_X:
+                elif char == INFO_OFFSET_X:
                     self._s['offset'][0] = num
-                elif char == INFO_OFFCUSTOM_Y:
+                elif char == INFO_OFFSET_Y:
                     self._s['offset'][1] = num
-                elif char == INFO_OFFCUSTOM_Z:
+                elif char == INFO_OFFSET_Z:
                     self._s['offset'][2] = num
                 elif char == INFO_FEEDRATE:
                     self._s['feedrate'] = num
@@ -867,8 +867,18 @@ def absmove(x=None, y=None, z=None):
     """Moves in machine coordinates bypassing any offsets."""
     global SerialLoop
     with SerialLoop.lock:
+        # clear offset
         SerialLoop.send_command(CMD_OFFSET_STORE)
-        SerialLoop.send_command(CMD_CLEAR_OFFSET)
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_ABSOLUTE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, 0)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, 0)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, 0)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+        # move
         if x is not None:
             SerialLoop.send_param(PARAM_TARGET_X, x)
         if y is not None:
@@ -1220,11 +1230,11 @@ def offset(x=None, y=None, z=None):
         SerialLoop.send_command(CMD_REF_STORE)
         SerialLoop.send_command(CMD_REF_RELATIVE)
         if x is not None:
-            SerialLoop.send_command(PARAM_OFFSET_X, x)
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
         if y is not None:
-            SerialLoop.send_command(PARAM_OFFSET_Y, y)
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
         if z is not None:
-            SerialLoop.send_command(PARAM_OFFSET_Z, z)
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
         SerialLoop.send_command(CMD_REF_RESTORE)
 
 def absoffset(x=None, y=None, z=None):
@@ -1234,11 +1244,11 @@ def absoffset(x=None, y=None, z=None):
         SerialLoop.send_command(CMD_REF_STORE)
         SerialLoop.send_command(CMD_REF_ABSOLUTE)
         if x is not None:
-            SerialLoop.send_command(PARAM_OFFSET_X, x)
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
         if y is not None:
-            SerialLoop.send_command(PARAM_OFFSET_Y, y)
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
         if z is not None:
-            SerialLoop.send_command(PARAM_OFFSET_Z, z)
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
         SerialLoop.send_command(CMD_REF_RESTORE)
 
 

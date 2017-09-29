@@ -321,15 +321,6 @@ def offset(x, y, z):
     driveboard.absoffset(x, y, z)
     return '{}'
 
-@bottle.route('/clear_offset')
-@bottle.auth_basic(checkuser)
-@checkserial
-def clear_offset():
-    if not driveboard.status()['ready']:
-        bottle.abort(400, "Machine not ready.")
-    driveboard.clear_offset()
-    return '{}'
-
 
 
 
