@@ -24,7 +24,7 @@ argparser.add_argument('-c', '--cli', dest='cli', action='store_true',
                        default=False, help='run without server GUI window')
 argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
-argparser.add_argument('--mill_mode', dest='mill_mode', action='store_true',
+argparser.add_argument('--mill-mode', dest='mill_mode', action='store_true',
                        default=False, help='Start in cnc mill mode.')
 args = argparser.parse_args()
 
