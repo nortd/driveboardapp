@@ -729,6 +729,12 @@ def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate'], verbos
             if verbose:
                 print "INFO: Hardware found at %s." % serialfindresult
             connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
+            if not connected():  # special case arduino found, but no firmware
+                yesno = raw_input("Firmware appears to be missing. Want to flash-upload it (Y/N)? ")
+                if yesno in ('Y', 'y'):
+                    ret = flash(serial_port=serialfindresult)
+                    if ret == 0:
+                        connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
         if connected():
             if verbose:
                 print "INFO: Connected at %s." % serialfindresult
