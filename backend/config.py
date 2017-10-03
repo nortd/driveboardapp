@@ -33,7 +33,7 @@ conf = {
     'serial_port': '',                     # set to '' for auto (req. firmware)
     'baudrate': 57600,
     'rootdir': None,                       # defined further down (../)
-    'stordir': None,                       # defined further down
+    'confdir': None,                       # defined further down
     'hardware': None,                      # defined further down
     'firmware': None,                      # defined further down
     'tolerance': 0.01,
@@ -110,7 +110,7 @@ else:
     directory = os.path.join(os.path.expanduser('~'), "." + conf['appname'])
 if not os.path.exists(directory):
     os.makedirs(directory)
-conf['stordir'] = directory
+conf['confdir'] = directory
 #
 ###
 
@@ -279,33 +279,37 @@ elif conf['hardware'] == 'raspberrypi':
 
 
 
-### user configuration file
-userfile = os.path.join(conf['stordir'], "config.json")
-if os.path.exists(userfile):
-    print "CONFIG: reading " + userfile
-    # apply user config
-    with open(userfile) as fp:
-        try:
-            userconf = json.load(fp)
-            for k in userconfigurable.keys():
-                if k in userconf:
-                    conf[k] = userconf[k]
-        except ValueError:
-            print "ERROR: failed to read config file"
-else:
-    # copy default config to user config
-    with open(userfile, "w") as fp:
-        confout = {k:v for k,v in conf.items() if k in userconfigurable}
-        json.dump(confout, fp, indent=4)
+def load(configname):
+    if configname:
+        path = os.path.join(conf['confdir'], 'config.'+configname+'.json')
+    else:
+        path = os.path.join(conf['confdir'], 'config.json')
+    #load
+    if os.path.exists(path):
+        print "CONFIG: " + path
+        # apply user config
+        with open(path) as fp:
+            try:
+                userconf = json.load(fp)
+                for k in userconfigurable.keys():
+                    if k in userconf:
+                        conf[k] = userconf[k]
+            except ValueError:
+                print "ERROR: failed to read config file"
+    else:
+        # copy default config to user config
+        with open(path, "w") as fp:
+            confout = {k:v for k,v in conf.items() if k in userconfigurable}
+            json.dump(confout, fp, indent=4)
 
 
 def write_config_fields(subconfigdict):
     conftemp = None
-    if os.path.exists(userfile):
-        with open(userfile) as fp:
+    if os.path.exists(conf['confdir']):
+        with open(conf['confdir']) as fp:
             conftemp = json.load(fp)
     else:
         conftemp = {}
     conftemp.update(subconfigdict)
-    with open(userfile, "w") as fp:
+    with open(conf['confdir'], "w") as fp:
         json.dump(conftemp, fp, indent=4)
