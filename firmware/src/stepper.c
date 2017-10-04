@@ -80,6 +80,7 @@ static uint32_t adjusted_rate;                // The current rate of step_events
 static volatile bool processing_flag;         // indicates if blocks are being processed
 static volatile bool stop_requested;          // when set to true stepper interrupt will go idle on next entry
 static volatile uint8_t stop_status;          // yields the reason for a stop request
+static volatile uint8_t disable_limits;       // option to disable limts for homing cycle
 
 #if PWM_MODE == SYNCED_FREQ
   static volatile uint8_t pwm_counter = 1;
@@ -90,6 +91,10 @@ static bool acceleration_tick();
 static void adjust_speed( uint32_t steps_per_minute );
 static void adjust_beam_dynamics( uint32_t steps_per_minute );
 static uint32_t config_step_timer(uint32_t cycles);
+static void homing_delimit();
+static void homing_move(double xfar, double yfar, double zfar,
+                        double xback, double yback, double zback,
+                        double feedrate);
 
 
 // Initialize and start the stepper motor subsystem
@@ -124,6 +129,7 @@ void stepper_init() {
   stop_requested = false;
   stop_status = STOPERROR_OK;
   busy = false;
+  disable_limits = false;
 
   // start in the idle state
   // The stepper interrupt gets started when blocks are being added.
@@ -237,40 +243,42 @@ ISR(TIMER1_COMPA_vect) {
   }
 
   #ifdef ENABLE_INTERLOCKS
-    // honor interlocks
-    // (for unlikely edge case the protocol loop stops)
-    if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
-      control_laser_intensity(0);
-    }
-    // stop program when any limit is hit
-    if (SENSE_X1_LIMIT) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_X1);
-      busy = false;
-      return;
-    } else if (SENSE_X2_LIMIT) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_X2);
-      busy = false;
-      return;
-    } else if (SENSE_Y1_LIMIT) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_Y1);
-      busy = false;
-      return;
-    }else if (SENSE_Y2_LIMIT) {
-      stepper_request_stop(STOPERROR_LIMIT_HIT_Y2);
-      busy = false;
-      return;
-    }
-    #ifdef ENABLE_3AXES
-      else if (SENSE_Z1_LIMIT) {
-        stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
+    if (!disable_limits) {
+      // honor interlocks
+      // (for unlikely edge case the protocol loop stops)
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        control_laser_intensity(0);
+      }
+      // stop program when any limit is hit
+      if (SENSE_X1_LIMIT) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_X1);
         busy = false;
         return;
-      } else if (SENSE_Z2_LIMIT) {
-        stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
+      } else if (SENSE_X2_LIMIT) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_X2);
+        busy = false;
+        return;
+      } else if (SENSE_Y1_LIMIT) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_Y1);
+        busy = false;
+        return;
+      }else if (SENSE_Y2_LIMIT) {
+        stepper_request_stop(STOPERROR_LIMIT_HIT_Y2);
         busy = false;
         return;
       }
-    #endif
+      #ifdef ENABLE_3AXES
+        else if (SENSE_Z1_LIMIT) {
+          stepper_request_stop(STOPERROR_LIMIT_HIT_Z1);
+          busy = false;
+          return;
+        } else if (SENSE_Z2_LIMIT) {
+          stepper_request_stop(STOPERROR_LIMIT_HIT_Z2);
+          busy = false;
+          return;
+        }
+      #endif
+    }
   #endif
 
   #if PWM_MODE == SYNCED_FREQ
@@ -590,110 +598,103 @@ inline void adjust_beam_dynamics( uint32_t steps_per_minute ) {
 
 
 
+inline void homing_move(double xfar, double yfar, double zfar,
+                        double xback, double yback, double zback,
+                        double feedrate) {
+  // wait until planner buffer empty and executed
+  while(stepper_processing()) { protocol_idle(); }
+  // reset, relative moves
+  planner_set_position(0.0, 0.0, 0.0);
+  clear_vector(stepper_position);
+  // move into limit
+  planner_line(xfar, yfar, zfar, feedrate, 0, 0.0);
+  // wait for limit hit
+  while(stepper_processing()) { protocol_idle(); }
+  // reset, relative moves
+  planner_set_position(0.0, 0.0, 0.0);
+  clear_vector(stepper_position);
+  // backoff move with limits disabled
+  stepper_stop_resume();
+  disable_limits = true;
+  planner_line(xback, yback, zback, feedrate, 0, 0.0);
+  // wait for move to finish
+  while(stepper_processing()) { protocol_idle(); }
+  disable_limits = false;
+}
 
 
-inline static void homing_cycle(bool x_axis, bool y_axis, bool z_axis, bool reverse_direction, uint32_t microseconds_per_pulse) {
-  uint32_t step_delay = microseconds_per_pulse - CONFIG_PULSE_MICROSECONDS;
-  uint8_t out_bits = DIRECTION_MASK;
-  uint8_t limit_bits;
-  uint8_t x_limit_bit;
-  uint8_t y_limit_bit;
-  uint8_t x_overshoot_count = 6;
-  uint8_t y_overshoot_count = 6;
-  #ifdef ENABLE_3AXES
-  uint8_t z_overshoot_count = 6;
-  uint8_t z_limit_bit;
-  #endif
-
-  // prime axes
-  if (x_axis) { out_bits |= (1<<X_STEP_BIT);}
-  if (y_axis) { out_bits |= (1<<Y_STEP_BIT);}
-  if (z_axis) { out_bits |= (1<<Z_STEP_BIT);}
-
-  // Invert direction bits if this is a reverse homing_cycle
-  if (reverse_direction) {
-    out_bits ^= DIRECTION_MASK;
+inline void homing_delimit() {
+  // wait until planner buffer empty and executed
+  while(stepper_processing()) { protocol_idle(); }
+  // reset position to make moves relative
+  planner_set_position(0.0, 0.0, 0.0);
+  clear_vector(stepper_position);
+  // disable limit checking
+  disable_limits = true;
+  if (SENSE_X1_LIMIT) {
+    planner_line(10.0, 0.0, 0.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
   }
-  // aply axis direction inversion
-  out_bits ^= INVERT_DIRECTION_MASK;
-  // apply homing inversion
-  out_bits ^= INVERT_HOMING_MASK;
-  if (CONFIG_INVERT_X_HOMING) {x_limit_bit = X2_LIMIT_BIT;} else {x_limit_bit = X1_LIMIT_BIT;}
-  if (CONFIG_INVERT_Y_HOMING) {y_limit_bit = Y2_LIMIT_BIT;} else {y_limit_bit = Y1_LIMIT_BIT;}
-  #ifdef ENABLE_3AXES
-  if (CONFIG_INVERT_Z_HOMING) {z_limit_bit = Z2_LIMIT_BIT;} else {z_limit_bit = Z1_LIMIT_BIT;}
-  #endif
-
-  for(;;) {
-    limit_bits = LIMIT_PIN;
-    if (reverse_direction) {limit_bits ^= LIMIT_MASK;}
-
-    #ifdef SENSE_INVERT
-      bool sense_x_limit = (limit_bits & (1<<x_limit_bit));
-      bool sense_y_limit = (limit_bits & (1<<y_limit_bit));
-      #ifdef ENABLE_3AXES
-      bool sense_z_limit = (limit_bits & (1<<z_limit_bit));
-      #endif
-    #else
-      bool sense_x_limit = !(limit_bits & (1<<x_limit_bit));
-      bool sense_y_limit = !(limit_bits & (1<<y_limit_bit));
-      #ifdef ENABLE_3AXES
-      bool sense_z_limit = !(limit_bits & (1<<z_limit_bit));
-      #endif
-    #endif
-
-    if (x_axis && sense_x_limit) {
-      if(x_overshoot_count == 0) {
-        x_axis = false;
-        out_bits ^= (1<<X_STEP_BIT);
-      } else {
-        x_overshoot_count--;
-      }
-    }
-    if (y_axis && sense_y_limit) {
-      if(y_overshoot_count == 0) {
-        y_axis = false;
-        out_bits ^= (1<<Y_STEP_BIT);
-      } else {
-        y_overshoot_count--;
-      }
-    }
-    #ifdef ENABLE_3AXES
-    if (z_axis && sense_z_limit) {
-      if(z_overshoot_count == 0) {
-        z_axis = false;
-        out_bits ^= (1<<Z_STEP_BIT);
-      } else {
-        z_overshoot_count--;
-      }
-    }
-    #endif
-
-    if(x_axis || y_axis || z_axis) {
-        // step all axes still in out_bits
-        STEPPING_PORT |= out_bits & STEPPING_MASK;
-        _delay_us(CONFIG_PULSE_MICROSECONDS);
-        STEPPING_PORT ^= out_bits & STEPPING_MASK;
-        _delay_us(step_delay);
-    } else {
-        break;
-    }
+  if (SENSE_X2_LIMIT) {
+    planner_line(-10.0, 0.0, 0.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
   }
-  return;
+  if (SENSE_Y1_LIMIT) {
+    planner_line(0.0, 10.0, 0.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
+  }
+  if (SENSE_Y2_LIMIT) {
+    planner_line(0.0, -10.0, 0.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
+  }
+  #ifdef ENABLE_3AXES
+    if (SENSE_Z1_LIMIT) {
+      planner_line(0.0, 0.0, 10.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
+    }
+    if (SENSE_Z2_LIMIT) {
+      planner_line(0.0, 0.0, -10.0, 0.1*CONFIG_SEEKRATE, 0, 0.0);
+    }
+  #endif
+  // wait until planner buffer empty and executed
+  while(stepper_processing()) { protocol_idle(); }
+  disable_limits = false;
 }
 
 
 inline void stepper_homing_cycle() {
-  // home the x and y axis
-  #ifdef ENABLE_3AXES
-  // approach limit
-  homing_cycle(false, false, true, false, CONFIG_HOMINGRATE);  //approach z-limit
-  homing_cycle(false, false, true, true, CONFIG_HOMINGRATE);   //leave z-limit
-  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);   //approach x/y-limits
-  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);    //leave x/y-limits
+  // homing direction
+  #ifdef CONFIG_INVERT_X_HOMING
+    double xdir = -1.0;
   #else
-  homing_cycle(true, true, false, false, CONFIG_HOMINGRATE);   //approach x/y-limits
-  homing_cycle(true, true, false, true, CONFIG_HOMINGRATE);    //leave x/y-limits
+    double xdir = 1.0;
   #endif
+
+  #ifdef CONFIG_INVERT_Y_HOMING
+    double ydir = -1.0;
+  #else
+    double ydir = 1.0;
+  #endif
+
+  #ifdef ENABLE_3AXES
+    #ifdef CONFIG_INVERT_Z_HOMING
+      double zdir = -1.0;
+    #else
+      double zdir = 1.0;
+    #endif
+  #endif
+
+  // deal with active limts
+  homing_delimit();
+
+  // execute homing moves
+  #ifdef ENABLE_3AXES
+    // z-axis, first for save retract
+    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 10.0*zdir, 0.5*CONFIG_SEEKRATE);
+    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 3.0*zdir, 0.1*CONFIG_SEEKRATE);
+  #endif
+  // x-axis
+  homing_move(-999999*xdir, 0.0, 0.0, 10.0*xdir, 0.0, 0.0, 0.5*CONFIG_SEEKRATE);
+  homing_move(-999999*xdir, 0.0, 0.0, 3.0*xdir, 0.0, 0.0, 0.1*CONFIG_SEEKRATE);
+  // y-axis
+  homing_move(0.0, -999999*ydir, 0.0, 0.0, 10.0*ydir, 0.0, 0.5*CONFIG_SEEKRATE);
+  homing_move(0.0, -999999*ydir, 0.0, 0.0, 3.0*ydir, 0.0, 0.1*CONFIG_SEEKRATE);
+
+  planner_set_position(0.0, 0.0, 0.0);
   clear_vector(stepper_position);
 }

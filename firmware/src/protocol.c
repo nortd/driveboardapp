@@ -195,15 +195,7 @@ inline void on_cmd(uint8_t command) {
       st.ref_mode = st.ref_mode_store;
       break;
     case CMD_HOMING:
-      while(stepper_processing()) {
-        // sleep_mode();
-        protocol_idle();
-      }
       stepper_homing_cycle();
-      // now that we are at the physical home
-      // zero all the position vectors
-      // clear_vector(st.target);
-      planner_set_position(0.0, 0.0, 0.0);
       clear_vector(st.offset);
       // move head to table offset
       st.target[X_AXIS] = CONFIG_X_ORIGIN_OFFSET;
