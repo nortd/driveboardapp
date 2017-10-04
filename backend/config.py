@@ -278,12 +278,14 @@ elif conf['hardware'] == 'raspberrypi':
     # (basically anything related to ttyAMA0)
 
 
-
+configpath = ''
 def load(configname):
     if configname:
         path = os.path.join(conf['confdir'], 'config.'+configname+'.json')
     else:
         path = os.path.join(conf['confdir'], 'config.json')
+    global configpath
+    configpath = path
     #load
     if os.path.exists(path):
         print "CONFIG: " + path
@@ -305,11 +307,11 @@ def load(configname):
 
 def write_config_fields(subconfigdict):
     conftemp = None
-    if os.path.exists(conf['confdir']):
-        with open(conf['confdir']) as fp:
+    if os.path.exists(configpath):
+        with open(configpath) as fp:
             conftemp = json.load(fp)
     else:
         conftemp = {}
     conftemp.update(subconfigdict)
-    with open(conf['confdir'], "w") as fp:
+    with open(configpath, "w") as fp:
         json.dump(conftemp, fp, indent=4)

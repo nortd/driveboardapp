@@ -689,11 +689,12 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
                 SerialLoop.device.setDTR(True)
                 # for good measure
                 SerialLoop.device.flushOutput()
-            # else:
-            #     reset()
-                # time.sleep(0.5)
-                # SerialLoop.device.flushInput()
-                # SerialLoop.device.flushOutput()
+            else:
+                import flash
+                flash.reset_atmega()
+                time.sleep(0.5)
+                SerialLoop.device.flushInput()
+                SerialLoop.device.flushOutput()
 
             start = time.time()
             while True:
