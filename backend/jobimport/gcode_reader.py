@@ -126,9 +126,9 @@ class GcodeReader:
 
         # modal state
         self.G_motion = 'G0'
-        self.X_pos = 0.0
-        self.Y_pos = 0.0
-        self.Z_pos = 0.0
+        self.X_pos = None
+        self.Y_pos = None
+        self.Z_pos = None
         self.F_rate = 0
         self.S_freq = 0
         self.S_on = False
