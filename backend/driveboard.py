@@ -1172,7 +1172,7 @@ def job(jobdict):
     else:
         if conf['mill_mode']:
             supermove(z=0)
-            supermove(0,0,0)
+            supermove(x=0, y=0)
         else:
             move(0, 0, 0)
 

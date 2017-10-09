@@ -364,6 +364,10 @@ inline void protocol_idle() {
     // TODO: reset serial rx buffer
     planner_reset_block_buffer();
     planner_set_position(stepper_get_position_x(), stepper_get_position_y(), stepper_get_position_z());
+    // sync up target again, so future line commands act as expected
+    st.target[X_AXIS] = stepper_get_position_x();
+    st.target[Y_AXIS] = stepper_get_position_y();
+    st.target[Z_AXIS] = stepper_get_position_z();
     pdata.count = 0;
   }
 
