@@ -59,8 +59,8 @@
 #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_X_HOMING 0  // 0 is regular, 1 inverts
-#define CONFIG_INVERT_Y_HOMING 1  // 0 is regular, 1 inverts
-#define CONFIG_INVERT_Z_HOMING 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Y_HOMING 0  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Z_HOMING 0  // 0 is regular, 1 inverts
 
 
 #define SENSE_DDR               DDRD

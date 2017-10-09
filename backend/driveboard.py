@@ -12,10 +12,11 @@ import serial
 import serial.tools.list_ports
 from config import conf, write_config_fields
 
-try:
-    from PIL import Image
-except ImportError:
-    print "Pillow module missing, raster mode will fail."
+if not conf['mill_mode']:
+    try:
+        from PIL import Image
+    except ImportError:
+        print "Pillow module missing, raster mode will fail."
 
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -870,7 +871,7 @@ def move(x=None, y=None, z=None):
             SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_LINE)
 
-def absmove(x=None, y=None, z=None):
+def supermove(x=None, y=None, z=None):
     """Moves in machine coordinates bypassing any offsets."""
     global SerialLoop
     with SerialLoop.lock:
@@ -1135,7 +1136,8 @@ def job(jobdict):
                         feedrate_ = item[1]
                     elif item[0] == 'S':
                         #convert RPMs to 0-100%
-                        intensity(item[1]*(100.0/conf['mill_max_rpm']))
+                        ipct = item[1]*(100.0/conf['mill_max_rpm'])
+                        intensity(ipct)
                     elif item[0] == 'MIST':
                         if item[1] == True:
                             air_on()
@@ -1169,8 +1171,8 @@ def job(jobdict):
         pass
     else:
         if conf['mill_mode']:
-            absmove(z=0)
-            absmove(0,0,0)
+            supermove(z=0)
+            supermove(0,0,0)
         else:
             move(0, 0, 0)
 

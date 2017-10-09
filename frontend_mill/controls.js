@@ -274,9 +274,14 @@ function controls_ready() {
   $("#homing_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#homing_btn").click(function(e){
     request_get({
-      url:'/homing',
+      url:'/reset',
       success: function (data) {
-        $().uxmessage('notice', "Homing ...")
+        request_get({
+          url:'/homing',
+          success: function (data) {
+            $().uxmessage('notice', "Homing ...")
+          }
+        })
       }
     })
     return false

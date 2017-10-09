@@ -93,9 +93,10 @@ function import_open(jobname, from_library) {
       // $().uxmessage('notice', data)
 
       function jobhandler_done() {
-        tools_addfill_init()
-        jobhandler.render()
-        jobhandler.draw()
+        // tools_addfill_init()
+        jobhandler.build_jobview_scene()
+        jobview_render()
+        // jobhandler.draw()
       }
 
       jobhandler.set(job, jobname, true, jobhandler_done)

@@ -253,6 +253,6 @@ function passes_update_handler() {
     }
     // bounds
     jobhandler.renderBounds()
-    jobhandler.draw()
+    // jobhandler.draw()
   }, 2000)
 }

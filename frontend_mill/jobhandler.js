@@ -249,7 +249,7 @@ jobhandler = {
 
   // rendering //////////////////////////////////
 
-  render : function () {
+  build_jobview_scene : function () {
     var x = 0
     var y = 0
     jobview_clear()
@@ -354,10 +354,6 @@ jobhandler = {
     // all_bounds.dashArray = [2, 4]
   },
 
-
-  draw : function () {
-    jobview_render()
-  },
 
 
   selectItem : function(idx) {

@@ -2,10 +2,8 @@ var jobview_scene = undefined
 var jobview_camera = undefined
 var jobview_controls = undefined
 
-var jobview_path_geometry = undefined
-var jobview_path_material = undefined
-
-var jobview_tool = undefined
+var jobview_path = undefined
+var jobview_head = undefined
 
 
 var jobview_width = 0
@@ -16,7 +14,6 @@ var jobview_gridLayer = undefined
 var jobview_boundsLayer = undefined
 var jobview_seekLayer = undefined
 var jobview_feedLayer = undefined
-var jobview_headLayer = undefined
 var jobview_offsetLayer = undefined
 var jobview_moveLayer = undefined
 var jobview_jogLayer = undefined
@@ -33,7 +30,11 @@ var jobview_item_selected = undefined
 
 
 function jobview_clear(){
-  // TODO: delete scene content
+  // while(jobview_scene.children.length > 0){
+  //     jobview_scene.remove(jobview_scene.children[0])
+  // }
+  console.log("deleting jobview_path")
+  jobview_scene.remove(jobview_path)
   jobview_render()
 }
 
@@ -210,9 +211,9 @@ function jobview_ready() {
     var cone_geometry = new THREE.ConeGeometry( 6, 20, 32 );
     cone_geometry.translate(0,-10,0)
     var cone_material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-    jobview_tool = new THREE.Mesh( cone_geometry, cone_material );
-    jobview_tool.rotateX(-Math.PI/2)
-    jobview_scene.add( jobview_tool );
+    jobview_head = new THREE.Mesh( cone_geometry, cone_material );
+    jobview_head.rotateX(-Math.PI/2)
+    jobview_scene.add( jobview_head );
 
     // jobview_testpath()
 
@@ -221,6 +222,7 @@ function jobview_ready() {
 
 
 function jobview_render() {
+  console.log("rendering")
   jobview_renderer.render(jobview_scene, jobview_camera)
 }
 
@@ -295,33 +297,12 @@ function jobview_grid(){
 
 
 function jobview_head(){
-  jobview_headLayer = new paper.Layer()
-  jobview_headLayer.transformContent = false
-  jobview_headLayer.pivot = new paper.Point(0,0)
-  jobview_headLayer.activate()
-  var head_group = new paper.Group()
 
-  var line1 = new paper.Path()
-  line1.add([-10,0],[10,0])
-  head_group.addChild(line1)
-
-  var line2 = new paper.Path()
-  line2.add([0,-10],[0,10])
-  head_group.addChild(line2)
-
-  var circ1 = new paper.Path.Circle([0,0],5)
-  head_group.addChild(circ1)
-
-  head_group.strokeColor = '#aa0000';
 }
 
 function jobview_head_move(pos, offset) {
-  jobview_tool.position.set(pos[0], pos[1], pos[2])
+  jobview_head.position.set(pos[0], pos[1], pos[2])
   jobview_render()
-  // var x = (pos[0]+offset[0])*jobview_mm2px
-  // var y = (pos[1]+offset[1])*jobview_mm2px
-  // jobview_headLayer.position = new paper.Point(x, y)
-  // paper.view.draw()
 }
 
 

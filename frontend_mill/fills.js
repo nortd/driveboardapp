@@ -96,7 +96,7 @@ function fills_add_by_item(idx, callback) {
     passes_clear()
     passes_set_assignments()
     jobhandler.render()
-    jobhandler.draw()
+    // jobhandler.draw()
     callback()
   }
 }

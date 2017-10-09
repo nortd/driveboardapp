@@ -52,9 +52,9 @@
 #define CONFIG_HOMINGRATE 300  // ms/pulse
 #define CONFIG_ACCELERATION 100000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
 #define CONFIG_JUNCTION_DEVIATION 0.006 // mm
-#define CONFIG_X_ORIGIN_OFFSET 239.0  // mm, x-offset of table origin from physical home
-#define CONFIG_Y_ORIGIN_OFFSET 73.0  // mm, y-offset of table origin from physical home
-#define CONFIG_Z_ORIGIN_OFFSET 200.0   // mm, z-offset of table origin from physical home
+#define CONFIG_X_ORIGIN_OFFSET -235.8   // mm, x-offset of table origin from physical home
+#define CONFIG_Y_ORIGIN_OFFSET -73.0    // mm, y-offset of table origin from physical home
+#define CONFIG_Z_ORIGIN_OFFSET -20.0    // mm, z-offset of table origin from physical home
 #define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts
 #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts
 #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts
