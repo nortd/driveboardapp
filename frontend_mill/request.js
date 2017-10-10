@@ -114,7 +114,16 @@ function request_boundary(bounds, seekrate) {
 }
 
 
-function request_relative_move(x, y, z, seekrate, success_msg) {
+function request_jog(x, y, z, success_msg) {
+  request_get({
+    url:'/jog/'+x+'/'+y+'/'+z,
+    success: function (data) {
+      $().uxmessage('notice', success_msg)
+    }
+  })
+}
+
+function request_relative_move(x, y, z, seekrate, success_msg) {  // DEPRECATED
   var job = {
     "head":{"noreturn":true},
     "passes":[

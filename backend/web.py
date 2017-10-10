@@ -187,6 +187,28 @@ def absolute():
     return '{}'
 
 
+@bottle.route('/retract')
+@bottle.auth_basic(checkuser)
+@checkserial
+def retract():
+    driveboard.intensity(0)
+    driveboard.feedrate(conf['seekrate'])
+    driveboard.supermove(z=0)
+    driveboard.supermove(x=0, y=0)
+    return '{}'
+
+@bottle.route('/jog/<x:float>/<y:float>/<z:float>')
+@bottle.auth_basic(checkuser)
+@checkserial
+def jog(x, y, z):
+    driveboard.intensity(0)
+    driveboard.feedrate(conf['seekrate'])
+    driveboard.relative()
+    driveboard.move(x, y, z)
+    driveboard.absolute()
+    return '{}'
+
+
 @bottle.route('/move/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -215,15 +237,6 @@ def movez(z):
     driveboard.move(z=z)
     return '{}'
 
-@bottle.route('/retract')
-@bottle.auth_basic(checkuser)
-@checkserial
-def retract():
-    driveboard.intensity(0)
-    driveboard.feedrate(conf['seekrate'])
-    driveboard.supermove(z=0)
-    driveboard.supermove(x=0, y=0)
-    return '{}'
 
 @bottle.route('/supermove/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
@@ -252,6 +265,7 @@ def supermovey(y):
 def supermovez(z):
     driveboard.supermove(z=z)
     return '{}'
+
 
 @bottle.route('/air_on')
 @bottle.auth_basic(checkuser)

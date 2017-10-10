@@ -339,39 +339,39 @@ function controls_ready() {
   $("#jog_x_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_x_minus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(-djog, 0, 0, app_config_main.seekrate, "X-"+djog)
+    request_jog(-djog, 0, 0, "X-"+djog)
     return true
   })
   $("#jog_x_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_x_plus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(djog, 0, 0, app_config_main.seekrate, "X"+djog)
+    request_jog(djog, 0, 0, "X"+djog)
     return true
   })
   // Jog Y
   $("#jog_y_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_y_minus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(0, -djog, 0, app_config_main.seekrate, "Y-"+djog)
+    request_jog(0, -djog, 0, "Y-"+djog)
     return true
   })
   $("#jog_y_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_y_plus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(0, djog, 0, app_config_main.seekrate, "Y"+djog)
+    request_jog(0, djog, 0, "Y"+djog)
     return true
   })
   // Jog Z
   $("#jog_z_minus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_z_minus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(0, 0, -djog, app_config_main.seekrate, "Z-"+djog)
+    request_jog(0, 0, -djog, "Z-"+djog)
     return true
   })
   $("#jog_z_plus").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#jog_z_plus").click(function(e){
     var djog = parseFloat($('#jog_delta input:radio:checked').val())
-    request_relative_move(0, 0, djog, app_config_main.seekrate, "Z"+djog)
+    request_jog(0, 0, djog, "Z"+djog)
     return true
   })
 

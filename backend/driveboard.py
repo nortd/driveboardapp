@@ -909,6 +909,84 @@ def rasterdata(data, start, end):
     # more granular locking in send_data
     SerialLoop.send_data(data, start, end)
 
+def pause():
+    global SerialLoop
+    with SerialLoop.lock:
+        if SerialLoop.tx_buffer:
+            SerialLoop._paused = True
+
+def unpause():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop._paused = False
+
+
+def stop():
+    """Force stop condition."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.tx_buffer = []
+        SerialLoop.tx_pos = 0
+        SerialLoop.job_size = 0
+        SerialLoop.request_stop = True
+
+
+def unstop():
+    """Resume from stop condition."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.request_resume = True
+
+
+def air_on():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AIR_ENABLE)
+
+def air_off():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AIR_DISABLE)
+
+def aux_on():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_ENABLE)
+
+def aux_off():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_DISABLE)
+
+
+def offset(x=None, y=None, z=None):
+    """Sets an offset relative to present pos."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_RELATIVE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+
+def absoffset(x=None, y=None, z=None):
+    """Sets an offset in machine coordinates."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_ABSOLUTE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+
 
 
 def job(jobdict):
@@ -1180,85 +1258,6 @@ def job(jobdict):
 def jobfile(filepath):
     jobdict = json.load(open(filepath))
     job(jobdict)
-
-
-def pause():
-    global SerialLoop
-    with SerialLoop.lock:
-        if SerialLoop.tx_buffer:
-            SerialLoop._paused = True
-
-def unpause():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop._paused = False
-
-
-def stop():
-    """Force stop condition."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.tx_buffer = []
-        SerialLoop.tx_pos = 0
-        SerialLoop.job_size = 0
-        SerialLoop.request_stop = True
-
-
-def unstop():
-    """Resume from stop condition."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.request_resume = True
-
-
-def air_on():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AIR_ENABLE)
-
-def air_off():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AIR_DISABLE)
-
-def aux_on():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX_ENABLE)
-
-def aux_off():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX_DISABLE)
-
-
-def offset(x=None, y=None, z=None):
-    """Sets an offset relative to present pos."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_REF_STORE)
-        SerialLoop.send_command(CMD_REF_RELATIVE)
-        if x is not None:
-            SerialLoop.send_param(PARAM_OFFSET_X, x)
-        if y is not None:
-            SerialLoop.send_param(PARAM_OFFSET_Y, y)
-        if z is not None:
-            SerialLoop.send_param(PARAM_OFFSET_Z, z)
-        SerialLoop.send_command(CMD_REF_RESTORE)
-
-def absoffset(x=None, y=None, z=None):
-    """Sets an offset in machine coordinates."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_REF_STORE)
-        SerialLoop.send_command(CMD_REF_ABSOLUTE)
-        if x is not None:
-            SerialLoop.send_param(PARAM_OFFSET_X, x)
-        if y is not None:
-            SerialLoop.send_param(PARAM_OFFSET_Y, y)
-        if z is not None:
-            SerialLoop.send_param(PARAM_OFFSET_Z, z)
-        SerialLoop.send_command(CMD_REF_RESTORE)
 
 
 
