@@ -33,8 +33,9 @@ function jobview_clear(){
   // while(jobview_scene.children.length > 0){
   //     jobview_scene.remove(jobview_scene.children[0])
   // }
-  console.log("deleting jobview_path")
   jobview_scene.remove(jobview_path)
+  jobview_path = new THREE.Group()
+  jobview_scene.add(jobview_path)
   jobview_render()
 }
 
@@ -154,7 +155,7 @@ function jobview_ready() {
     jobview_scene.background = new THREE.Color(0xf0f0f0);
 
     jobview_camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 1, 10000);
-    jobview_camera.position.set(0, 250, 1000);
+    jobview_camera.position.set(0, 0, 500);
     // jobview_camera.up.set( 0, 0, 1);
     jobview_scene.add(jobview_camera);
 
@@ -227,41 +228,58 @@ function jobview_render() {
 }
 
 
-function jobview_fit_camera_to_object(object, offset) {
+function fitCameraToObject( object, offset ) {
 
-  const boundingBox = new THREE.Box3();
-  boundingBox.setFromObject( object );
+	offset = offset || 1.25;
 
-  const center = boundingBox.getCenter();
-  const size = boundingBox.getSize();
+	const boundingBox = new THREE.Box3();
 
-  // get the max side of the bounding box
-  const maxDim = Math.max( size.x, size.y, size.z );
-  const fov = jobview_camera.fov * ( Math.PI / 180 );
-  let cameraZ = Math.abs( maxDim / 4 * Math.tan( fov * 2 ) );
+	// get bounding box of object - this will be used to setup controls and camera
+	boundingBox.setFromObject( object );
 
-  // offset the camera as desired - usually a value of ~ 1.25 is good to prevent
-  // object filling the whole canvas
-  if( offset !== undefined && offset !== 0 ) cameraZ *= offset;
+	const center = boundingBox.getCenter();
 
-  jobview_camera.position.set( center.x, center.y, cameraZ );
+	const size = boundingBox.getSize();
 
-  // set the far plane of the camera so that it easily encompasses the whole object
-  const minZ = boundingBox.min.z;
-  const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ;
+	// get the max side of the bounding box (fits to width OR height as needed )
+	const maxDim = Math.max( size.x, size.y, size.z );
+	const fov = jobview_camera.fov * ( Math.PI / 180 );
+	let cameraZ = Math.abs( maxDim / 2 * Math.tan( fov * 2 ) ); //Applied fifonik correction
 
-  jobview_camera.far = cameraToFarEdge * 3;
-  jobview_camera.updateProjectionMatrix();
+	cameraZ *= offset; // zoom out a little so that objects don't fill the screen
 
-  if ( jobview_controls !== undefined ) {
+	// <--- NEW CODE
+	//Method 1 to get object's world position
+	scene.updateMatrixWorld(); //Update world positions
+	var objectWorldPosition = new THREE.Vector3();
+	objectWorldPosition.setFromMatrixPosition( object.matrixWorld );
 
-    // set camera to rotate around center of loaded object
-    jobview_controls.target = center;
+	//Method 2 to get object's world position
+	//objectWorldPosition = object.getWorldPosition();
 
-    // prevent camera from zooming out far enough to create far plane cutoff
-    jobview_controls.maxDistance = cameraToFarEdge * 2;
+	const directionVector = jobview_camera.position.sub(objectWorldPosition); 	//Get vector from camera to object
+	const unitDirectionVector = directionVector.normalize(); // Convert to unit vector
+	jobview_camera.position = unitDirectionVector.multiplyScalar(cameraZ); //Multiply unit vector times cameraZ distance
+	jobview_camera.lookAt(objectWorldPosition); //Look at object
+	// --->
+
+	const minZ = boundingBox.min.z;
+	const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ;
+
+	jobview_camera.far = cameraToFarEdge * 3;
+	jobview_camera.updateProjectionMatrix();
+
+	if ( jobview_controls ) {
+	  // set camera to rotate around center of loaded object
+	  jobview_controls.target = center;
+	  // prevent camera from zooming out far enough to create far plane cutoff
+	  jobview_controls.maxDistance = cameraToFarEdge * 2;
+	  jobview_controls.saveState();
+	} else {
+		jobview_camera.lookAt( center )
   }
 }
+
 
 
 function jobview_grid(){

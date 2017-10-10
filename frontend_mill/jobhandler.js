@@ -335,9 +335,10 @@ jobhandler = {
           )
         }
       }
-      jobview_path = new THREE.Line(geometry, material)
-      jobview_scene.add(jobview_path)
-      jobview_fit_camera_to_object(jobview_path, 10)
+      path = new THREE.Line(geometry, material)
+      jobview_path.add(path)
+      // jobview_fit_camera_to_object(jobview_path, 10)
+      // fitCameraToObject(jobview_path, 3)
     }
   },
 

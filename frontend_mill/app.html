@@ -316,16 +316,14 @@
             <button id="homing_btn" class="btn btn-default" type="submit" title="find machine origin [H]" style="margin-left:12px">
               <span class="glyphicon glyphicon-home"></span> Homing
             </button>
-          </div>
-          <div class="col-md-6">
-            <!-- zero all button -->
-            <button id="offset_btn" type="button" class="btn btn-default venlarge2" title="zero out at resent position [0]">Zero All</button>
             <!-- origin button -->
-            <button id="origin_btn" class="btn btn-default venlarge2" type="submit" title="retract to machine origin [R]">
+            <button id="origin_btn" class="btn btn-default " type="submit" title="retract to machine origin [R]" style="margin-left:12px">
               Retract
             </button>
+          </div>
+          <div class="col-md-6 nodrag">
             <!-- jog delta -->
-            <div id="jog_delta" class="btn-group" data-toggle="buttons" style="margin-left:24px">
+            <div id="jog_delta" class="btn-group" data-toggle="buttons">
               <label class="btn btn-default">
                 <input type="radio" name="options" id="option2" autocomplete="off" value="0.01">0.01
               </label>
@@ -340,21 +338,24 @@
               </label>
             </div>
           </div>
-          <div class="col-md-3 noptr"></div>
+          <div class="col-md-3">
+            <!-- zero all button -->
+            <button id="offset_btn" type="button" class="btn btn-default venlarge2" title="zero out at resent position [0]">Zero All</button>
+          </div>
         </div>
-
         <!-- x row -->
         <div class="row">
           <div class="col-md-3">
             <div class="input-group">
               <div class="input-group-addon enlarge">X</div>
               <input type="text" id="x_ro" class="form-control enlarge">
+              <span class="input-group-btn">
+                <button id="move_x_btn" type="button" class="btn btn-default enlarge2">Move</button>
+              </span>
             </div>
           </div>
-          <div class="col-md-6">
-
-            <button type="button" class="btn btn-default enlarge2">Goto</button>
-            <div class="btn-group" role="group" style="margin-left:24px">
+          <div class="col-md-6 nodrag">
+            <div class="btn-group" role="group">
               <button id="jog_x_minus" type="button" class="btn btn-default enlarge2" title="left-jog X [ARROW-LEFT]">
                 <span class="glyphicon glyphicon-minus-sign"></span>
               </button>
@@ -362,18 +363,16 @@
                 <span class="glyphicon glyphicon-plus-sign"></span>
               </button>
             </div>
-
-            <button id="offset_x_btn" type="button" class="btn btn-default enlarge2">Zero</button>
           </div>
-
-          <div class="col-md-1">
+          <div class="col-md-3">
             <div class="input-group">
-              <div class="input-group-addon enlarge">XOff</div>
-              <input type="text" id="x_ro" class="form-control enlarge">
+              <span class="input-group-btn">
+                <button id="offset_x_btn" type="button" class="btn btn-default enlarge2">Zero</button>
+              </span>
+              <div class="input-group-addon enlarge">With XOff</div>
+              <input type="text" id="x_off_ro" class="form-control enlarge">
             </div>
           </div>
-
-          <div class="col-md-2 noptr"></div>
         </div>
         <!-- y row -->
         <div class="row">
@@ -381,12 +380,13 @@
             <div class="input-group">
               <div class="input-group-addon enlarge">Y</div>
               <input type="text" id="y_ro" class="form-control enlarge">
+              <span class="input-group-btn">
+                <button id="move_y_btn" type="button" class="btn btn-default enlarge2">Move</button>
+              </span>
             </div>
           </div>
-          <div class="col-md-6">
-            <button id="offset_y_btn" type="button" class="btn btn-default enlarge2">Zero</button>
-            <button type="button" class="btn btn-default enlarge2">Goto</button>
-            <div class="btn-group" role="group" style="margin-left:24px">
+          <div class="col-md-6 nodrag">
+            <div class="btn-group" role="group">
               <button id="jog_y_minus" type="button" class="btn btn-default enlarge2" title="rear-jog Y [ARROW-UP]">
                 <span class="glyphicon glyphicon-minus-sign"></span>
               </button>
@@ -395,7 +395,15 @@
               </button>
             </div>
           </div>
-          <div class="col-md-3 noptr"></div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button id="offset_y_btn" type="button" class="btn btn-default enlarge2">Zero</button>
+              </span>
+              <div class="input-group-addon enlarge">With YOff</div>
+              <input type="text" id="y_off_ro" class="form-control enlarge">
+            </div>
+          </div>
         </div>
         <!-- z row -->
         <div class="row">
@@ -403,12 +411,13 @@
             <div class="input-group">
               <div class="input-group-addon enlarge">Z</div>
               <input type="text" id="z_ro" class="form-control enlarge">
+              <span class="input-group-btn">
+                <button id="move_x_btn" type="button" class="btn btn-default enlarge2">Move</button>
+              </span>
             </div>
           </div>
-          <div class="col-md-6">
-            <button id="offset_z_btn" type="button" class="btn btn-default enlarge2">Zero</button>
-            <button type="button" class="btn btn-default enlarge2">Goto</button>
-            <div class="btn-group" role="group" style="margin-left:24px">
+          <div class="col-md-6 nodrag">
+            <div class="btn-group" role="group">
               <button id="jog_z_minus" type="button" class="btn btn-default enlarge2" title="down-jog Z [PAGE-DOWN]">
                 <span class="glyphicon glyphicon-minus-sign"></span>
               </button>
@@ -416,12 +425,18 @@
                 <span class="glyphicon glyphicon-plus-sign"></span>
               </button>
             </div>
-          </div>
-          <div class="col-md-1 noptr"></div>
-          <div class="col-md-2" style="vertical-align:bottom">
-            <a class="navbar-brand" href="/">
+            <a href="/" style="margin-left:48px">
               <img src="img/lasersaur-dino-driveboardapp.png" style="margin-right:6px; margin-top:55px">
             </a>
+          </div>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button id="offset_z_btn" type="button" class="btn btn-default enlarge2">Zero</button>
+              </span>
+              <div class="input-group-addon enlarge">With ZOff</div>
+              <input type="text" id="z_off_ro" class="form-control enlarge">
+            </div>
           </div>
         </div>
 

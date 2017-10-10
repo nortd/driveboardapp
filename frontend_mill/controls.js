@@ -292,8 +292,14 @@ function controls_ready() {
 
   $("#offset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_btn").click(function(e){
+    var xoff = parseFloat($('#x_off_ro').val())
+    var yoff = parseFloat($('#y_off_ro').val())
+    var zoff = parseFloat($('#z_off_ro').val())
+    if (isNaN(xoff)) {xoff=0}
+    if (isNaN(yoff)) {yoff=0}
+    if (isNaN(zoff)) {zoff=0}
     request_get({
-      url:'/offset/0/0/0',
+      url:'/offset/'+x+'/'+y+'/'+z,
       success: function (data) {
         $().uxmessage('notice', "X,Y,Z zero'd.")
       }
@@ -303,8 +309,10 @@ function controls_ready() {
   // X
   $("#offset_x_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_x_btn").click(function(e){
+    var xoff = parseFloat($('#x_off_ro').val())
+    if (isNaN(xoff)) {xoff=0}
     request_get({
-      url:'/offsetx/0',
+      url:'/offsetx/'+xoff,
       success: function (data) {
         $().uxmessage('notice', "X zero'd.")
       }
@@ -314,8 +322,10 @@ function controls_ready() {
   // Y
   $("#offset_y_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_y_btn").click(function(e){
+    var yoff = parseFloat($('#y_off_ro').val())
+    if (isNaN(yoff)) {yoff=0}
     request_get({
-      url:'/offsety/0',
+      url:'/offsety/'+yoff,
       success: function (data) {
         $().uxmessage('notice', "Y zero'd.")
       }
@@ -325,8 +335,10 @@ function controls_ready() {
   // Z
   $("#offset_z_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_z_btn").click(function(e){
+    var zoff = parseFloat($('#z_off_ro').val())
+    if (isNaN(zoff)) {zoff=0}
     request_get({
-      url:'/offsetz/0',
+      url:'/offsetz/'+z,
       success: function (data) {
         $().uxmessage('notice', "Z zero'd.")
       }
