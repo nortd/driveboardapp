@@ -58,6 +58,7 @@ jobhandler = {
     $('#job_info_length').html('')
     $('#info_content').html('')
     $('#info_btn').hide()
+    $('#passes_status').html('')
   },
 
   isEmpty : function() {
@@ -169,6 +170,21 @@ jobhandler = {
       if (image_to_load == -1) {
         allImagesLoaded()
       }
+
+      // list passes
+      $('#passes_status').append("<tr><th>T#</th><th>Tool Info</th><th>RPMs</th><th>Feedrates</th></tr>")
+      for (var i = 0; i < this.defs.length; i++) {
+        var def = this.defs[i]
+        if (def.kind == "mill") {
+          var cells = ""
+          cells += "<td>"+def.tool+"</td>"
+          cells += "<td>"+def.toolinfo+"</td>"
+          cells += "<td>"+Math.min(...def.freqs)+"-"+Math.max(...def.freqs)+"</td>"
+          cells += "<td>"+Math.min(...def.rates)+"-"+Math.max(...def.rates)+"</td>"
+          $('#passes_status').append("<tr>"+cells+"</tr>")
+        }
+      }
+
     }
   },
 
@@ -197,7 +213,7 @@ jobhandler = {
   getJson : function() {
     // json stringify while limiting numbers to 3 decimals
     return JSON.stringify(this.get() ,function(key, val) {
-        if (isNaN(+key)) return val
+        if (isNaN(+key) || val === null) return val
         return val.toFixed ? Number(val.toFixed(3)) : val
       }, '\t')
   },

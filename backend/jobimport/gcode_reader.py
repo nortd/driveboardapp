@@ -137,7 +137,13 @@ class GcodeReader:
         self.M_flood = False
 
         # tools table
+        self.def_ = None
         self.toolinfo = {}
+        self.rates = []
+        self.freqs = []
+        self.mists = False
+        self.floods = False
+        self.bbox = None
 
         # regexes
         self.re_parts = re.compile('(X|Y|Z|G|M|T|S|F)(-?[0-9]+\.?[0-9]*(?:e-?[0-9]*)?)').findall
@@ -149,13 +155,35 @@ class GcodeReader:
         self.job = {'passes':[], 'items':[], 'defs':[]}
 
 
+    def finalize_pass(self):
+        if self.def_:
+            self.def_['rates'] = self.rates
+            self.def_['freqs'] = self.freqs
+            self.def_['mists'] = self.mists
+            self.def_['floods'] = self.floods
+            self.def_['bbox'] = self.bbox
+
+
     def next_pass(self):
-        # print("INFO: Setting up pass for tool: T%s" % (self.T_num))
+        self.rates = []
+        self.freqs = []
+        self.mists = False
+        self.floods = False
+        self.bbox = [999999,999999,999999,-999999,-999999,-999999]
         self.job['defs'].append({'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''})
         self.job['items'].append({'def':len(self.job['defs'])-1})
         self.job['passes'].append({'items':[len(self.job['items'])-1]})
         self.def_ = self.job['defs'][-1]
         self.path = self.def_['data']
+
+
+    def expand_bbox(self, bbox, x, y, z):
+        if x < bbox[0]: bbox[0] = x
+        elif x > bbox[3]: bbox[3] = x
+        if y < bbox[1]: bbox[1] = y
+        elif y > bbox[4]: bbox[4] = y
+        if z < bbox[2]: bbox[2] = z
+        elif z > bbox[5]: bbox[5] = z
 
 
     def on_toolchange(self, line):
@@ -172,6 +200,7 @@ class GcodeReader:
         if len(self.re_parts(line)) != nParts:
             print("ERROR: cannot handle anything but T on M6 toolchange line")
         else:
+            self.finalize_pass()
             self.next_pass()
             self.bTool = True
             # add tool, toolinfo to def
@@ -290,21 +319,28 @@ class GcodeReader:
             # commit coolant
             if bMist:
                 self.on_action(('MIST',self.M_mist))
+                self.mists = True
             if bFlood:
                 self.on_action(('FLOOD',self.M_flood))
+                self.floods = True
             # commit spindle
             if bSpindle:
                 if self.S_on:
                     self.on_action(('S',self.S_freq))
+                    self.freqs.append(self.S_freq)
                 else:
                     self.on_action(('S',0))
             # commit feedrate
             if bFeed:
                 self.on_action(('F',self.F_rate))
+                self.rates.append(self.F_rate)
             # commit motion
             if bMotion:
                 self.on_action((self.G_motion,(self.X_pos, self.Y_pos, self.Z_pos)))
+                if self.G_motion == 'G1':
+                    self.expand_bbox(self.bbox, self.X_pos, self.Y_pos, self.Z_pos)
 
+        self.finalize_pass()
         return self.job
 
 

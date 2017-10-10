@@ -337,7 +337,7 @@ function controls_ready() {
     var zoff = parseFloat($('#z_off_ro').val())
     if (isNaN(zoff)) {zoff=0}
     request_get({
-      url:'/offsetz/'+z,
+      url:'/offsetz/'+zoff,
       success: function (data) {
         $().uxmessage('notice', "Z zero'd.")
       }

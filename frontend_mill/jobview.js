@@ -223,7 +223,6 @@ function jobview_ready() {
 
 
 function jobview_render() {
-  console.log("rendering")
   jobview_renderer.render(jobview_scene, jobview_camera)
 }
 
