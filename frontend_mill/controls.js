@@ -288,8 +288,7 @@ function controls_ready() {
   })
 
 
-  // offsets
-
+  // offsets all
   $("#offset_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_btn").click(function(e){
     var xoff = parseFloat($('#x_off_ro').val())
@@ -299,14 +298,14 @@ function controls_ready() {
     if (isNaN(yoff)) {yoff=0}
     if (isNaN(zoff)) {zoff=0}
     request_get({
-      url:'/offset/'+x+'/'+y+'/'+z,
+      url:'/offset/'+xoff+'/'+yoff+'/'+zoff,
       success: function (data) {
         $().uxmessage('notice', "X,Y,Z zero'd.")
       }
     })
     return true
   })
-  // X
+  // offset X
   $("#offset_x_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_x_btn").click(function(e){
     var xoff = parseFloat($('#x_off_ro').val())
@@ -319,7 +318,7 @@ function controls_ready() {
     })
     return true
   })
-  // Y
+  // offset Y
   $("#offset_y_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_y_btn").click(function(e){
     var yoff = parseFloat($('#y_off_ro').val())
@@ -332,7 +331,7 @@ function controls_ready() {
     })
     return true
   })
-  // Z
+  // offset Z
   $("#offset_z_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
   $("#offset_z_btn").click(function(e){
     var zoff = parseFloat($('#z_off_ro').val())
@@ -345,6 +344,49 @@ function controls_ready() {
     })
     return true
   })
+
+
+
+  // move X
+  $("#move_x_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#move_x_btn").click(function(e){
+    var x = parseFloat($('#x_ro').val())
+    if (isNaN(x)) {x=0}
+    request_get({
+      url:'/movex/'+x,
+      success: function (data) {
+        $().uxmessage('notice', "Moving X ...")
+      }
+    })
+    return true
+  })
+  // move X
+  $("#move_y_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#move_y_btn").click(function(e){
+    var y = parseFloat($('#y_ro').val())
+    if (isNaN(y)) {y=0}
+    request_get({
+      url:'/movey/'+y,
+      success: function (data) {
+        $().uxmessage('notice', "Moving Y ...")
+      }
+    })
+    return true
+  })
+  // move Z
+  $("#move_z_btn").tooltip({placement:'top', delay: {show:1000, hide:100}})
+  $("#move_z_btn").click(function(e){
+    var z = parseFloat($('#z_ro').val())
+    if (isNaN(z)) {z=0}
+    request_get({
+      url:'/movez/'+z,
+      success: function (data) {
+        $().uxmessage('notice', "Moving Z ...")
+      }
+    })
+    return true
+  })
+
 
 
   // Jog X
