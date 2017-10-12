@@ -187,7 +187,8 @@ jobhandler = {
   // passes  ////////////////////////////////////
 
   add_passes : function() {
-    $('#passes_status').append("<tr><th>T#</th><th>Tool Info</th><th>RPMs</th><th>Feedrates</th></tr>")
+    $('#passes_status').append('<tr class="nodrag"><th>T#</th><th>Tool \
+                                Info</th><th>RPMs</th><th>Feedrates</th></tr>')
     for (var i = 0; i < this.defs.length; i++) {
       var def = this.defs[i]
       var cells = ""
@@ -195,7 +196,7 @@ jobhandler = {
       cells += "<td>"+def.toolinfo+"</td>"
       cells += "<td>"+Math.min(...def.freqs)+"-"+Math.max(...def.freqs)+"</td>"
       cells += "<td>"+Math.min(...def.rates)+"-"+Math.max(...def.rates)+"</td>"
-      $('#passes_status').append("<tr>"+cells+"</tr>")
+      $('#passes_status').append('<tr class="nodrag">'+cells+"</tr>")
     }
     $('#tool_btn_lable').html(this.defs[this.pass].tool)
     $('#passes_status tr').eq(this.pass+1).addClass('info')
