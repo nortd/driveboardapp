@@ -99,14 +99,14 @@ class GcodeReader:
 
     OUTPUT
     ------
-    Output is a job where every "pass" has one "item" that has one "def".
-    This def is of kind "mill". A mill def has a data item which is a path.
-    A mill path is a series of moves and param changes.
+    Output is a job with a 'kind':'mill' marker in the 'head'. The actual
+    data is in 'defs':{'data':[]}. Every tool becomes one data entry.
+    A data path is a series of moves and param changes.
 
     A def looks like this:
-    {'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''}
+    {data':[], 'tool':'', 'toolinfo':''}
 
-    The format of a path is a series of possible ath items:
+    The format of a data path is a series of possible action items:
     - ('G0',(x,y,z))      (mapped to move with seekrate)
     - ('G1',(x,y,z))      (mapped to move with feedrate)
     - ('F',rate)          (mapped to feedrate)
@@ -152,7 +152,7 @@ class GcodeReader:
         self.re_toolinfo = re.compile('\((T[0-9]+) *(.+) *\)').findall
 
         # output job
-        self.job = {'passes':[], 'items':[], 'defs':[]}
+        self.job = {'head':{'kind':'mill'}, 'defs':[]}
 
 
     def finalize_pass(self):
@@ -170,9 +170,7 @@ class GcodeReader:
         self.mists = False
         self.floods = False
         self.bbox = [999999,999999,999999,-999999,-999999,-999999]
-        self.job['defs'].append({'kind':'mill', 'data':[], 'tool':'', 'toolinfo':''})
-        self.job['items'].append({'def':len(self.job['defs'])-1})
-        self.job['passes'].append({'items':[len(self.job['items'])-1]})
+        self.job['defs'].append({'data':[], 'tool':'', 'toolinfo':''})
         self.def_ = self.job['defs'][-1]
         self.path = self.def_['data']
 

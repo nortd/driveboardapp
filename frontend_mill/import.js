@@ -91,16 +91,9 @@ function import_open(jobname, from_library) {
     success: function (job) {
       // alert(JSON.stringify(data))
       // $().uxmessage('notice', data)
-
-      function jobhandler_done() {
-        // tools_addfill_init()
-        jobhandler.build_jobview_scene()
-        jobview_render()
-        // jobhandler.draw()
-      }
-
-      jobhandler.set(job, jobname, true, jobhandler_done)
-
+      jobhandler.set(job, jobname, true)
+      jobhandler.add_to_scene()
+      jobview_render()
       // debug, show image, stats
       // console.log(JSON.stringify(job))
       // $().uxmessage('notice'," job: " + JSON.stringify(job))

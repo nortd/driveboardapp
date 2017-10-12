@@ -989,8 +989,23 @@ def absoffset(x=None, y=None, z=None):
 
 
 
+def jobfile(filepath):
+    jobdict = json.load(open(filepath))
+    job(jobdict)
+
+
 def job(jobdict):
-    """Queue a .dba job.
+    if 'head' in jobdict:
+        if 'kind' in jobdict['head'] and jobdict['head']['kind'] == 'mill':
+            job_mill(jobdict)
+        else:
+            job_laser(jobdict)
+    else:
+        print "INFO: not a valid job"
+
+
+def job_laser(jobdict):
+    """Queue a .dba laser job.
     A job dictionary can define vector and raster passes.
     Unlike gcode it's not procedural but declarative.
     The job dict looks like this:
@@ -1195,39 +1210,6 @@ def job(jobdict):
                             # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'feed':
                             #     aux_off()
 
-            elif kind == "mill":
-                feedrate(seekrate)
-                feedrate_active = seekrate
-                path = def_['data']
-                for item in path:
-                    if item[0] == 'G0':
-                        if feedrate_active != seekrate:
-                            feedrate(seekrate)
-                            feedrate_active = seekrate
-                        move(item[1][0],item[1][1],item[1][2])
-                    elif item[0] == 'G1':
-                        if feedrate_active != feedrate_:
-                            feedrate(feedrate_)
-                            feedrate_active = feedrate_
-                        move(item[1][0],item[1][1],item[1][2])
-                    elif item[0] == 'F':
-                        feedrate_ = item[1]
-                    elif item[0] == 'S':
-                        #convert RPMs to 0-100%
-                        ipct = item[1]*(100.0/conf['mill_max_rpm'])
-                        intensity(ipct)
-                    elif item[0] == 'MIST':
-                        if item[1] == True:
-                            air_on()
-                        elif item[1] == False:
-                            air_off()
-                    elif item[0] == 'FLOOD':
-                        if item[1] == True:
-                            aux_on()
-                        elif item[1] == False:
-                            aux_off()
-
-
         # assists off, end of pass if set to 'pass'
         if 'air_assist' in pass_:
             if pass_['air_assist'] == 'pass':
@@ -1248,16 +1230,82 @@ def job(jobdict):
        jobdict['head']['noreturn']:
         pass
     else:
-        if conf['mill_mode']:
-            supermove(z=0)
-            supermove(x=0, y=0)
-        else:
-            move(0, 0, 0)
+        move(0, 0, 0)
 
 
-def jobfile(filepath):
-    jobdict = json.load(open(filepath))
-    job(jobdict)
+
+def job_mill(jobdict):
+    """Queue a .dba mill job.
+    A typical mill job dict looks like this:
+    ###########################################################################
+    {
+      "head": {
+          "kind": "mill",          # specify a mill job
+       },
+      "defs": [
+        {"data":[('G0',(x,y,z)), ('F', 1000), ('G1', (x,y,z))]},
+      ],
+    }
+    ###########################################################################
+    """
+    # check job
+    if (not 'head' in jobdict) or \
+       (not 'kind' in jobdict['head']) or \
+       (jobdict['head']['kind'] != 'mill'):
+        print "NOTICE: not a mill job"
+        return
+
+    if not 'defs' in jobdict:
+        print "ERROR: invalid job"
+        return
+    # prime job
+    air_off()
+    aux_off()
+    absolute()
+    intensity(0.0)
+    feedrate(seekrate)
+    seekrate = conf['seekrate']
+    feedrate_ = conf['feedrate']
+    feedrate_active = seekrate
+    # run job
+    for def_ in job['defs']:
+        path = def_['data']
+        for item in path:
+            if item[0] == 'G0':
+                if feedrate_active != seekrate:
+                    feedrate(seekrate)
+                    feedrate_active = seekrate
+                move(item[1][0],item[1][1],item[1][2])
+            elif item[0] == 'G1':
+                if feedrate_active != feedrate_:
+                    feedrate(feedrate_)
+                    feedrate_active = feedrate_
+                move(item[1][0],item[1][1],item[1][2])
+            elif item[0] == 'F':
+                feedrate_ = item[1]
+            elif item[0] == 'S':
+                #convert RPMs to 0-100%
+                ipct = item[1]*(100.0/conf['mill_max_rpm'])
+                intensity(ipct)
+            elif item[0] == 'MIST':
+                if item[1] == True:
+                    air_on()
+                elif item[1] == False:
+                    air_off()
+            elif item[0] == 'FLOOD':
+                if item[1] == True:
+                    aux_on()
+                elif item[1] == False:
+                    aux_off()
+    # finalize job
+    air_off()
+    aux_off()
+    absolute()
+    feedrate(conf['seekrate'])
+    intensity(0.0)
+    supermove(z=0)
+    supermove(x=0, y=0)
+
 
 
 

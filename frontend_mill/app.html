@@ -42,7 +42,6 @@
     <script src="jobhandler.js"></script>
     <script src="import.js"></script>
     <script src="controls.js"></script>
-    <script src="passes.js"></script>
     <script src="queue.js"></script>
     <script src="library.js"></script>
     <script src="status.js"></script>
@@ -93,8 +92,20 @@
             <input type="file" id="open_file_fld" name="data" style="visibility:hidden; position:fixed">
         </form>
 
-        <!-- process buttons -->
+        <!-- tool button -->
+        <!-- <div id="status_btn_div" class="btn-group">
+
+        </div> -->
+        <!-- run button -->
         <div class="btn-group pull-left menu_btn">
+          <button id="tool_btn" class="btn btn-primary" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span id="tool_btn_lable">Tx</span> <span class="caret"></span>
+          </button>
+          <div class="dropdown-menu" style="width:600px; padding:10px">
+            <table id="passes_status" class="table table-condensed table-hover">
+              <tr><th>No Tools defined. You may want to open a job first.</th></tr>
+            </table>
+          </div>
           <button id="run_btn" class="btn btn-primary ladda-button" data-style="expand-right" style="min-width:90px">
             <span class="ladda-label">Run</span>
           </button>
@@ -138,10 +149,10 @@
       </canvas> -->
 
       <!-- passes div -->
-      <div class="container" style="width:30%; height:40%; position:absolute; top:10%; overflow:auto">
+      <!-- <div class="container" style="width:30%; height:40%; position:absolute; top:10%; overflow:auto">
         <table id="passes_status" class="table table-condensed">
         </table>
-      </div>
+      </div> -->
 
       <!-- info div -->
       <div id="info_panel" class="pull-left" style="width:240px; overflow:auto">

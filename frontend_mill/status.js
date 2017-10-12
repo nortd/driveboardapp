@@ -218,6 +218,9 @@ var status_handlers = {
       $('#offset_btn').removeClass('disabled')
       $('#motion_btn').removeClass('disabled')
       $('#jog_btn').removeClass('disabled')
+      if (jobhandler.job_active()) {
+        jobhandler.job_end()
+      }
     } else {
       app_run_btn.start()
       $('#boundary_btn').prop('disabled', true)

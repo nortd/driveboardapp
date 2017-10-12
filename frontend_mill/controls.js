@@ -29,23 +29,8 @@ function controls_ready() {
         filename = filename+'.dba'
       }
       jobhandler.passes = passes_get_active()
-      var blob = new Blob([jobhandler.getJson()], {type: "application/json;charset=utf-8"})
+      var blob = new Blob([jobhandler.get_json()], {type: "application/json;charset=utf-8"})
       saveAs(blob, filename)
-      // var load_request = {'job':jobhandler.getJson()}
-      // request_post({
-      //   url:'/temp',
-      //   data: load_request,
-      //   success: function (jobname) {
-      //     console.log("stashing successful")
-      //     // download file
-      //     window.open('/download/'+jobname+'/'+jobhandler.name+'.dba', '_blank')
-      //   },
-      //   error: function (data) {
-      //     $().uxmessage('error', "/temp error.")
-      //     $().uxmessage('error', JSON.stringify(data), false)
-      //   }
-      // })
-      // $('#hamburger').dropdown("toggle")
     } else {
       $().uxmessage('notice', "Cannot Export. No job loaded.")
     }
@@ -132,11 +117,6 @@ function controls_ready() {
       $().uxmessage('notice', "Cannot run. No job loaded.")
       return false
     }
-    // check for passes
-    if (!jobhandler.hasPasses()) {
-      $().uxmessage('notice', "No passes assigned to this job.")
-      return false
-    }
     // check for machine
     // if (!status_cache.serial) {
     //   $().uxmessage('error', "No machine.")
@@ -148,7 +128,7 @@ function controls_ready() {
     status_cache.ready = true  // prevent ready update
     // save job to queue, in-place
     var load_request = {
-      'job':jobhandler.getJson(),
+      'job':jobhandler.get_pass_json(),
       'name':jobhandler.name,
       'optimize':true,
       // 'optimize':false,
@@ -163,6 +143,7 @@ function controls_ready() {
         request_get({
           url:'/run/'+jobname,
           success: function (data) {
+            jobhandler.job_start()
             // $().uxmessage('success', "Running job ...")
           },
           error: function (data) {
@@ -498,6 +479,11 @@ function controls_ready() {
 
   Mousetrap.bind(['s'], function(e) {
     $('#status_btn').trigger('click')
+    return false;
+  })
+
+  Mousetrap.bind(['t'], function(e) {
+    $('#tool_btn').trigger('click')
     return false;
   })
 
