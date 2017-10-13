@@ -130,8 +130,7 @@ function controls_ready() {
     var load_request = {
       'job':jobhandler.get_pass_json(),
       'name':jobhandler.name,
-      'optimize':true,
-      // 'optimize':false,
+      'optimize':false,
       'overwrite':true
     }
     request_post({

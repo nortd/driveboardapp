@@ -25,7 +25,7 @@ jobhandler = {
   pass : 0,
   feed_length : 0,
   bbox : [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity],
-  job_active : false,
+  job_active_ : false,
 
   clear : function() {
     this.head = {}
@@ -34,7 +34,7 @@ jobhandler = {
     this.pass = 0
     this.feed_length = 0
     this.bbox = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]
-    job_active = false
+    job_active_ = false
     jobview_clear()
     $('#job_info_name').html('')
     $('#job_info_length').html('')
@@ -49,15 +49,15 @@ jobhandler = {
   },
 
   job_start : function() {
-    this.job_active = true
+    this.job_active_ = true
   },
 
   job_active : function() {
-    return this.job_active
+    return this.job_active_
   },
 
   job_end : function() {
-    this.job_active = false
+    this.job_active_ = false
     this.next_pass()
   },
 

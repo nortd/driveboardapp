@@ -1263,12 +1263,12 @@ def job_mill(jobdict):
     aux_off()
     absolute()
     intensity(0.0)
-    feedrate(seekrate)
     seekrate = conf['seekrate']
     feedrate_ = conf['feedrate']
+    feedrate(seekrate)
     feedrate_active = seekrate
     # run job
-    for def_ in job['defs']:
+    for def_ in jobdict['defs']:
         path = def_['data']
         for item in path:
             if item[0] == 'G0':

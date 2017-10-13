@@ -55,7 +55,7 @@ $(document).ready(function(){
     }
 
     // send to backend
-    var load_request = {'job':job, 'name':import_name, 'optimize':true}
+    var load_request = {'job':job, 'name':import_name, 'optimize':false}
     request_post({
       url:'/load',
       data: load_request,

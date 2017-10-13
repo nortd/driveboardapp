@@ -279,7 +279,7 @@ var status_handlers = {
   'underruns': function (status) {},
   'stackclear': function (status) {
     if (typeof(status.stackclear) == 'number') {
-      console.log("stackclear: " + status.stackclear)
+      // console.log("stackclear: " + status.stackclear)
       if (status.stackclear < 100) {
         // console.log("stackclear none: " + status.stackclear)
         $().uxmessage('error', "Drive hardware low on memory ("+status.stackclear+").")
