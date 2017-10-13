@@ -90,13 +90,17 @@ jobhandler = {
         // this.segmentizeLongLines()
       }
       // stats
-      // this.calculateStats()
+      this.calculate_stats()
       // job info
       $('#job_info_name').html(this.name)
       $('#info_btn').show()
       // info modal
       var html = ''
       html += "name : " + this.name + "<br>"
+      html += "length : " + (this.feed_length/1000).toFixed(2) + "m<br>"
+      html += "bbox : x["+this.bbox[0].toFixed(0)+", "+this.bbox[3].toFixed(0)+
+                   "] y["+this.bbox[1].toFixed(0)+", "+this.bbox[4].toFixed(0)+
+                   "] z["+this.bbox[2].toFixed(0)+", "+this.bbox[5].toFixed(0)+"]<br>"
       $('#info_content').html(html)
       // handle passes
       this.add_passes()
@@ -221,10 +225,8 @@ jobhandler = {
 
   // stats //////////////////////////////////////
 
-  calculateStats : function() {
+  calculate_stats : function() {
     // calculate bounding boxes and feed lengths for each def
-    var length_all = 0
-    var bbox_all = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]
     // loop through defs
     for (var i = 0; i < this.defs.length; i++) {
       var def = this.defs[i]
@@ -236,9 +238,9 @@ jobhandler = {
       for (var j=0; j<def.data.length; j++) {
         var action = def.data[j]
         if (action[0] == 'G0' || (action[0] == 'G1')) {
-          var x = action[1][0] || x_prev
-          var y = action[1][1] || y_prev
-          var z = action[1][2] || z_prev
+          var x = action[1][0]
+          var y = action[1][1]
+          var z = action[1][2]
           if (action[0] == 'G1') {
             length += Math.sqrt((x-x_prev)*(x-x_prev)+(y-y_prev)*(y-y_prev)+(z-z_prev)*(z-z_prev))
             this.bboxExpand(bbox, x, y, z)
@@ -265,8 +267,8 @@ jobhandler = {
 
 
   bboxExpand2 : function(bbox, bbox2) {
-    this.bboxExpand(bbox, bbox2[0], bbox2[1], bbox[2])
-    this.bboxExpand(bbox, bbox2[3], bbox2[4], bbox[5])
+    this.bboxExpand(bbox, bbox2[0], bbox2[1], bbox2[2])
+    this.bboxExpand(bbox, bbox2[3], bbox2[4], bbox2[5])
   },
 
 
