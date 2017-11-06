@@ -45,7 +45,7 @@
 // NOTE: max step freq: (STEPS_PER_MIN*SEEKRATE)/60 needs to be < 40kHz
 #define CONFIG_X_STEPS_PER_MM 623.7 //microsteps/mm
 #define CONFIG_Y_STEPS_PER_MM 623.7 //microsteps/mm
-#define CONFIG_Z_STEPS_PER_MM 797.812 //microsteps/mm
+#define CONFIG_Z_STEPS_PER_MM 802.6 //microsteps/mm
 #define CONFIG_PULSE_MICROSECONDS 5
 #define CONFIG_FEEDRATE 800.0 // in millimeters per minute
 #define CONFIG_SEEKRATE 800.0
