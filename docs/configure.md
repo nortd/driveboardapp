@@ -25,7 +25,6 @@ To reset any entry to the default do something like this:
 
 Firmware Configuration
 ----------------------
+Custom firmwares can be created by adding special `config.xxxx.h` files in the `firmware/src` directory. For example `config.driveboardusb.h` is the configuration file for the Driveboard Element. When you click 'Rebuild Firmware' the backend will then build one firmware for every config file in the `src` directory.
 
-The main configuration file for the firmware is [config.h](../firmware/src/config.h) and an alternative configuration can be created by adding a *config.user.h* file. This file has to be complete and is typically the *config.h* with some modifications. The main reason this is done like this is to prevent your changes being overwritten when you update the software with a `git pull`.
-
-Any updates or changes to the firmware are not automatically loaded onto the Driveboard. For this use the *Flash from source* feature in the user interface. After flashing it's recommended to restart the Driveboard. For your own sanity you should also change the `define VERSION` entry in *config.user.h* and make sure this number is reflected in the *About* dialog of the user interface.
+To flash a custom firmware open `/flash/xxxx` with your browser. Alternatively you can configure this custom firmware as your new default by opening `/config/firmware/xxxx`. Then a click on 'Flash Firmware' will use this newly configured firmware from now on.
