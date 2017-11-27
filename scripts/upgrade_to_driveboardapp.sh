@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Switching from LasaurApp to DriveboardApp ..."
 
