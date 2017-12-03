@@ -26,7 +26,7 @@ from encodings import mac_roman  # explicit for pyinstaller
 
 conf = {
     'appname': 'driveboardapp',
-    'version': '17.04-beta',
+    'version': '17.04-beta-jet',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
