@@ -81,7 +81,7 @@ void control_init() {
     // also see: http://arduino.cc/en/Tutorial/SecretsOfArduinoPWM
     // see: https://sites.google.com/site/qeewiki/books/avr-guide/pwm-on-the-atmega328
     ASSIST_DDR |= (1 << LASER_PWM_BIT);   // set as output pin
-    if (LASER_PWM_BIT == 5) {  // granular freq only works with PDS
+    if (LASER_PWM_BIT == 5) {  // granular freq only works with PD5
       // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
       TCCR0B = _BV(WGM02);
       TCCR0A = _BV(WGM00);
@@ -101,11 +101,20 @@ void control_init() {
     }
   #endif
 
-  //// air and aux assist control
-  ASSIST_DDR |= (1 << AIR_ASSIST_BIT);   // set as output pin
-  control_air_assist(false);
-  ASSIST_DDR |= (1 << AUX_ASSIST_BIT);  // set as output pin
-  control_aux_assist(false);
+  // LasaurShield has no air or aux
+  #ifndef LASAURSHIELD
+    //// air and aux assist control
+    ASSIST_DDR |= (1 << AIR_ASSIST_BIT);   // set as output pin
+    control_air_assist(false);
+
+    ASSIST_DDR |= (1 << AUX_ASSIST_BIT);  // set as output pin
+    control_aux_assist(false);
+  #else
+    //// limits overwrite control
+    // Never used in LasaurShield, just disable
+    ASSIST_DDR |= 1<<LIMITS_OVERWRITE_BIT; // define as output pin
+    ASSIST_PORT &= ~(1<<LIMITS_OVERWRITE_BIT); // do not use hardware logic to stop steppers
+  #endif
 }
 
 
@@ -197,18 +206,23 @@ inline uint8_t control_get_intensity() {
 }
 
 
+
 inline void control_air_assist(bool enable) {
-  if (enable) {
-    ASSIST_PORT |= (1 << AIR_ASSIST_BIT);
-  } else {
-    ASSIST_PORT &= ~(1 << AIR_ASSIST_BIT);
-  }
+  #ifndef LASAURSHIELD
+    if (enable) {
+      ASSIST_PORT |= (1 << AIR_ASSIST_BIT);
+    } else {
+      ASSIST_PORT &= ~(1 << AIR_ASSIST_BIT);
+    }
+  #endif
 }
 
 inline void control_aux_assist(bool enable) {
-  if (enable) {
-    ASSIST_PORT |= (1 << AUX_ASSIST_BIT);
-  } else {
-    ASSIST_PORT &= ~(1 << AUX_ASSIST_BIT);
-  }
+  #ifndef LASAURSHIELD
+    if (enable) {
+      ASSIST_PORT |= (1 << AUX_ASSIST_BIT);
+    } else {
+      ASSIST_PORT &= ~(1 << AUX_ASSIST_BIT);
+    }
+  #endif
 }
