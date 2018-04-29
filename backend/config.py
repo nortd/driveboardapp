@@ -30,6 +30,7 @@ conf = {
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
+    'enable_gzip': True,                   # allow gzip upload of files / jobs
     'serial_port': '',                     # set to '' for auto (req. firmware)
     'baudrate': 57600,
     'rootdir': None,                       # defined further down (../)
@@ -70,7 +71,8 @@ userconfigurable = {
     'max_jobs_in_list': "Jobs to keep in the history list.",
     'fill_leadin': "Leadin for vector fills in mm.",
     'raster_leadin': "Leadin for raster fills in mm.",
-    'users': "List of user cendentials for UI access."
+    'users': "List of user cendentials for UI access.",
+    'enable_gzip': "Enable gzip compression of file / job uploads",
 }
 
 

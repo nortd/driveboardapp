@@ -55,7 +55,7 @@ $(document).ready(function(){
     }
 
     // send to backend
-    var load_request = {'job':job, 'name':import_name, 'optimize':true}
+    var load_request = {'job': job, 'name':import_name, 'optimize':true}
     request_post({
       url:'/load',
       data: load_request,
@@ -72,7 +72,6 @@ $(document).ready(function(){
         $('#open_btn').button('reset')
       }
     })
-
   }
 
 })  // ready
@@ -97,7 +96,7 @@ function import_open(jobname, from_library) {
         jobhandler.render()
         jobhandler.draw()
       }
-      
+
       jobhandler.set(job, jobname, true, jobhandler_done)
 
       // debug, show image, stats
