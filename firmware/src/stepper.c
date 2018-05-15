@@ -308,7 +308,16 @@ ISR(TIMER1_COMPA_vect) {
   #endif
 
   // pulse steppers
-  STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | (out_bits & DIRECTION_MASK);
+  uint8_t dir_bits_old = STEPPING_PORT & DIRECTION_MASK;
+  uint8_t dir_bits_new = out_bits & DIRECTION_MASK;
+  STEPPING_PORT = (STEPPING_PORT & ~DIRECTION_MASK) | dir_bits_new;
+  if (dir_bits_old != dir_bits_new) {
+    // on direction change wait one step cycle to give slow
+    // stepper drivers a chance to respond accordingly
+    // _delay_us(5); // add more, for testing only
+    return;
+  }
+  STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | out_bits;
   STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | out_bits;
   // prime for reset pulse in CONFIG_PULSE_MICROSECONDS
   TCNT2 = -(((CONFIG_PULSE_MICROSECONDS-2)*CYCLES_PER_MICROSECOND) >> 3); // Reload timer counter
