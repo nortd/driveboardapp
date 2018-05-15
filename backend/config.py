@@ -301,10 +301,15 @@ def load(configname):
             except ValueError:
                 print "ERROR: failed to read config file"
     else:
-        # copy default config to user config
-        with open(path, "w") as fp:
-            confout = {k:v for k,v in conf.items() if k in userconfigurable}
-            json.dump(confout, fp, indent=4)
+        if not configname:
+            # special case: default config not present, create
+            print "INFO: creating default config file"
+            with open(path, "w") as fp:
+                confout = {k:v for k,v in conf.items() if k in userconfigurable}
+                json.dump(confout, fp, indent=4)
+        else:
+            print "ERROR: invalid config specified"
+            sys.exit()
 
 
 def write_config_fields(subconfigdict):
