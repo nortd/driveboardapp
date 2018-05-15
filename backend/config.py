@@ -315,3 +315,14 @@ def write_config_fields(subconfigdict):
     conftemp.update(subconfigdict)
     with open(configpath, "w") as fp:
         json.dump(conftemp, fp, indent=4)
+
+
+def list_configs():
+    print "Config files in " + conf['confdir'] + ":"
+    tempdir = os.getcwd()
+    os.chdir(conf['confdir'])
+    cfiles = glob.glob('config.*.json')
+    for cfile in cfiles:
+        confname = cfile.split('.')[1]
+        print "%s - (%s)" % (confname, cfile)
+    os.chdir(tempdir)

@@ -25,7 +25,13 @@ argparser.add_argument('-u', '--usbhack', dest='usbhack', action='store_true',
                        default=False, help='use usb reset hack (advanced)')
 argparser.add_argument('--config', dest='config',
                        help='Specify alternative configuration (It\'s the  xxxx in config.xxxx.json of a file inside the config directory).')
+argparser.add_argument('--list-configs', dest='list_configs', action='store_true',
+                       default=False, help='list available configurations')
 args = argparser.parse_args()
+
+if args.list_configs:
+    config.list_configs()
+    sys.exit()
 
 try:
     import Tkinter
