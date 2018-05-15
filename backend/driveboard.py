@@ -391,22 +391,22 @@ class SerialLoopClass(threading.Thread):
                 # chr is in [!-@], process flag
                 if char == ERROR_LIMIT_HIT_X1:
                     self._s['stops']['x1'] = True
-                    print "ERROR firmware: limit hit x1"
+                    # print "ERROR firmware: limit hit x1"
                 elif char == ERROR_LIMIT_HIT_X2:
                     self._s['stops']['x2'] = True
-                    print "ERROR firmware: limit hit x2"
+                    # print "ERROR firmware: limit hit x2"
                 elif char == ERROR_LIMIT_HIT_Y1:
                     self._s['stops']['y1'] = True
-                    print "ERROR firmware: limit hit y1"
+                    # print "ERROR firmware: limit hit y1"
                 elif char == ERROR_LIMIT_HIT_Y2:
                     self._s['stops']['y2'] = True
-                    print "ERROR firmware: limit hit y2"
+                    # print "ERROR firmware: limit hit y2"
                 elif char == ERROR_LIMIT_HIT_Z1:
                     self._s['stops']['z1'] = True
-                    print "ERROR firmware: limit hit z1"
+                    # print "ERROR firmware: limit hit z1"
                 elif char == ERROR_LIMIT_HIT_Z2:
                     self._s['stops']['z2'] = True
-                    print "ERROR firmware: limit hit z2"
+                    # print "ERROR firmware: limit hit z2"
                 elif char == ERROR_SERIAL_STOP_REQUEST:
                     self._s['stops']['requested'] = True
                     # print "ERROR firmware: stop request"
@@ -431,8 +431,14 @@ class SerialLoopClass(threading.Thread):
                     print "ERROR firmware: transmission"
                 else:
                     print "ERROR: invalid stop error marker"
-                # in stop mode, print recent transmission, unless stop request
-                if char != ERROR_SERIAL_STOP_REQUEST:
+                # in stop mode, print recent transmission, unless stop request, or limit
+                if char != ERROR_SERIAL_STOP_REQUEST and \
+                          char != ERROR_LIMIT_HIT_X1 and \
+                          char != ERROR_LIMIT_HIT_X2 and \
+                          char != ERROR_LIMIT_HIT_Y1 and \
+                          char != ERROR_LIMIT_HIT_Y2 and \
+                          char != ERROR_LIMIT_HIT_Z1 and \
+                          char != ERROR_LIMIT_HIT_Z2:
                     recent_chars = self.tx_buffer[max(0,self.tx_pos-128):self.tx_pos]
                     print "RECENT TX BUFFER:"
                     for char in recent_chars:
