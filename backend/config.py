@@ -3,12 +3,14 @@
 #
 # NOTE!
 # -----
-# To add/change config parameters create a file named
-# userfileig.py and write something like this:
+# To change config parameters create a file named
+# config.name_of_config.json in the config directory
+# (use --list-configs to find it)
+# and write something like this:
 #
-# conf = {
-#     'network_port': 4411,
-#     'serial_port': 'COM3'
+# {
+#     "network_port": 4411,
+#     "serial_port": "COM3"
 # }
 #
 
@@ -26,7 +28,7 @@ from encodings import mac_roman  # explicit for pyinstaller
 
 conf = {
     'appname': 'driveboardapp',
-    'version': '17.09-beta',
+    'version': '18.05',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
