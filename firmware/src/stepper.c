@@ -321,6 +321,7 @@ ISR(TIMER1_COMPA_vect) {
     // on direction change wait one step cycle to give slow
     // stepper drivers a chance to respond accordingly
     // _delay_us(5); // add more, for testing only
+    busy = false;
     return;
   }
   STEPPING_PORT = (STEPPING_PORT & ~STEPPING_MASK) | out_bits;
