@@ -213,6 +213,7 @@ var status_handlers = {
     if (status.ready) {
       app_run_btn.stop()
       $('#boundary_btn').removeClass('disabled')
+      $('#boundary_btn').prop('disabled', false) // required
       $('#origin_btn').removeClass('disabled')
       $('#homing_btn').removeClass('disabled')
       $('#offset_btn').removeClass('disabled')
