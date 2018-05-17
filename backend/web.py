@@ -12,6 +12,7 @@ import webbrowser
 import wsgiref.simple_server
 import bottle
 import traceback
+import gzip
 from config import conf, userconfigurable, write_config_fields, conf_defaults
 
 import driveboard
@@ -449,6 +450,10 @@ def load():
     """
     load_request = json.loads(bottle.request.forms.get('load_request'))
     job = load_request.get('job')  # always a string
+    if job == 'upload':  # data was passed as gzip file upload
+        upload = bottle.request.files.get('job', None)
+        job = gzip.GzipFile(fileobj=upload.file, mode='rb').read()
+
     name = load_request.get('name')
     # optimize defaults
     if 'optimize' in load_request:

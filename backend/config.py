@@ -54,6 +54,7 @@ conf = {
     'users': {
         'laser': 'laser',
     },
+    'enable_gzip': True,           # allow gzip upload of files / jobs
     'mill_mode': False,
     'mill_max_rpm': 18000,
 }
@@ -75,6 +76,7 @@ userconfigurable = {
     'fill_leadin': "Leadin for vector fills in mm.",
     'raster_leadin': "Leadin for raster fills in mm.",
     'users': "List of user cendentials for UI access.",
+    'enable_gzip': "Enable gzip compression in job uploads.",
     'mill_mode': "Activate CNC mill mode.",
     'mill_max_rpm': "Maximum spindle RPM."
 }
