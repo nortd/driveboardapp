@@ -456,6 +456,7 @@ class SerialLoopClass(threading.Thread):
                 self._paused = False
                 self.device.flushOutput()
                 self.pdata_count = 0
+                self._s['ready'] = True # ready but in stop mode
             elif 64 < ord(char) < 91:  # info flags
                 # chr is in [A-Z], info flag
                 if char == INFO_IDLE_YES:
@@ -830,6 +831,7 @@ def homing():
     global SerialLoop
     with SerialLoop.lock:
         if SerialLoop._status['ready'] or SerialLoop._status['stops']:
+            SerialLoop.request_resume = True  # to recover from a stop mode
             SerialLoop.send_command(CMD_HOMING)
         else:
             print "WARN: ignoring homing command while job running"
@@ -1007,7 +1009,7 @@ def job(jobdict):
         else:
             job_laser(jobdict)
     else:
-        print "INFO: not a valid job, 'head:{}' missing"
+        print "INFO: not a valid job, 'head' entry missing"
 
 
 def job_laser(jobdict):
