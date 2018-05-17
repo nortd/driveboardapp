@@ -1110,7 +1110,7 @@ def job_laser(jobdict):
                 px_w = int(size[0]/pxsize_2)
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
-                print "--- start of image processing ---"
+                # print "--- start of image processing ---"
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':
@@ -1119,7 +1119,7 @@ def job_laser(jobdict):
                     imgobj = imgbg.convert("L")
                 else:
                     imgobj = imgobj.convert("L")
-                print "---- end of image processing ----"
+                # print "---- end of image processing ----"
                 # imgobj.show()
                 posx = pos[0]
                 posy = pos[1]

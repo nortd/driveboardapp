@@ -694,15 +694,15 @@ inline void stepper_homing_cycle() {
   // execute homing moves
   #ifdef ENABLE_3AXES
     // z-axis, first for save retract
-    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 5.0*zdir, 0.5*CONFIG_SEEKRATE);
-    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 2.0*zdir, 0.2*CONFIG_SEEKRATE);
+    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 10.0*zdir, 0.4*CONFIG_SEEKRATE);
+    homing_move(0.0, 0.0, -999999*zdir, 0.0, 0.0, 2.0*zdir, 0.1*CONFIG_SEEKRATE);
   #endif
   // x-axis
-  homing_move(-999999*xdir, 0.0, 0.0, 5.0*xdir, 0.0, 0.0, 0.5*CONFIG_SEEKRATE);
-  homing_move(-999999*xdir, 0.0, 0.0, 2.0*xdir, 0.0, 0.0, 0.2*CONFIG_SEEKRATE);
+  homing_move(-999999*xdir, 0.0, 0.0, 10.0*xdir, 0.0, 0.0, 0.4*CONFIG_SEEKRATE);
+  homing_move(-999999*xdir, 0.0, 0.0, 2.0*xdir, 0.0, 0.0, 0.1*CONFIG_SEEKRATE);
   // y-axis
-  homing_move(0.0, -999999*ydir, 0.0, 0.0, 5.0*ydir, 0.0, 0.5*CONFIG_SEEKRATE);
-  homing_move(0.0, -999999*ydir, 0.0, 0.0, 2.0*ydir, 0.0, 0.2*CONFIG_SEEKRATE);
+  homing_move(0.0, -999999*ydir, 0.0, 0.0, 10.0*ydir, 0.0, 0.4*CONFIG_SEEKRATE);
+  homing_move(0.0, -999999*ydir, 0.0, 0.0, 2.0*ydir, 0.0, 0.1*CONFIG_SEEKRATE);
 
   planner_set_position(0.0, 0.0, 0.0);
   clear_vector(stepper_position);
