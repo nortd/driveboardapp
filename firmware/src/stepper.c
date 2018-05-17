@@ -668,20 +668,20 @@ inline void homing_delimit() {
 
 inline void stepper_homing_cycle() {
   // homing direction
-  #ifdef CONFIG_INVERT_X_HOMING
+  #if (CONFIG_INVERT_X_HOMING == 1)
     double xdir = -1.0;
   #else
     double xdir = 1.0;
   #endif
 
-  #ifdef CONFIG_INVERT_Y_HOMING
+  #if (CONFIG_INVERT_Y_HOMING == 1)
     double ydir = -1.0;
   #else
     double ydir = 1.0;
   #endif
 
   #ifdef ENABLE_3AXES
-    #ifdef CONFIG_INVERT_Z_HOMING
+    #if (CONFIG_INVERT_Z_HOMING == 1)
       double zdir = -1.0;
     #else
       double zdir = 1.0;
