@@ -12,6 +12,7 @@ import webbrowser
 import wsgiref.simple_server
 import bottle
 import traceback
+import gzip
 from config import conf, userconfigurable, write_config_fields, conf_defaults
 
 import driveboard
@@ -348,7 +349,11 @@ def load():
         overwrite: flag whether to overwite file if present (bool)
     """
     load_request = json.loads(bottle.request.forms.get('load_request'))
-    job = load_request.get('job')  # always a string
+    job = load_request.get('job')
+    if job == 'upload':  # data was passed as gzip file upload
+        upload = bottle.request.files.get('job', None)
+        job = gzip.GzipFile(fileobj=upload.file, mode='rb').read()
+
     name = load_request.get('name')
     # optimize defaults
     if 'optimize' in load_request:
@@ -367,7 +372,8 @@ def load():
     try:
         job = jobimport.convert(job, optimize=optimize)
     except TypeError:
-        if DEBUG: traceback.print_exc()
+        if DEBUG:
+            traceback.print_exc()
         bottle.abort(400, "Invalid file type.")
 
     if not overwrite:

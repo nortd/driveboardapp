@@ -21,7 +21,7 @@ function controls_ready() {
         filename = filename+'.dba'
       }
       jobhandler.passes = passes_get_active()
-      var blob = new Blob([jobhandler.getJson()], {type: "application/json;charset=utf-8"})
+      var blob = new Blob([jobhandler.getJson('\t')], {type: "application/json;charset=utf-8"})
       saveAs(blob, filename)
       // var load_request = {'job':jobhandler.getJson()}
       // request_post({
@@ -134,6 +134,7 @@ function controls_ready() {
       $().uxmessage('error', "No machine.")
       return false
     }
+
     // button feedback
     app_run_btn.start()
     $('#boundary_btn').prop('disabled', true)
@@ -143,7 +144,6 @@ function controls_ready() {
       'job':jobhandler.getJson(),
       'name':jobhandler.name,
       'optimize':true,
-      // 'optimize':false,
       'overwrite':true
     }
     request_post({
