@@ -86,6 +86,7 @@ function request_post(args) {
 
 function request_boundary(bounds, seekrate) {
   var job = {
+    "head":{},
     "passes":[
       {
         "items":[0],

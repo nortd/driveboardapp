@@ -1007,7 +1007,7 @@ def job(jobdict):
         else:
             job_laser(jobdict)
     else:
-        print "INFO: not a valid job"
+        print "INFO: not a valid job, 'head:{}' missing"
 
 
 def job_laser(jobdict):
