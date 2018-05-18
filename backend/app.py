@@ -4,12 +4,13 @@ import os
 import time
 import argparse
 
+import web
+
 try:
     import Tkinter
 except ImportError:
     pass
-    
-import web
+
 # from config import conf
 import config
 
