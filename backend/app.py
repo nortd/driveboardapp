@@ -4,9 +4,9 @@ import os
 import time
 import argparse
 
+# import web
 # from config import conf
 import config
-import web
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
@@ -32,6 +32,8 @@ args = argparser.parse_args()
 if args.list_configs:
     config.list_configs()
     sys.exit()
+
+import web
 
 try:
     import Tkinter
