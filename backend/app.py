@@ -5,7 +5,7 @@ import time
 import argparse
 
 import web
-config import conf
+# from config import conf
 import config
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
