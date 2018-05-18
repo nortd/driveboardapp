@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import sys
@@ -24,6 +25,11 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 DEBUG = False
 bottle.BaseRequest.MEMFILE_MAX = 1024*1024*100 # max 100Mb files
 time_status_last = 0
+frontend_path = 'frontend'
+
+def enable_mill_mode():
+    global frontend_path
+    frontend_path = 'frontend_mill'
 
 
 def checkuser(user, pw):
@@ -39,12 +45,6 @@ def checkserial(func):
                 bottle.abort(400, "No machine.")
     return _decorator
 
-
-if conf['mill_mode']:
-    frontend_path = 'frontend_mill'
-    print "INFO: loading mill mode frontend"
-else:
-    frontend_path = 'frontend'
 
 ### STATIC FILES
 
