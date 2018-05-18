@@ -4,7 +4,7 @@ import os
 import time
 import argparse
 
-import web
+# import web
 # from config import conf
 import config
 
