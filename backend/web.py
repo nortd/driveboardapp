@@ -25,11 +25,12 @@ __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 DEBUG = False
 bottle.BaseRequest.MEMFILE_MAX = 1024*1024*100 # max 100Mb files
 time_status_last = 0
-frontend_path = 'frontend'
 
-def enable_mill_mode():
-    global frontend_path
+if conf['mill_mode']:
     frontend_path = 'frontend_mill'
+    print "INFO: loading mill mode frontend"
+else:
+    frontend_path = 'frontend'
 
 
 def checkuser(user, pw):
@@ -763,7 +764,7 @@ def start(browser=False, debug=False):
             print "Cannot open Webbrowser, please do so manually."
     sys.stdout.flush()  # make sure everything gets flushed
     # start server
-    print "INFO: Starting web server thread."
+    # print "INFO: Starting web server thread."
     S.start()
 
 

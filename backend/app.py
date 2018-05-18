@@ -4,7 +4,6 @@ import os
 import time
 import argparse
 
-import web
 import config
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -32,6 +31,14 @@ if args.list_configs:
     config.list_configs()
     sys.exit()
 
+config.conf['usb_reset_hack'] = args.usbhack
+config.load(args.config)
+# NOTE: web has to be inported before Tkinter is initialized
+# otherwise the window will fail open on Windows.
+# The config has to be loaded/finalized before importing we
+# otherwise some initialization will use the wrong values.
+import web
+
 try:
     import Tkinter
 except ImportError:
@@ -42,11 +49,6 @@ if not args.cli:
     root = window.init()
 
 print "DriveboardApp v" + config.conf['version']
-config.conf['usb_reset_hack'] = args.usbhack
-config.load(args.config)
-if config.conf['mill_mode']:
-    web.enable_mill_mode()
-    print "INFO: loading mill mode frontend"
 
 # start server in thread
 web.start(browser=(not args.nobrowser), debug=args.debug)

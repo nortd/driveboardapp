@@ -251,7 +251,7 @@ elif conf['hardware'] == 'beaglebone':
     fw = file("/sys/class/gpio/gpio76/value", "r")
     ret = fw.read()
     fw.close()
-    print "Stepper driver configure pin is: " + str(ret)
+    # print "Stepper driver configure pin is: " + str(ret)
 
 elif conf['hardware'] == 'raspberrypi':
     if not conf['firmware']:
@@ -292,7 +292,7 @@ def load(configname):
     configpath = path
     #load
     if os.path.exists(path):
-        print "CONFIG: " + path
+        # print "CONFIG: " + path
         # apply user config
         with open(path) as fp:
             try:
