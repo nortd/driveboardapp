@@ -4,7 +4,12 @@ import os
 import time
 import argparse
 
-# import web
+try:
+    import Tkinter
+except ImportError:
+    pass
+    
+import web
 # from config import conf
 import config
 
@@ -33,7 +38,12 @@ if args.list_configs:
     config.list_configs()
     sys.exit()
 
+if 'Tkinter' not in sys.modules:
+    args.cli = True
 
+if not args.cli:
+    import window
+    root = window.init()
 
 print "DriveboardApp v" + config.conf['version']
 config.conf['usb_reset_hack'] = args.usbhack
@@ -41,16 +51,6 @@ config.load(args.config)
 
 # start server in thread
 import web
-
-try:
-    import Tkinter
-except ImportError:
-    args.cli = True
-
-if not args.cli:
-    import window
-    root = window.init()
-    
 web.start(browser=(not args.nobrowser), debug=args.debug)
 
 # main thread loop
