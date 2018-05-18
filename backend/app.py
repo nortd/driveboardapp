@@ -29,9 +29,9 @@ argparser.add_argument('--list-configs', dest='list_configs', action='store_true
                        default=False, help='list available configurations')
 args = argparser.parse_args()
 
-if args.list_configs:
-    config.list_configs()
-    sys.exit()
+# if args.list_configs:
+#     config.list_configs()
+#     sys.exit()
 
 try:
     import Tkinter
