@@ -4,14 +4,12 @@ import os
 import time
 import argparse
 
+# try:
+#     import Tkinter
+# except ImportError:
+#     pass
+
 import web
-
-try:
-    import Tkinter
-except ImportError:
-    pass
-
-# from config import conf
 import config
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -39,8 +37,13 @@ if args.list_configs:
     config.list_configs()
     sys.exit()
 
-if 'Tkinter' not in sys.modules:
+try:
+    import Tkinter
+except ImportError:
     args.cli = True
+
+# if 'Tkinter' not in sys.modules:
+#     args.cli = True
 
 if not args.cli:
     import window
