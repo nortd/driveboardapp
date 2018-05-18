@@ -4,9 +4,9 @@ import os
 import time
 import argparse
 
-# import web
 # from config import conf
 import config
+import web
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
 
