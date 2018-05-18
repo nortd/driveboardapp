@@ -33,12 +33,12 @@ if args.list_configs:
     config.list_configs()
     sys.exit()
 
-import web
-
 try:
     import Tkinter
 except ImportError:
     args.cli = True
+
+import web
 
 if not args.cli:
     import window
