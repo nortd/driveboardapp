@@ -44,11 +44,25 @@ function request_get(args) {
 
 function request_post(args) {
   // args items: url, data, success, error, complete
+
+  // special case load job, use file upload with compression
+  var formData = new FormData();
+  if(args.url == '/load' && app_config_main.enable_gzip) {
+    job = new File([pako.gzip(args.data.job)], 'upload.gz');
+    formData.append('job', job);
+    args.data.job = 'upload'
+  }
+  formData.append('load_request', JSON.stringify(args.data))
+
   $.ajax({
     type: "POST",
     url: args.url,
-    data: {'load_request':JSON.stringify(args.data)},
+    // data: {'load_request':JSON.stringify(args.data)},
+    data: formData,
     dataType: "json",
+    contentType: false,
+    processData: false,
+    cache: false,
     username: "laser",
     password: "laser",
     statusCode: {
