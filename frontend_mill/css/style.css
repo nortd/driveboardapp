@@ -1,0 +1,184 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+  overflow:hidden;
+  background-color: #f2f2f2;
+}
+a, a:active, a:focus {
+  outline:none
+}
+.footer {
+  /*position: absolute;*/
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  /*background-color: #f0f0f0;*/
+}
+
+.noptr {
+  pointer-events : none;
+}
+
+.nodrag {
+  user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  cursor: default;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+#main_navbar {
+    position:absolute;
+    margin:0;
+    border:0;
+    background-color: transparent;
+    z-index:10;
+    width:100%;
+}
+
+#main_footer {
+    position:absolute;
+    margin:0;
+    border:0;
+    background-color: transparent;
+    z-index:10;
+    width:100%;
+    bottom:400px;
+}
+
+#info_panel {
+    position:absolute;
+    margin:0;
+    border:0;
+    background-color: transparent;
+    z-index:10;
+    width:240px;
+    top:100px;
+    right:0px;
+}
+
+.row {
+  margin-bottom: 12px;
+}
+
+.menu_btn {
+  padding: 8px;
+}
+
+.footer_btn {
+  padding: 12px;
+}
+
+.enlarge {
+  height: 100px;
+  padding: 18px 18px;
+  font-size: 22px;
+  border-radius: 8px;
+}
+
+.enlarge2 {
+  height: 100px;
+  width: 100px;
+  padding: 18px 18px;
+  font-size: 22px;
+  border-radius: 8px;
+}
+
+.venlarge2 {
+  width: 100px;
+}
+
+.input-enlarge {
+  height: 100px;
+  padding: 10px 24px;
+  font-size: 24px;
+  line-height: 1.3333333;
+  border-radius: 6px;
+}
+
+#main_container {
+  /*position:fixed;
+  top:52px;
+  left:0;*/
+  padding:0;
+  margin:0;
+  /*border: 1px blue solid;*/
+  width:100%;
+}
+.container .text-muted {
+  margin: 20px 0;
+}
+
+#canvas_container {
+  position: relative;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+#job_canvas {
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+code {
+  font-size: 80%;
+}
+
+
+div.log_item {
+  padding:5px;
+  margin: 5px;
+}
+div.log_notice {
+  border: 2px solid #aaaaaa;
+}
+div.log_success {
+  border: 2px solid green;
+}
+div.log_warning {
+  border: 2px solid orange;
+}
+div.log_error {
+  border: 2px solid red;
+}
+
+
+.pass_color_dropdown > li > a:hover {
+    background-color: transparent;
+    background-image: none;
+    color: white;
+}
+
+
+.spinning {
+    animation: spin 1s infinite linear;
+    transform-origin: 49.5% 49.7%;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1) rotate(360deg); }
+}
+
+#status_btn_div ul li {
+  padding-top:2px;
+  padding-bottom:2px;
+}

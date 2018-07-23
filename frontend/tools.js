@@ -87,7 +87,7 @@ function tools_toffset_init() {
     var x = Math.ceil(event.point.x/jobview_mm2px)
     var y = Math.ceil(event.point.y/jobview_mm2px)
     request_get({
-      url:'/offset/'+x+'/'+y+'/0',
+      url:'/absoffset/'+x+'/'+y+'/0',
       success: function (data) {
         $().uxmessage('notice', "Offset set to: "+x+","+y)
       },
@@ -292,21 +292,21 @@ function tools_tjog_init() {
     var hit = jobview_jogLayer.hitTest(event.point)
     if (hit) {
       if (hit.item === arrow_up) {
-        request_relative_move(0, -10, 0, app_config_main.seekrate, "jogging up 10mm")
+        request_jog(0, -10, 0, "jogging up 10mm")
       } else if (hit.item === arrow_up_lg) {
-        request_relative_move(0, -50, 0, app_config_main.seekrate, "jogging up 50mm")
+        request_jog(0, -50, 0, "jogging up 50mm")
       } else if (hit.item === arrow_down) {
-        request_relative_move(0, 10, 0, app_config_main.seekrate, "jogging down 10mm")
+        request_jog(0, 10, 0, "jogging down 10mm")
       } else if (hit.item === arrow_down_lg) {
-        request_relative_move(0, 50, 0, app_config_main.seekrate, "jogging down 50mm")
+        request_jog(0, 50, 0, "jogging down 50mm")
       } else if (hit.item === arrow_left) {
-        request_relative_move(-10, 0, 0, app_config_main.seekrate, "jogging left 10mm")
+        request_jog(-10, 0, 0, "jogging left 10mm")
       } else if (hit.item === arrow_left_lg) {
-        request_relative_move(-50, 0, 0, app_config_main.seekrate, "jogging left 50mm")
+        request_jog(-50, 0, 0, "jogging left 50mm")
       } else if (hit.item === arrow_right) {
-        request_relative_move(10, 0, 0, app_config_main.seekrate, "jogging right 10mm")
+        request_jog(10, 0, 0, "jogging right 10mm")
       } else if (hit.item === arrow_right_lg) {
-        request_relative_move(50, 0, 0, app_config_main.seekrate, "jogging right 50mm")
+        request_jog(50, 0, 0, "jogging right 50mm")
       }
     }
   }

@@ -12,10 +12,11 @@ import serial
 import serial.tools.list_ports
 from config import conf, write_config_fields
 
-try:
-    from PIL import Image
-except ImportError:
-    print "Pillow module missing, raster mode will fail."
+if not conf['mill_mode']:
+    try:
+        from PIL import Image
+    except ImportError:
+        print "Pillow module missing, raster mode will fail."
 
 
 __author__  = 'Stefan Hechenberger <stefan@nortd.com>'
@@ -39,21 +40,17 @@ CMD_RASTER = "D"
 
 CMD_REF_RELATIVE = "E"
 CMD_REF_ABSOLUTE = "F"
+CMD_REF_STORE = "G"
+CMD_REF_RESTORE = "H"
 
-CMD_HOMING = "G"
-
-CMD_SET_OFFSET_TABLE = "H"
-CMD_SET_OFFSET_CUSTOM = "I"
-CMD_SEL_OFFSET_TABLE = "J"
-CMD_SEL_OFFSET_CUSTOM = "K"
+CMD_HOMING = "I"
+CMD_OFFSET_STORE = "J"
+CMD_OFFSET_RESTORE = "K"
 
 CMD_AIR_ENABLE = "L"
 CMD_AIR_DISABLE = "M"
 CMD_AUX_ENABLE = "N"
 CMD_AUX_DISABLE = "O"
-# CMD_AUX2_ENABLE = "P"
-# CMD_AUX2_DISABLE = "Q"
-
 
 PARAM_TARGET_X = "x"
 PARAM_TARGET_Y = "y"
@@ -62,12 +59,9 @@ PARAM_FEEDRATE = "f"
 PARAM_INTENSITY = "s"
 PARAM_DURATION = "d"
 PARAM_PIXEL_WIDTH = "p"
-PARAM_OFFTABLE_X = "h"
-PARAM_OFFTABLE_Y = "i"
-PARAM_OFFTABLE_Z = "j"
-PARAM_OFFCUSTOM_X = "k"
-PARAM_OFFCUSTOM_Y = "l"
-PARAM_OFFCUSTOM_Z = "m"
+PARAM_OFFSET_X = "h"
+PARAM_OFFSET_Y = "i"
+PARAM_OFFSET_Z = "j"
 
 ################
 
@@ -106,9 +100,9 @@ INFO_STACK_CLEARANCE = 'u'
 
 INFO_HELLO = '~'
 
-INFO_OFFCUSTOM_X = 'a'
-INFO_OFFCUSTOM_Y = 'b'
-INFO_OFFCUSTOM_Z = 'c'
+INFO_OFFSET_X = 'a'
+INFO_OFFSET_Y = 'b'
+INFO_OFFSET_Z = 'c'
 # INFO_TARGET_X = 'd'
 # INFO_TARGET_Y = 'e'
 # INFO_TARGET_Z = 'f'
@@ -139,21 +133,17 @@ markers_tx = {
 
     "E": "CMD_REF_RELATIVE",
     "F": "CMD_REF_ABSOLUTE",
+    "G": "CMD_REF_STORE",
+    "H": "CMD_REF_RESTORE",
 
-    "G": "CMD_HOMING",
-
-    "H": "CMD_SET_OFFSET_TABLE",
-    "I": "CMD_SET_OFFSET_CUSTOM",
-    "J": "CMD_SEL_OFFSET_TABLE",
-    "K": "CMD_SEL_OFFSET_CUSTOM",
+    "I": "CMD_HOMING",
+    "J": "CMD_OFFSET_STORE",
+    "K": "CMD_OFFSET_RESTORE",
 
     "L": "CMD_AIR_ENABLE",
     "M": "CMD_AIR_DISABLE",
     "N": "CMD_AUX_ENABLE",
     "O": "CMD_AUX_DISABLE",
-    # "P": "CMD_AUX2_ENABLE",
-    # "Q": "CMD_AUX2_DISABLE",
-
 
     "x": "PARAM_TARGET_X",
     "y": "PARAM_TARGET_Y",
@@ -162,12 +152,9 @@ markers_tx = {
     "s": "PARAM_INTENSITY",
     "d": "PARAM_DURATION",
     "p": "PARAM_PIXEL_WIDTH",
-    "h": "PARAM_OFFTABLE_X",
-    "i": "PARAM_OFFTABLE_Y",
-    "j": "PARAM_OFFTABLE_Z",
-    "k": "PARAM_OFFCUSTOM_X",
-    "l": "PARAM_OFFCUSTOM_Y",
-    "m": "PARAM_OFFCUSTOM_Z",
+    "h": "PARAM_OFFSET_X",
+    "i": "PARAM_OFFSET_Y",
+    "j": "PARAM_OFFSET_Z",
 }
 
 markers_rx = {
@@ -203,9 +190,9 @@ markers_rx = {
 
     '~': "INFO_HELLO",
 
-    'a': "INFO_OFFCUSTOM_X",
-    'b': "INFO_OFFCUSTOM_Y",
-    'c': "INFO_OFFCUSTOM_Z",
+    'a': "INFO_OFFSET_X",
+    'b': "INFO_OFFSET_Y",
+    'c': "INFO_OFFSET_Z",
     # 'd': "INFO_TARGET_X",
     # 'e': "INFO_TARGET_Y",
     # 'f': "INFO_TARGET_Z",
@@ -404,22 +391,22 @@ class SerialLoopClass(threading.Thread):
                 # chr is in [!-@], process flag
                 if char == ERROR_LIMIT_HIT_X1:
                     self._s['stops']['x1'] = True
-                    print "ERROR firmware: limit hit x1"
+                    # print "ERROR firmware: limit hit x1"
                 elif char == ERROR_LIMIT_HIT_X2:
                     self._s['stops']['x2'] = True
-                    print "ERROR firmware: limit hit x2"
+                    # print "ERROR firmware: limit hit x2"
                 elif char == ERROR_LIMIT_HIT_Y1:
                     self._s['stops']['y1'] = True
-                    print "ERROR firmware: limit hit y1"
+                    # print "ERROR firmware: limit hit y1"
                 elif char == ERROR_LIMIT_HIT_Y2:
                     self._s['stops']['y2'] = True
-                    print "ERROR firmware: limit hit y2"
+                    # print "ERROR firmware: limit hit y2"
                 elif char == ERROR_LIMIT_HIT_Z1:
                     self._s['stops']['z1'] = True
-                    print "ERROR firmware: limit hit z1"
+                    # print "ERROR firmware: limit hit z1"
                 elif char == ERROR_LIMIT_HIT_Z2:
                     self._s['stops']['z2'] = True
-                    print "ERROR firmware: limit hit z2"
+                    # print "ERROR firmware: limit hit z2"
                 elif char == ERROR_SERIAL_STOP_REQUEST:
                     self._s['stops']['requested'] = True
                     # print "ERROR firmware: stop request"
@@ -444,8 +431,14 @@ class SerialLoopClass(threading.Thread):
                     print "ERROR firmware: transmission"
                 else:
                     print "ERROR: invalid stop error marker"
-                # in stop mode, print recent transmission, unless stop request
-                if char != ERROR_SERIAL_STOP_REQUEST:
+                # in stop mode, print recent transmission, unless stop request, or limit
+                if char != ERROR_SERIAL_STOP_REQUEST and \
+                          char != ERROR_LIMIT_HIT_X1 and \
+                          char != ERROR_LIMIT_HIT_X2 and \
+                          char != ERROR_LIMIT_HIT_Y1 and \
+                          char != ERROR_LIMIT_HIT_Y2 and \
+                          char != ERROR_LIMIT_HIT_Z1 and \
+                          char != ERROR_LIMIT_HIT_Z2:
                     recent_chars = self.tx_buffer[max(0,self.tx_pos-128):self.tx_pos]
                     print "RECENT TX BUFFER:"
                     for char in recent_chars:
@@ -463,6 +456,7 @@ class SerialLoopClass(threading.Thread):
                 self._paused = False
                 self.device.flushOutput()
                 self.pdata_count = 0
+                self._s['ready'] = True # ready but in stop mode
             elif 64 < ord(char) < 91:  # info flags
                 # chr is in [A-Z], info flag
                 if char == INFO_IDLE_YES:
@@ -494,11 +488,11 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_BUFFER_UNDERRUN:
                     self._s['underruns'] = num
                 # super status
-                elif char == INFO_OFFCUSTOM_X:
+                elif char == INFO_OFFSET_X:
                     self._s['offset'][0] = num
-                elif char == INFO_OFFCUSTOM_Y:
+                elif char == INFO_OFFSET_Y:
                     self._s['offset'][1] = num
-                elif char == INFO_OFFCUSTOM_Z:
+                elif char == INFO_OFFSET_Z:
                     self._s['offset'][2] = num
                 elif char == INFO_FEEDRATE:
                     self._s['feedrate'] = num
@@ -703,11 +697,12 @@ def connect(port=conf['serial_port'], baudrate=conf['baudrate'], verbose=True):
                 SerialLoop.device.setDTR(True)
                 # for good measure
                 SerialLoop.device.flushOutput()
-            # else:
-            #     reset()
-                # time.sleep(0.5)
-                # SerialLoop.device.flushInput()
-                # SerialLoop.device.flushOutput()
+            else:
+                import flash
+                flash.reset_atmega()
+                time.sleep(0.5)
+                SerialLoop.device.flushInput()
+                SerialLoop.device.flushOutput()
 
             start = time.time()
             while True:
@@ -743,6 +738,12 @@ def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate'], verbos
             if verbose:
                 print "INFO: Hardware found at %s." % serialfindresult
             connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
+            if not connected():  # special case arduino found, but no firmware
+                yesno = raw_input("Firmware appears to be missing. Want to flash-upload it (Y/N)? ")
+                if yesno in ('Y', 'y'):
+                    ret = flash(serial_port=serialfindresult)
+                    if ret == 0:
+                        connect(port=serialfindresult, baudrate=baudrate, verbose=verbose)
         if connected():
             if verbose:
                 print "INFO: Connected at %s." % serialfindresult
@@ -830,6 +831,7 @@ def homing():
     global SerialLoop
     with SerialLoop.lock:
         if SerialLoop._status['ready'] or SerialLoop._status['stops']:
+            SerialLoop.request_resume = True  # to recover from a stop mode
             SerialLoop.send_command(CMD_HOMING)
         else:
             print "WARN: ignoring homing command while job running"
@@ -861,18 +863,45 @@ def relative():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_RELATIVE)
 
-
 def absolute():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_ABSOLUTE)
 
-def move(x, y, z=0.0):
+def move(x=None, y=None, z=None):
     global SerialLoop
     with SerialLoop.lock:
-        SerialLoop.send_param(PARAM_TARGET_X, x)
-        SerialLoop.send_param(PARAM_TARGET_Y, y)
-        SerialLoop.send_param(PARAM_TARGET_Z, z)
+        if x is not None:
+            SerialLoop.send_param(PARAM_TARGET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_TARGET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_TARGET_Z, z)
+        SerialLoop.send_command(CMD_LINE)
+
+def supermove(x=None, y=None, z=None):
+    """Moves in machine coordinates bypassing any offsets."""
+    global SerialLoop
+    with SerialLoop.lock:
+        # clear offset
+        SerialLoop.send_command(CMD_OFFSET_STORE)
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_ABSOLUTE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, 0)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, 0)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, 0)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+        # move
+        if x is not None:
+            SerialLoop.send_param(PARAM_TARGET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_TARGET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_TARGET_Z, z)
+        SerialLoop.send_command(CMD_OFFSET_RESTORE)
         SerialLoop.send_command(CMD_LINE)
 
 def rastermove(x, y, z=0.0):
@@ -888,10 +917,103 @@ def rasterdata(data, start, end):
     # more granular locking in send_data
     SerialLoop.send_data(data, start, end)
 
+def pause():
+    global SerialLoop
+    with SerialLoop.lock:
+        if SerialLoop.tx_buffer:
+            SerialLoop._paused = True
+
+def unpause():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop._paused = False
+
+
+def stop():
+    """Force stop condition."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.tx_buffer = []
+        SerialLoop.tx_pos = 0
+        SerialLoop.job_size = 0
+        SerialLoop.request_stop = True
+
+
+def unstop():
+    """Resume from stop condition."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.request_resume = True
+
+
+def air_on():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AIR_ENABLE)
+
+def air_off():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AIR_DISABLE)
+
+def aux_on():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_ENABLE)
+
+def aux_off():
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_AUX_DISABLE)
+
+
+def offset(x=None, y=None, z=None):
+    """Sets an offset relative to present pos."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_RELATIVE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+
+def absoffset(x=None, y=None, z=None):
+    """Sets an offset in machine coordinates."""
+    global SerialLoop
+    with SerialLoop.lock:
+        SerialLoop.send_command(CMD_REF_STORE)
+        SerialLoop.send_command(CMD_REF_ABSOLUTE)
+        if x is not None:
+            SerialLoop.send_param(PARAM_OFFSET_X, x)
+        if y is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Y, y)
+        if z is not None:
+            SerialLoop.send_param(PARAM_OFFSET_Z, z)
+        SerialLoop.send_command(CMD_REF_RESTORE)
+
+
+
+def jobfile(filepath):
+    jobdict = json.load(open(filepath))
+    job(jobdict)
 
 
 def job(jobdict):
-    """Queue a .dba job.
+    if 'head' in jobdict:
+        if 'kind' in jobdict['head'] and jobdict['head']['kind'] == 'mill':
+            job_mill(jobdict)
+        else:
+            job_laser(jobdict)
+    else:
+        print "INFO: not a valid job, 'head' entry missing"
+
+
+def job_laser(jobdict):
+    """Queue a .dba laser job.
     A job dictionary can define vector and raster passes.
     Unlike gcode it's not procedural but declarative.
     The job dict looks like this:
@@ -921,6 +1043,7 @@ def job(jobdict):
         {"kind":"path", "data":[[[0,10,0]]]},
         {"kind":"fill", "data":[[[0,10,0]]], "pxsize":0.4},
         {"kind":"image", "data":<data in base64>, "pos":[0,0], "size":[300,200]},
+        {"kind":"mill", "data":[('G0',(x,y,z)), ('F', 1000), ('G1', (x,y,z))]},
      ],
      "stats":{"items":[{"bbox":[x1,y1,x2,y2], "len":100}], "all":{}}
     }
@@ -989,7 +1112,7 @@ def job(jobdict):
                 px_w = int(size[0]/pxsize_2)
                 px_h = int(size[1]/pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
-                print "--- start of image processing ---"
+                # print "--- start of image processing ---"
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
                 imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':
@@ -998,7 +1121,7 @@ def job(jobdict):
                     imgobj = imgbg.convert("L")
                 else:
                     imgobj = imgobj.convert("L")
-                print "---- end of image processing ----"
+                # print "---- end of image processing ----"
                 # imgobj.show()
                 posx = pos[0]
                 posy = pos[1]
@@ -1104,6 +1227,9 @@ def job(jobdict):
         # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
         #     aux_off()
 
+    # leave machine in absolute mode
+    absolute()
+
     # return to origin
     feedrate(conf['seekrate'])
     intensity(0.0)
@@ -1115,93 +1241,80 @@ def job(jobdict):
         move(0, 0, 0)
 
 
-def jobfile(filepath):
-    jobdict = json.load(open(filepath))
-    job(jobdict)
+
+def job_mill(jobdict):
+    """Queue a .dba mill job.
+    A typical mill job dict looks like this:
+    ###########################################################################
+    {
+      "head": {
+          "kind": "mill",          # specify a mill job
+       },
+      "defs": [
+        {"data":[('G0',(x,y,z)), ('F', 1000), ('G1', (x,y,z))]},
+      ],
+    }
+    ###########################################################################
+    """
+    # check job
+    if (not 'head' in jobdict) or \
+       (not 'kind' in jobdict['head']) or \
+       (jobdict['head']['kind'] != 'mill'):
+        print "NOTICE: not a mill job"
+        return
+
+    if not 'defs' in jobdict:
+        print "ERROR: invalid job"
+        return
+    # prime job
+    air_off()
+    aux_off()
+    absolute()
+    intensity(0.0)
+    seekrate = conf['seekrate']
+    feedrate_ = conf['feedrate']
+    feedrate(seekrate)
+    feedrate_active = seekrate
+    # run job
+    for def_ in jobdict['defs']:
+        path = def_['data']
+        for item in path:
+            if item[0] == 'G0':
+                if feedrate_active != seekrate:
+                    feedrate(seekrate)
+                    feedrate_active = seekrate
+                move(item[1][0],item[1][1],item[1][2])
+            elif item[0] == 'G1':
+                if feedrate_active != feedrate_:
+                    feedrate(feedrate_)
+                    feedrate_active = feedrate_
+                move(item[1][0],item[1][1],item[1][2])
+            elif item[0] == 'F':
+                feedrate_ = item[1]
+            elif item[0] == 'S':
+                #convert RPMs to 0-100%
+                ipct = item[1]*(100.0/conf['mill_max_rpm'])
+                intensity(ipct)
+            elif item[0] == 'MIST':
+                if item[1] == True:
+                    air_on()
+                elif item[1] == False:
+                    air_off()
+            elif item[0] == 'FLOOD':
+                if item[1] == True:
+                    aux_on()
+                elif item[1] == False:
+                    aux_off()
+    # finalize job
+    air_off()
+    aux_off()
+    absolute()
+    feedrate(conf['seekrate'])
+    intensity(0.0)
+    supermove(z=0)
+    supermove(x=0, y=0)
 
 
-def pause():
-    global SerialLoop
-    with SerialLoop.lock:
-        if SerialLoop.tx_buffer:
-            SerialLoop._paused = True
-
-def unpause():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop._paused = False
-
-
-def stop():
-    """Force stop condition."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.tx_buffer = []
-        SerialLoop.tx_pos = 0
-        SerialLoop.job_size = 0
-        SerialLoop.request_stop = True
-
-
-def unstop():
-    """Resume from stop condition."""
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.request_resume = True
-
-
-def air_on():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AIR_ENABLE)
-
-def air_off():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AIR_DISABLE)
-
-def aux_on():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX_ENABLE)
-
-def aux_off():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_AUX_DISABLE)
-
-def set_offset_table():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_TABLE)
-
-def set_offset_custom():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SET_OFFSET_CUSTOM)
-
-def def_offset_table(x, y, z):
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_param(PARAM_OFFTABLE_X, x)
-        SerialLoop.send_param(PARAM_OFFTABLE_Y, y)
-        SerialLoop.send_param(PARAM_OFFTABLE_Z, z)
-
-def def_offset_custom(x, y, z):
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_param(PARAM_OFFCUSTOM_X, x)
-        SerialLoop.send_param(PARAM_OFFCUSTOM_Y, y)
-        SerialLoop.send_param(PARAM_OFFCUSTOM_Z, z)
-
-def sel_offset_table():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_TABLE)
-
-def sel_offset_custom():
-    global SerialLoop
-    with SerialLoop.lock:
-        SerialLoop.send_command(CMD_SEL_OFFSET_CUSTOM)
 
 
 

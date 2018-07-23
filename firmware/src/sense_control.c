@@ -24,8 +24,7 @@
 #include "planner.h"
 
 
-// #ifdef STATIC_PWM_FREQ
-#if PWM_MODE == STATIC_FREQ
+#if (PWM_MODE == STATIC_FREQ_PD5) || (PWM_MODE == STATIC_FREQ_PD6)
   uint8_t pwmTop;
 #elif PWM_MODE == SYNCED_FREQ
   static volatile uint8_t pwm_duty = 0;
@@ -44,44 +43,12 @@ void sense_init() {
 
 
 void control_init() {
-  // #ifndef STATIC_PWM_FREQ
-  #if PWM_MODE == SYNCED_FREQ
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
-    // configure timer 0, pwm reset timer
-    TCCR0A = 0; // Normal operation
-    TCCR0B = 0; // Disable timer until needed.
-    TIMSK0 |= (1<<TOIE0); // Enable Timer0 interrupt flag
-    TCNT0 = 0;
-  #elif PWM_MODE == STEPPED_FREQ_PD5
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
-    // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
-    TCCR0B = _BV(WGM02);
-    TCCR0A = _BV(WGM00);
-    // output trigger, PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
-    TCCR0A |= _BV(COM0B1);
-    OCR0A = 0xFF;                            // set TOP
-    OCR0B = 0;                               // set PWM to a 0% duty cycle
-  // #else
-  #elif PWM_MODE == STEPPED_FREQ_PD6
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);      // set as output pin
-    OCR0A = 0;                               // set PWM to a 0% duty cycle
-    TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
-    // TCCR0A = _BV(COM0A1) | _BV(WGM01) | _BV(WGM00);  // fast PWM mode
-    // prescaler: PWMfreq = 16000/(2*256*prescaler)
-    // TCCR0B = _BV(CS00);                // 1 => 31.3kHz
-    // TCCR0B = _BV(CS01);                // 8 => 3.9kHz
-    TCCR0B = _BV(CS01) | _BV(CS00);       // 64 => 489Hz
-    // TCCR0B = _BV(CS02);                // 256 => 122Hz
-    // TCCR0B = _BV(CS02) | _BV(CS00);    // 1024 => 31Hz
-    // NOTES:
-    // PPI = PWMfreq/(feedrate/25.4/60)
-  // #else
-  #elif PWM_MODE == STATIC_FREQ
-    // Setup Timer0 for granular freq
+  #if PWM_MODE == STATIC_FREQ_PD5
+    // Setup Timer0 for  to granular freq
     // also see: http://arduino.cc/en/Tutorial/SecretsOfArduinoPWM
     // see: https://sites.google.com/site/qeewiki/books/avr-guide/pwm-on-the-atmega328
-    ASSIST_DDR |= (1 << LASER_PWM_BIT);   // set as output pin
-    if (LASER_PWM_BIT == 5) {  // granular freq only works with PD5
+    ASSIST_DDR |= (1 << PWM_BIT);   // set as output pin
+    if (PWM_BIT == 5) {  // granular freq only works with PDS
       // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
       TCCR0B = _BV(WGM02);
       TCCR0A = _BV(WGM00);
@@ -99,6 +66,48 @@ void control_init() {
       OCR0A = pwmTop = cycles;                                              // OCR0A is TOP in p & f correct pwm mode
       // OCR0B in range 0-pwmTop sets the duty cycle
     }
+  #elif PWM_MODE == STATIC_FREQ_PD6
+    ASSIST_DDR |= (1 << PWM_BIT);            // set as output pin
+    OCR0A = 0;                               // set PWM to a 0% duty cycle
+    TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
+    // TCCR0A = _BV(COM0A1) | _BV(WGM01) | _BV(WGM00);  // fast PWM mode
+    // prescaler: PWMfreq = 16000/(2*256*prescaler)
+    // TCCR0B = _BV(CS00);                // 1 => 31.3kHz
+    TCCR0B = _BV(CS01);                // 8 => 3.9kHz
+    // TCCR0B = _BV(CS01) | _BV(CS00);       // 64 => 489Hz
+    // TCCR0B = _BV(CS02);                // 256 => 122Hz
+    // TCCR0B = _BV(CS02) | _BV(CS00);    // 1024 => 31Hz
+    // NOTES:
+    // PPI = PWMfreq/(feedrate/25.4/60)
+  #elif PWM_MODE == STEPPED_FREQ_PD5
+    ASSIST_DDR |= (1 << PWM_BIT);      // set as output pin
+    // pwm mode 5, phase correct, TOP = OCR0A, set by WGMxx
+    TCCR0B = _BV(WGM02);
+    TCCR0A = _BV(WGM00);
+    // output trigger, PD5 (OC0B), non-inverted, HIGH at bottom, LOW on Match
+    TCCR0A |= _BV(COM0B1);
+    OCR0A = 0xFF;                            // set TOP
+    OCR0B = 0;                               // set PWM to a 0% duty cycle
+  #elif PWM_MODE == STEPPED_FREQ_PD6
+    ASSIST_DDR |= (1 << PWM_BIT);            // set as output pin
+    OCR0A = 0;                               // set PWM to a 0% duty cycle
+    TCCR0A = _BV(COM0A1) | _BV(WGM00);       // phase correct PWM mode
+    // TCCR0A = _BV(COM0A1) | _BV(WGM01) | _BV(WGM00);  // fast PWM mode
+    // prescaler: PWMfreq = 16000/(2*256*prescaler)
+    // TCCR0B = _BV(CS00);                // 1 => 31.3kHz
+    // TCCR0B = _BV(CS01);                // 8 => 3.9kHz
+    TCCR0B = _BV(CS01) | _BV(CS00);       // 64 => 489Hz
+    // TCCR0B = _BV(CS02);                // 256 => 122Hz
+    // TCCR0B = _BV(CS02) | _BV(CS00);    // 1024 => 31Hz
+    // NOTES:
+    // PPI = PWMfreq/(feedrate/25.4/60)
+  #elif PWM_MODE == SYNCED_FREQ
+    ASSIST_DDR |= (1 << PWM_BIT);      // set as output pin
+    // configure timer 0, pwm reset timer
+    TCCR0A = 0; // Normal operation
+    TCCR0B = 0; // Disable timer until needed.
+    TIMSK0 |= (1<<TOIE0); // Enable Timer0 interrupt flag
+    TCNT0 = 0;
   #endif
 
   //// air and aux assist control
@@ -110,10 +119,9 @@ void control_init() {
 
 
 inline void control_laser_intensity(uint8_t intensity) {
-  // #ifdef STATIC_PWM_FREQ
-  #if PWM_MODE == STATIC_FREQ
+  #if PWM_MODE == STATIC_FREQ_PD5
     // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0B = 0;
       } else {
@@ -122,8 +130,18 @@ inline void control_laser_intensity(uint8_t intensity) {
     #else
       OCR0B = (intensity*pwmTop)/255;
     #endif
+  #elif PWM_MODE == STATIC_FREQ_PD6
+    #ifdef ENABLE_INTERLOCKS
+      if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
+        OCR0A = 0;
+      } else {
+        OCR0A = intensity;
+      }
+    #else
+      OCR0A = intensity;
+    #endif
   #elif PWM_MODE == STEPPED_FREQ_PD5
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0B = 0;
       } else {
@@ -144,9 +162,8 @@ inline void control_laser_intensity(uint8_t intensity) {
       // set PWM freq to 122Hz
       TCCR0B = _BV(CS02);
     }
-  // #else
   #elif PWM_MODE == STEPPED_FREQ_PD6
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF) {
         OCR0A = 0;
       } else {
@@ -167,13 +184,12 @@ inline void control_laser_intensity(uint8_t intensity) {
       // set PWM freq to 122Hz
       TCCR0B = _BV(CS02);
     }
-  // #else
   #elif PWM_MODE == SYNCED_FREQ
     // adjust intensity
-    #ifdef ENABLE_LASER_INTERLOCKS
+    #ifdef ENABLE_INTERLOCKS
       if (SENSE_DOOR_OPEN || SENSE_CHILLER_OFF || intensity == 0) {
         pwm_duty = 0;
-        ASSIST_PORT &= ~(1 << LASER_PWM_BIT); // off
+        ASSIST_PORT &= ~(1 << PWM_BIT); // off
       } else {
         pwm_duty = intensity;
       }
@@ -185,8 +201,10 @@ inline void control_laser_intensity(uint8_t intensity) {
 
 
 inline uint8_t control_get_intensity() {
-  #if PWM_MODE == STATIC_FREQ
+  #if PWM_MODE == STATIC_FREQ_PD5
     return (OCR0B*255)/pwmTop;
+  #elif PWM_MODE == STATIC_FREQ_PD6
+    return OCR0A;
   #elif PWM_MODE == STEPPED_FREQ_PD5
     return OCR0B;
   #elif PWM_MODE == STEPPED_FREQ_PD6

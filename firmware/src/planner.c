@@ -126,7 +126,6 @@ inline void planner_line(double x, double y, double z, double feed_rate, uint8_t
   block->rate_delta = ceil( block->step_event_count * inverse_millimeters
                             * CONFIG_ACCELERATION / (60 * ACCELERATION_TICKS_PER_SECOND) );
 
-
   //// acceleeration manager calculations
   // Compute path unit vector
   double unit_vec[3];

@@ -39,20 +39,17 @@
 
 #define CMD_REF_RELATIVE 'E'
 #define CMD_REF_ABSOLUTE 'F'
+#define CMD_REF_STORE 'G'
+#define CMD_REF_RESTORE 'H'
 
-#define CMD_HOMING 'G'
-
-#define CMD_SET_OFFSET_TABLE 'H'
-#define CMD_SET_OFFSET_CUSTOM 'I'
-#define CMD_SEL_OFFSET_TABLE 'J'
-#define CMD_SEL_OFFSET_CUSTOM 'K'
+#define CMD_HOMING 'I'
+#define CMD_OFFSET_STORE 'J'
+#define CMD_OFFSET_RESTORE 'K'
 
 #define CMD_AIR_ENABLE 'L'
 #define CMD_AIR_DISABLE 'M'
 #define CMD_AUX_ENABLE 'N'
 #define CMD_AUX_DISABLE 'O'
-// #define CMD_AUX2_ENABLE 'P'
-// #define CMD_AUX2_DISABLE 'Q'
 
 #define PARAM_TARGET_X 'x'
 #define PARAM_TARGET_Y 'y'
@@ -61,12 +58,9 @@
 #define PARAM_INTENSITY 's'
 #define PARAM_DURATION 'd'
 #define PARAM_PIXEL_WIDTH 'p'
-#define PARAM_OFFTABLE_X 'h'
-#define PARAM_OFFTABLE_Y 'i'
-#define PARAM_OFFTABLE_Z 'j'
-#define PARAM_OFFCUSTOM_X 'k'
-#define PARAM_OFFCUSTOM_Y 'l'
-#define PARAM_OFFCUSTOM_Z 'm'
+#define PARAM_OFFSET_X 'h'
+#define PARAM_OFFSET_Y 'i'
+#define PARAM_OFFSET_Z 'j'
 
 
 // status: error markers
@@ -105,9 +99,9 @@
 #define INFO_HELLO '~'
 
 // super status:
-#define INFO_OFFCUSTOM_X 'a'
-#define INFO_OFFCUSTOM_Y 'b'
-#define INFO_OFFCUSTOM_Z 'c'
+#define INFO_OFFSET_X 'a'
+#define INFO_OFFSET_Y 'b'
+#define INFO_OFFSET_Z 'c'
 #define INFO_FEEDRATE 'g'
 #define INFO_INTENSITY 'h'
 #define INFO_DURATION 'i'

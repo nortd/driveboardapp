@@ -23,17 +23,18 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1706               // int or float
+#define VERSION 1805               // int or float
 #define BAUD_RATE 57600
 // #define ENABLE_3AXES            // enable/disable 3-axis mode (vs 2-axis)
-#define ENABLE_LASER_INTERLOCKS    // enable/disable all interlocks
+#define ENABLE_INTERLOCKS          // enable/disable all interlocks
 
 // PWM_MODE enumeration
-#define STATIC_FREQ 0
-#define STEPPED_FREQ_PD5 1
-#define STEPPED_FREQ_PD6 2
-#define SYNCED_FREQ 3
-// #define STATIC_PWM_FREQ 5000    // only works with LASER_PWM_BIT == 5
+#define STATIC_FREQ_PD5 0
+#define STATIC_FREQ_PD6 1
+#define STEPPED_FREQ_PD5 2
+#define STEPPED_FREQ_PD6 3
+#define SYNCED_FREQ 4
+// #define STATIC_PWM_FREQ 5000    // only works with PWM_BIT == 5
 
 // #define SENSE_INVERT                     // invert how sense input is interpreted
 #define PWM_MODE SYNCED_FREQ
@@ -41,7 +42,7 @@
 #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
 #define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
-
+// NOTE: max step freq: (STEPS_PER_MIN*SEEKRATE)/60 needs to be < 40kHz
 #define CONFIG_X_STEPS_PER_MM 88.88888888 //microsteps/mm
 #define CONFIG_Y_STEPS_PER_MM 90.90909090 //microsteps/mm
 #define CONFIG_Z_STEPS_PER_MM 33.33333333 //microsteps/mm
@@ -57,6 +58,9 @@
 #define CONFIG_INVERT_X_AXIS 0  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
 #define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
+#define CONFIG_INVERT_X_HOMING 0  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Y_HOMING 0  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Z_HOMING 0  // 0 is regular, 1 inverts
 
 
 #define SENSE_DDR               DDRD
@@ -68,7 +72,7 @@
 #define ASSIST_DDR              DDRD
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
-#define LASER_PWM_BIT           6           // Arduino: 6
+#define PWM_BIT                 6           // Arduino: 6
 #define AUX_ASSIST_BIT          7           // Arduino: 7
 
 #define LIMIT_DDR               DDRC
@@ -95,27 +99,8 @@
 #define LIMIT_MASK ((1<<X1_LIMIT_BIT)|(1<<X2_LIMIT_BIT)|(1<<Y1_LIMIT_BIT)|(1<<Y2_LIMIT_BIT)|(1<<Z1_LIMIT_BIT)|(1<<Z2_LIMIT_BIT))
 #define STEPPING_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT))
 #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT))
-
-// figure out INVERT_MASK
-// careful! direction pins hardcoded here
-// (1<<X_DIRECTION_BIT) | (1<<Y_DIRECTION_BIT) | (1<<Z_DIRECTION_BIT)
-#if CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Y_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 56U
-#elif CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Y_AXIS
-  #define INVERT_MASK 24U
-#elif CONFIG_INVERT_Y_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 48U
-#elif CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 40U
-#elif CONFIG_INVERT_X_AXIS
-  #define INVERT_MASK 8U
-#elif CONFIG_INVERT_Y_AXIS
-  #define INVERT_MASK 16U
-#elif CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 32U
-#else
-  #define INVERT_MASK 0U
-#endif
+#define INVERT_DIRECTION_MASK ((CONFIG_INVERT_X_AXIS<<X_DIRECTION_BIT)|(CONFIG_INVERT_Y_AXIS<<Y_DIRECTION_BIT)|(CONFIG_INVERT_Z_AXIS<<Z_DIRECTION_BIT))
+#define INVERT_HOMING_MASK ((CONFIG_INVERT_X_HOMING<<X_DIRECTION_BIT)|(CONFIG_INVERT_Y_HOMING<<Y_DIRECTION_BIT)|(CONFIG_INVERT_Z_HOMING<<Z_DIRECTION_BIT))
 
 
 

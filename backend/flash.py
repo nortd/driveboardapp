@@ -35,10 +35,11 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
             AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude.conf")
 
         elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
-            AVRDUDEAPP    = os.path.join(resources_dir, "/usr/bin/avrdude")
-            AVRDUDECONFIG = os.path.join(resources_dir, "/etc/avrdude.conf")
+            # AVRDUDEAPP    = os.path.join(resources_dir, "/usr/bin/avrdude")
+            # AVRDUDECONFIG = os.path.join(resources_dir, "/etc/avrdude.conf")
             # AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude64")
-            # AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude.conf")
+            AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude")
+            AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude.conf")
             # chmod +x
             # st = os.stat(AVRDUDEAPP)
             # os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)

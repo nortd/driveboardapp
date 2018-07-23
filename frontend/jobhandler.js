@@ -194,12 +194,12 @@ jobhandler = {
             'items':this.items, 'defs':defs_out, 'stats':this.stat}
   },
 
-  getJson : function() {
+  getJson : function(whitespace) {
     // json stringify while limiting numbers to 3 decimals
     return JSON.stringify(this.get() ,function(key, val) {
         if (isNaN(+key)) return val
         return val.toFixed ? Number(val.toFixed(3)) : val
-      }, '\t')
+      }, whitespace)
   },
 
   getKind : function(item) {

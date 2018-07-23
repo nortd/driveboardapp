@@ -212,17 +212,18 @@ var status_handlers = {
     // hardware sends this when idle but not in a "stop mode" (e.g. error)
     if (status.ready) {
       app_run_btn.stop()
-      $('#boundary_btn').prop('disabled', false)
-      $('#origin_btn').prop('disabled', false)
-      $('#homing_btn').prop('disabled', false)
+      $('#boundary_btn').removeClass('disabled')
+      $('#boundary_btn').prop('disabled', false) // required
+      $('#origin_btn').removeClass('disabled')
+      $('#homing_btn').removeClass('disabled')
       $('#offset_btn').removeClass('disabled')
       $('#motion_btn').removeClass('disabled')
       $('#jog_btn').removeClass('disabled')
     } else {
       app_run_btn.start()
-      $('#boundary_btn').prop('disabled', true)
-      $('#origin_btn').prop('disabled', true)
-      $('#homing_btn').prop('disabled', true)
+      $('#boundary_btn').addClass('disabled')
+      $('#origin_btn').addClass('disabled')
+      $('#homing_btn').addClass('disabled')
       $('#offset_btn').addClass('disabled')
       $('#motion_btn').addClass('disabled')
       $('#jog_btn').addClass('disabled')
@@ -301,6 +302,15 @@ var status_handlers = {
     $('#status_command').removeClass("label-danger").addClass("label-success")
     $('#status_parameter').removeClass("label-danger").addClass("label-success")
     $('#status_transmission').removeClass("label-danger").addClass("label-success")
+    $('#run_btn').removeClass('disabled')
+    $('#boundary_btn').removeClass('disabled')
+    $('#pause_btn').removeClass('disabled')
+    $('#stop_btn').removeClass('disabled')
+    $('#origin_btn').removeClass('disabled')
+    $('#offset_btn').removeClass('disabled')
+    $('#motion_btn').removeClass('disabled')
+    $('#jog_btn').removeClass('disabled')
+    $('#addfill_btn').removeClass('disabled')
     // set stop error indicators
     if ('stops' in status) {
       if (status.stops.x1) {$('#status_limit_x1').removeClass("label-success").addClass("label-danger")}
@@ -316,6 +326,17 @@ var status_handlers = {
       if (status.stops.command) {$('#status_command').removeClass("label-success").addClass("label-danger")}
       if (status.stops.parameter) {$('#status_parameter').removeClass("label-success").addClass("label-danger")}
       if (status.stops.transmission) {$('#status_transmission').removeClass("label-success").addClass("label-danger")}
+      if (!$.isEmptyObject(status.stops)) {
+        $('#run_btn').addClass('disabled')
+        $('#boundary_btn').addClass('disabled')
+        $('#pause_btn').addClass('disabled')
+        $('#stop_btn').addClass('disabled')
+        $('#origin_btn').addClass('disabled')
+        $('#offset_btn').addClass('disabled')
+        $('#motion_btn').addClass('disabled')
+        $('#jog_btn').addClass('disabled')
+        $('#addfill_btn').addClass('disabled')
+      }
     }
     status_set_main_button(status)
   },

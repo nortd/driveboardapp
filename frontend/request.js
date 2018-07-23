@@ -44,11 +44,25 @@ function request_get(args) {
 
 function request_post(args) {
   // args items: url, data, success, error, complete
+
+  // special case load job, use file upload with compression
+  var formData = new FormData();
+  if(args.url == '/load' && app_config_main.enable_gzip) {
+    job = new File([pako.gzip(args.data.job)], 'upload.gz');
+    formData.append('job', job);
+    args.data.job = 'upload'
+  }
+  formData.append('load_request', JSON.stringify(args.data))
+
   $.ajax({
     type: "POST",
     url: args.url,
-    data: {'load_request':JSON.stringify(args.data)},
+    // data: {'load_request':JSON.stringify(args.data)},
+    data: formData,
     dataType: "json",
+    contentType: false,
+    processData: false,
+    cache: false,
     username: "laser",
     password: "laser",
     statusCode: {
@@ -86,6 +100,7 @@ function request_post(args) {
 
 function request_boundary(bounds, seekrate) {
   var job = {
+    "head":{},
     "passes":[
       {
         "items":[0],
@@ -114,7 +129,16 @@ function request_boundary(bounds, seekrate) {
 }
 
 
-function request_relative_move(x, y, z, seekrate, success_msg) {
+function request_jog(x, y, z, success_msg) {
+  request_get({
+    url:'/jog/'+x+'/'+y+'/'+z,
+    success: function (data) {
+      $().uxmessage('notice', success_msg)
+    }
+  })
+}
+
+function request_relative_move(x, y, z, seekrate, success_msg) {  // DEPRECATED
   var job = {
     "head":{"noreturn":true},
     "passes":[

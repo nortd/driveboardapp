@@ -23,29 +23,44 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define VERSION 1500             // int or float
+#define VERSION 1805               // int or float
 #define BAUD_RATE 57600
-// #define DEBUG_IGNORE_SENSORS  // set for debugging
-// #define NOT_GEARED
-#define ENABLE_3AXES
+#define ENABLE_3AXES               // enable/disable 3-axis mode (vs 2-axis)
+#define ENABLE_INTERLOCKS          // enable/disable all interlocks
 
+// PWM_MODE enumeration
+#define STATIC_FREQ_PD5 0
+#define STATIC_FREQ_PD6 1
+#define STEPPED_FREQ_PD5 2
+#define STEPPED_FREQ_PD6 3
+#define SYNCED_FREQ 4
+// #define STATIC_PWM_FREQ 5000    // only works with PWM_BIT == 5
 
+// #define SENSE_INVERT                     // invert how sense input is interpreted
+#define PWM_MODE STATIC_FREQ_PD6
+// #define CONFIG_BEAMDYNAMICS              // adjust intensity during accel/decel
+// #define CONFIG_BEAMDYNAMICS_START 0.05   // 0-1.0, offset after which to apply
+// #define CONFIG_BEAMDYNAMICS_EVERY 16     // freq as multiples of steps impulses
 
-#define CONFIG_X_STEPS_PER_MM 623.684 //microsteps/mm
-#define CONFIG_Y_STEPS_PER_MM 623.684 //microsteps/mm
-#define CONFIG_Z_STEPS_PER_MM 797.812 //microsteps/mm
+// NOTE: max step freq: (STEPS_PER_MIN*SEEKRATE)/60 needs to be < 40kHz
+#define CONFIG_X_STEPS_PER_MM 623.7 //microsteps/mm
+#define CONFIG_Y_STEPS_PER_MM 623.7 //microsteps/mm
+#define CONFIG_Z_STEPS_PER_MM 802.6 //microsteps/mm
 #define CONFIG_PULSE_MICROSECONDS 5
-#define CONFIG_FEEDRATE 200.0 // in millimeters per minute
-#define CONFIG_SEEKRATE 200.0
-#define CONFIG_HOMINGRATE 600  // ms/pulse
-#define CONFIG_ACCELERATION 300000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
+#define CONFIG_FEEDRATE 800.0 // in millimeters per minute
+#define CONFIG_SEEKRATE 800.0
+#define CONFIG_HOMINGRATE 300  // ms/pulse
+#define CONFIG_ACCELERATION 100000.0 // mm/min^2, typically 1000000-8000000, divide by (60*60) to get mm/sec^2
 #define CONFIG_JUNCTION_DEVIATION 0.006 // mm
-#define CONFIG_X_ORIGIN_OFFSET 240.0  // mm, x-offset of table origin from physical home
-#define CONFIG_Y_ORIGIN_OFFSET 74.0  // mm, y-offset of table origin from physical home
-#define CONFIG_Z_ORIGIN_OFFSET 120.0   // mm, z-offset of table origin from physical home
-#define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts the y direction
-#define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts the y direction
-#define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts the y direction
+#define CONFIG_X_ORIGIN_OFFSET -235.8   // mm, x-offset of table origin from physical home
+#define CONFIG_Y_ORIGIN_OFFSET -73.0    // mm, y-offset of table origin from physical home
+#define CONFIG_Z_ORIGIN_OFFSET -20.0    // mm, z-offset of table origin from physical home
+#define CONFIG_INVERT_X_AXIS 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Y_AXIS 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Z_AXIS 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_X_HOMING 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Y_HOMING 1  // 0 is regular, 1 inverts
+#define CONFIG_INVERT_Z_HOMING 1  // 0 is regular, 1 inverts
 
 
 #define SENSE_DDR               DDRD
@@ -57,10 +72,9 @@
 #define ASSIST_DDR              DDRD
 #define ASSIST_PORT             PORTD
 #define AIR_ASSIST_BIT          4           // Arduino: 4
-#define AUX1_ASSIST_BIT         7           // Arduino: 7
-#define AUX2_ASSIST_BIT         5           // Arduino: 5
-// laser pwm                    6           // Ardunio: 6
-  
+#define PWM_BIT                 6           // Arduino: 6
+#define AUX_ASSIST_BIT          5           // Arduino: 5
+
 #define LIMIT_DDR               DDRC
 #define LIMIT_PORT              PORTC
 #define LIMIT_PIN               PINC
@@ -70,7 +84,6 @@
 #define Y2_LIMIT_BIT            3           // Arduino: A3
 #define Z1_LIMIT_BIT            4           // Arduino: A4
 #define Z2_LIMIT_BIT            5           // Arduino: A5
-
 
 #define STEPPING_DDR            DDRB
 #define STEPPING_PORT           PORTB
@@ -82,41 +95,21 @@
 #define Z_DIRECTION_BIT         5           // Arduino: 13
 
 
-
 #define SENSE_MASK ((1<<CHILLER_BIT)|(1<<DOOR_BIT))
 #define LIMIT_MASK ((1<<X1_LIMIT_BIT)|(1<<X2_LIMIT_BIT)|(1<<Y1_LIMIT_BIT)|(1<<Y2_LIMIT_BIT)|(1<<Z1_LIMIT_BIT)|(1<<Z2_LIMIT_BIT))
 #define STEPPING_MASK ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT))
 #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT))
-
-// figure out INVERT_MASK
-// careful! direction pins hardcoded here
-// (1<<X_DIRECTION_BIT) | (1<<Y_DIRECTION_BIT) | (1<<Z_DIRECTION_BIT)
-#if CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Y_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 56U
-#elif CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Y_AXIS
-  #define INVERT_MASK 24U
-#elif CONFIG_INVERT_Y_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 48U
-#elif CONFIG_INVERT_X_AXIS && CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 40U
-#elif CONFIG_INVERT_X_AXIS
-  #define INVERT_MASK 8U
-#elif CONFIG_INVERT_Y_AXIS
-  #define INVERT_MASK 16U
-#elif CONFIG_INVERT_Z_AXIS
-  #define INVERT_MASK 32U
-#else
-  #define INVERT_MASK 0U
-#endif
+#define INVERT_DIRECTION_MASK ((CONFIG_INVERT_X_AXIS<<X_DIRECTION_BIT)|(CONFIG_INVERT_Y_AXIS<<Y_DIRECTION_BIT)|(CONFIG_INVERT_Z_AXIS<<Z_DIRECTION_BIT))
+#define INVERT_HOMING_MASK ((CONFIG_INVERT_X_HOMING<<X_DIRECTION_BIT)|(CONFIG_INVERT_Y_HOMING<<Y_DIRECTION_BIT)|(CONFIG_INVERT_Z_HOMING<<Z_DIRECTION_BIT))
 
 
 
 // The temporal resolution of the acceleration management subsystem. Higher number give smoother
 // acceleration but may impact performance.
-// NOTE: Increasing this parameter will help any resolution related issues, especially with machines 
-// requiring very high accelerations and/or very fast feedrates. In general, this will reduce the 
+// NOTE: Increasing this parameter will help any resolution related issues, especially with machines
+// requiring very high accelerations and/or very fast feedrates. In general, this will reduce the
 // error between how the planner plans the motions and how the stepper program actually performs them.
-// However, at some point, the resolution can be high enough, where the errors related to numerical 
+// However, at some point, the resolution can be high enough, where the errors related to numerical
 // round-off can be great enough to cause problems and/or it's too fast for the Arduino. The correct
 // value for this parameter is machine dependent, so it's advised to set this only as high as needed.
 // Approximate successful values can range from 30L to 100L or more.
@@ -133,7 +126,7 @@
 // never reach its target. This parameter should always be greater than zero.
 #define MINIMUM_STEPS_PER_MINUTE 1600U // (steps/min) - Integer value only
 // 1600 @ 32step_per_mm = 50mm/min
-  
+
 
 #define X_AXIS 0
 #define Y_AXIS 1
@@ -164,4 +157,3 @@
 // x ^= (1 << n); // toggles nth bit of x. all other bits left alone.
 //
 // x = ~x; // toggles ALL the bits in x.
-

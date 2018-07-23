@@ -30,7 +30,7 @@ For details on the encoding of numbers see:
 #### Example
 move command:
 ```
-<number>x<number>y<number><move_command>
+<number>x<number>y<number>z<move_command>
 ```
 
 Raster Data Mode

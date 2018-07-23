@@ -3,12 +3,14 @@
 #
 # NOTE!
 # -----
-# To add/change config parameters create a file named
-# userfileig.py and write something like this:
+# To change config parameters create a file named
+# config.name_of_config.json in the config directory
+# (use --list-configs to find it)
+# and write something like this:
 #
-# conf = {
-#     'network_port': 4411,
-#     'serial_port': 'COM3'
+# {
+#     "network_port": 4411,
+#     "serial_port": "COM3"
 # }
 #
 
@@ -26,14 +28,14 @@ from encodings import mac_roman  # explicit for pyinstaller
 
 conf = {
     'appname': 'driveboardapp',
-    'version': '17.06-delay',
+    'version': '18.05',
     'company_name': 'com.nortd.labs',
     'network_host': '',                    # '' for all nics
     'network_port': 4444,
     'serial_port': '',                     # set to '' for auto (req. firmware)
     'baudrate': 57600,
     'rootdir': None,                       # defined further down (../)
-    'stordir': None,                       # defined further down
+    'confdir': None,                       # defined further down
     'hardware': None,                      # defined further down
     'firmware': None,                      # defined further down
     'tolerance': 0.01,
@@ -52,6 +54,9 @@ conf = {
     'users': {
         'laser': 'laser',
     },
+    'enable_gzip': True,           # allow gzip upload of files / jobs
+    'mill_mode': False,
+    'mill_max_rpm': 18000,
 }
 conf_defaults = copy.deepcopy(conf)
 
@@ -70,7 +75,10 @@ userconfigurable = {
     'max_jobs_in_list': "Jobs to keep in the history list.",
     'fill_leadin': "Leadin for vector fills in mm.",
     'raster_leadin': "Leadin for raster fills in mm.",
-    'users': "List of user cendentials for UI access."
+    'users': "List of user cendentials for UI access.",
+    'enable_gzip': "Enable gzip compression in job uploads.",
+    'mill_mode': "Activate CNC mill mode.",
+    'mill_max_rpm': "Maximum spindle RPM."
 }
 
 
@@ -106,7 +114,7 @@ else:
     directory = os.path.join(os.path.expanduser('~'), "." + conf['appname'])
 if not os.path.exists(directory):
     os.makedirs(directory)
-conf['stordir'] = directory
+conf['confdir'] = directory
 #
 ###
 
@@ -243,7 +251,7 @@ elif conf['hardware'] == 'beaglebone':
     fw = file("/sys/class/gpio/gpio76/value", "r")
     ret = fw.read()
     fw.close()
-    print "Stepper driver configure pin is: " + str(ret)
+    # print "Stepper driver configure pin is: " + str(ret)
 
 elif conf['hardware'] == 'raspberrypi':
     if not conf['firmware']:
@@ -274,34 +282,56 @@ elif conf['hardware'] == 'raspberrypi':
     # (basically anything related to ttyAMA0)
 
 
-
-### user configuration file
-userfile = os.path.join(conf['stordir'], "config.json")
-if os.path.exists(userfile):
-    print "CONFIG: reading " + userfile
-    # apply user config
-    with open(userfile) as fp:
-        try:
-            userconf = json.load(fp)
-            for k in userconfigurable.keys():
-                if k in userconf:
-                    conf[k] = userconf[k]
-        except ValueError:
-            print "ERROR: failed to read config file"
-else:
-    # copy default config to user config
-    with open(userfile, "w") as fp:
-        confout = {k:v for k,v in conf.items() if k in userconfigurable}
-        json.dump(confout, fp, indent=4)
+configpath = ''
+def load(configname):
+    if configname:
+        path = os.path.join(conf['confdir'], 'config.'+configname+'.json')
+    else:
+        path = os.path.join(conf['confdir'], 'config.json')
+    global configpath
+    configpath = path
+    #load
+    if os.path.exists(path):
+        # print "CONFIG: " + path
+        # apply user config
+        with open(path) as fp:
+            try:
+                userconf = json.load(fp)
+                for k in userconfigurable.keys():
+                    if k in userconf:
+                        conf[k] = userconf[k]
+            except ValueError:
+                print "ERROR: failed to read config file"
+    else:
+        if not configname:
+            # special case: default config not present, create
+            print "INFO: creating default config file"
+            with open(path, "w") as fp:
+                confout = {k:v for k,v in conf.items() if k in userconfigurable}
+                json.dump(confout, fp, indent=4)
+        else:
+            print "ERROR: invalid config specified"
+            sys.exit()
 
 
 def write_config_fields(subconfigdict):
     conftemp = None
-    if os.path.exists(userfile):
-        with open(userfile) as fp:
+    if os.path.exists(configpath):
+        with open(configpath) as fp:
             conftemp = json.load(fp)
     else:
         conftemp = {}
     conftemp.update(subconfigdict)
-    with open(userfile, "w") as fp:
+    with open(configpath, "w") as fp:
         json.dump(conftemp, fp, indent=4)
+
+
+def list_configs():
+    print "Config files in " + conf['confdir'] + ":"
+    tempdir = os.getcwd()
+    os.chdir(conf['confdir'])
+    cfiles = glob.glob('config.*.json')
+    for cfile in cfiles:
+        confname = cfile.split('.')[1]
+        print "%s - (%s)" % (confname, cfile)
+    os.chdir(tempdir)
