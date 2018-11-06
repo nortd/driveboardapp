@@ -2,7 +2,7 @@
 DriveboardApp Configuration
 ===========================
 
-The user configuration file is `config.json` and is located in the DriveboardApp storage directory. This directory is printed to the console when starting-up the app. It is used to build the *conf* dictionary which gets used in both the *backend* and *frontend*.
+The user configuration file is `config.json` and is located in the DriveboardApp *config* directory. This directory is printed to the console when starting-up the app. It is used to build the *conf* dictionary which gets used in both the *backend* and *frontend*.
 
 How to change
 -------------
