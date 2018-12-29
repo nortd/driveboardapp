@@ -377,6 +377,7 @@ class SVGPathReader:
         # plus some recursive sugar for incrementally refining the
         # arc resolution until the requested tolerance is met.
         # http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+        phi = phi / 360.0 * 2*math.pi
         cp = math.cos(phi)
         sp = math.sin(phi)
         dx = 0.5 * (x1 - x2)
