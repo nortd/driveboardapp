@@ -86,39 +86,49 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
             # Setting it to low triggers a reset.
             # echo 71 > /sys/class/gpio/export
             try:
-                fw = file("/sys/class/gpio/export", "w")
-                fw.write("%d" % (71))
+                import Adafruit_BBIO.GPIO as GPIO
+                GPIO.setup("P8_46", GPIO.OUT)
+                GPIO.output("P8_46", GPIO.LOW)
+                GPIO.setup("P8_44", GPIO.OUT)
+                GPIO.output("P8_44", GPIO.LOW)
+                time.sleep(0.5)
+                GPIO.output("P8_46", GPIO.HIGH)
+                GPIO.output("P8_44", GPIO.HIGH)
+            except ImportError:
+                try:
+                    fw = file("/sys/class/gpio/export", "w")
+                    fw.write("%d" % (71))
+                    fw.close()
+                    fwb = file("/sys/class/gpio/export", "w")
+                    fwb.write("%d" % (73))
+                    fwb.close()
+                except IOError:
+                    # probably already exported
+                    pass
+                # set the gpio pin to output
+                # echo out > /sys/class/gpio/gpio71/direction
+                fw = file("/sys/class/gpio/gpio71/direction", "w")
+                fw.write("out")
                 fw.close()
-                fwb = file("/sys/class/gpio/export", "w")
-                fwb.write("%d" % (73))
+                fwb = file("/sys/class/gpio/gpio73/direction", "w")
+                fwb.write("out")
                 fwb.close()
-            except IOError:
-                # probably already exported
-                pass
-            # set the gpio pin to output
-            # echo out > /sys/class/gpio/gpio71/direction
-            fw = file("/sys/class/gpio/gpio71/direction", "w")
-            fw.write("out")
-            fw.close()
-            fwb = file("/sys/class/gpio/gpio73/direction", "w")
-            fwb.write("out")
-            fwb.close()
-            # set the gpio pin low -> high
-            # echo 1 > /sys/class/gpio/gpio71/value
-            fw = file("/sys/class/gpio/gpio71/value", "w")
-            fw.write("0")
-            fw.flush()
-            fwb = file("/sys/class/gpio/gpio73/value", "w")
-            fwb.write("0")
-            fwb.flush()
-            time.sleep(0.5)
-            fw.write("1")
-            fw.flush()
-            fw.close()
-            fwb.write("1")
-            fwb.flush()
-            fwb.close()
-            time.sleep(0.1)
+                # set the gpio pin low -> high
+                # echo 1 > /sys/class/gpio/gpio71/value
+                fw = file("/sys/class/gpio/gpio71/value", "w")
+                fw.write("0")
+                fw.flush()
+                fwb = file("/sys/class/gpio/gpio73/value", "w")
+                fwb.write("0")
+                fwb.flush()
+                time.sleep(0.5)
+                fw.write("1")
+                fw.flush()
+                fw.close()
+                fwb.write("1")
+                fwb.flush()
+                fwb.close()
+                time.sleep(0.1)
         elif conf['hardware'] == 'raspberrypi':
             print "Flashing from Raspberry Pi ..."
             import thread
@@ -148,33 +158,43 @@ def reset_atmega():
     print "Resetting Atmega ..."
     if conf['hardware'] == 'beaglebone':
         try:
-            fw = file("/sys/class/gpio/export", "w")
-            fw.write("%d" % (71))
+            import Adafruit_BBIO.GPIO as GPIO
+            GPIO.setup("P8_46", GPIO.OUT)
+            GPIO.output("P8_46", GPIO.LOW)
+            GPIO.setup("P8_44", GPIO.OUT)
+            GPIO.output("P8_44", GPIO.LOW)
+            time.sleep(0.2)
+            GPIO.output("P8_46", GPIO.HIGH)
+            GPIO.output("P8_44", GPIO.HIGH)
+        except ImportError:
+            try:
+                fw = file("/sys/class/gpio/export", "w")
+                fw.write("%d" % (71))
+                fw.close()
+                fwb = file("/sys/class/gpio/export", "w")
+                fwb.write("%d" % (73))
+                fwb.close()
+            except IOError:
+                pass
+            fw = file("/sys/class/gpio/gpio71/direction", "w")
+            fw.write("out")
             fw.close()
-            fwb = file("/sys/class/gpio/export", "w")
-            fwb.write("%d" % (73))
+            fwb = file("/sys/class/gpio/gpio73/direction", "w")
+            fwb.write("out")
             fwb.close()
-        except IOError:
-            pass
-        fw = file("/sys/class/gpio/gpio71/direction", "w")
-        fw.write("out")
-        fw.close()
-        fwb = file("/sys/class/gpio/gpio73/direction", "w")
-        fwb.write("out")
-        fwb.close()
-        fw = file("/sys/class/gpio/gpio71/value", "w")
-        fw.write("0")
-        fw.flush()
-        fwb = file("/sys/class/gpio/gpio73/value", "w")
-        fwb.write("0")
-        fwb.flush()
-        time.sleep(0.2)
-        fw.write("1")
-        fw.flush()
-        fw.close()
-        fwb.write("1")
-        fwb.flush()
-        fwb.close()
+            fw = file("/sys/class/gpio/gpio71/value", "w")
+            fw.write("0")
+            fw.flush()
+            fwb = file("/sys/class/gpio/gpio73/value", "w")
+            fwb.write("0")
+            fwb.flush()
+            time.sleep(0.2)
+            fw.write("1")
+            fw.flush()
+            fw.close()
+            fwb.write("1")
+            fwb.flush()
+            fwb.close()
     elif conf['hardware'] == 'raspberrypi':
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)  # use chip pin number

@@ -128,6 +128,13 @@ if sys.platform == "linux2":
         import RPi.GPIO
         conf['hardware'] = 'raspberrypi'
     except ImportError:
+        # try to import Adafruit GPIO library for Debian 9 based official BB image
+        try:
+            global GPIO
+            import Adafruit_BBIO.GPIO as GPIO
+        except ImportError:
+            # Adafruit GPIO library unavailable. Do nothing and continue.
+            pass
         # os.uname() on BBB:
         # ('Linux', 'lasersaur', '3.8.13-bone20',
         #  '#1 SMP Wed May 29 06:14:59 UTC 2013', 'armv7l')
@@ -180,24 +187,28 @@ elif conf['hardware'] == 'beaglebone':
     for pin46 in pin46list:
         os.system("echo gpio > %s" % (pin46))
 
-    try:
-        fw = file("/sys/class/gpio/export", "w")
-        fw.write("%d" % (71))
+    if ('GPIO' in globals()):
+        GPIO.setup("P8_46", GPIO.OUT)
+        GPIO.output("P8_46", GPIO.HIGH)
+    else:
+        try:
+            fw = file("/sys/class/gpio/export", "w")
+            fw.write("%d" % (71))
+            fw.close()
+        except IOError:
+            # probably already exported
+            pass
+        # set the gpio pin to output
+        # echo out > /sys/class/gpio/gpio71/direction
+        fw = file("/sys/class/gpio/gpio71/direction", "w")
+        fw.write("out")
         fw.close()
-    except IOError:
-        # probably already exported
-        pass
-    # set the gpio pin to output
-    # echo out > /sys/class/gpio/gpio71/direction
-    fw = file("/sys/class/gpio/gpio71/direction", "w")
-    fw.write("out")
-    fw.close()
-    # set the gpio pin high
-    # echo 1 > /sys/class/gpio/gpio71/value
-    fw = file("/sys/class/gpio/gpio71/value", "w")
-    fw.write("1")
-    fw.flush()
-    fw.close()
+        # set the gpio pin high
+        # echo 1 > /sys/class/gpio/gpio71/value
+        fw = file("/sys/class/gpio/gpio71/value", "w")
+        fw.write("1")
+        fw.flush()
+        fw.close()
 
     ### Set up atmega328 reset control - BeagleBone Black
     # The reset pin is connected to GPIO2_9 (2*32+9 = 73).
@@ -209,24 +220,28 @@ elif conf['hardware'] == 'beaglebone':
     for pin44 in pin44list:
         os.system("echo gpio > %s" % (pin44))
 
-    try:
-        fw = file("/sys/class/gpio/export", "w")
-        fw.write("%d" % (73))
+    if ('GPIO' in globals()):
+        GPIO.setup("P8_44", GPIO.OUT)
+        GPIO.output("P8_44", GPIO.HIGH)
+    else:
+        try:
+            fw = file("/sys/class/gpio/export", "w")
+            fw.write("%d" % (73))
+            fw.close()
+        except IOError:
+            # probably already exported
+            pass
+        # set the gpio pin to output
+        # echo out > /sys/class/gpio/gpio73/direction
+        fw = file("/sys/class/gpio/gpio73/direction", "w")
+        fw.write("out")
         fw.close()
-    except IOError:
-        # probably already exported
-        pass
-    # set the gpio pin to output
-    # echo out > /sys/class/gpio/gpio73/direction
-    fw = file("/sys/class/gpio/gpio73/direction", "w")
-    fw.write("out")
-    fw.close()
-    # set the gpio pin high
-    # echo 1 > /sys/class/gpio/gpio73/value
-    fw = file("/sys/class/gpio/gpio73/value", "w")
-    fw.write("1")
-    fw.flush()
-    fw.close()
+        # set the gpio pin high
+        # echo 1 > /sys/class/gpio/gpio73/value
+        fw = file("/sys/class/gpio/gpio73/value", "w")
+        fw.write("1")
+        fw.flush()
+        fw.close()
 
     ### read stepper driver configure pin GPIO2_12 (2*32+12 = 76).
     # Low means Geckos, high means SMC11s
@@ -236,22 +251,26 @@ elif conf['hardware'] == 'beaglebone':
     for pin39 in pin39list:
         os.system("echo gpio > %s" % (pin39))
 
-    try:
-        fw = file("/sys/class/gpio/export", "w")
-        fw.write("%d" % (76))
+    if ('GPIO' in globals()):
+        GPIO.setup("P8_39", GPIO.IN)
+        ret = GPIO.input("P8_39")
+    else:
+        try:
+            fw = file("/sys/class/gpio/export", "w")
+            fw.write("%d" % (76))
+            fw.close()
+        except IOError:
+            # probably already exported
+            pass
+        # set the gpio pin to input
+        fw = file("/sys/class/gpio/gpio76/direction", "w")
+        fw.write("in")
         fw.close()
-    except IOError:
-        # probably already exported
-        pass
-    # set the gpio pin to input
-    fw = file("/sys/class/gpio/gpio76/direction", "w")
-    fw.write("in")
-    fw.close()
-    # set the gpio pin high
-    fw = file("/sys/class/gpio/gpio76/value", "r")
-    ret = fw.read()
-    fw.close()
-    # print "Stepper driver configure pin is: " + str(ret)
+        # set the gpio pin high
+        fw = file("/sys/class/gpio/gpio76/value", "r")
+        ret = fw.read()
+        fw.close()
+        # print "Stepper driver configure pin is: " + str(ret)
 
 elif conf['hardware'] == 'raspberrypi':
     if not conf['firmware']:
