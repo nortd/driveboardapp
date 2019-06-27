@@ -1,0 +1,11 @@
+[Unit]
+Description=Lasersaur driveboardapp
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python /root/driveboardapp/backend/app.py
+
+[Install]
+WantedBy=multi-user.target
